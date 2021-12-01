@@ -15,7 +15,6 @@ Copyright (C) 2021 Pedro Simões
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include <math.h>
 #include "field.h"
 
 #ifdef __cplusplus
