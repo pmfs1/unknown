@@ -16,6 +16,7 @@ Copyright (C) 2021 Pedro Simões
 #include <time.h>
 #include <string.h>
 #include "field.h"
+#include "utils.h"
 
 #ifdef __cplusplus
 extern "C" {
