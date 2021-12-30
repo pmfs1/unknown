@@ -10,7 +10,6 @@ Copyright (C) 2021 Pedro Simões
 #define __FIELD__
 
 #include <stdint.h>
-#include "utils.h"
 
 // Translate an id wrapping it to the provided size (pacman effect).
 // WARNING: Only works with signed types and does not show errors otherwise.
