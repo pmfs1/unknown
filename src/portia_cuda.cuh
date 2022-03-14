@@ -13,8 +13,6 @@ Copyright (C) 2022 Pedro Simões
 #include "error.h"
 #include "utils.h"
 
-// TODO
-
 // Initialization functions:
 
 /// Initializes the given cortex with default values.
