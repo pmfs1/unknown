@@ -19,7 +19,6 @@ Copyright (C) 2021 Pedro Simões
 #include "cortex.h"
 #include "error.h"
 #include "utils.h"
-#include "utils_std.h"
 
 #ifdef __cplusplus
 extern "C" {
