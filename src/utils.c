@@ -53,7 +53,7 @@ bhm_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
     ignoreComments(pgmfile);
 
     // Allocate memory to store data in the struct.
-    pgm->data = (uint8_t *)malloc(pgm->width * pgm->height * sizeof(uint8_t));
+    pgm->data = (uint8_t *)malloc((unsigned long)pgm->width * pgm->height * sizeof(uint8_t));
 
     // Store data in the struct.
     if (!strcmp(pgm->pgmType, "P2"))
@@ -198,7 +198,7 @@ void c2d_from_file(bhm_cortex2d_t *cortex, char *file_name)
     fread(&(cortex->pulse_mapping), sizeof(bhm_pulse_mapping_t), 1, in_file);
 
     // Read all neurons.
-    cortex->neurons = (bhm_neuron_t *)malloc(cortex->width * cortex->height * sizeof(bhm_neuron_t));
+    cortex->neurons = (bhm_neuron_t *)malloc((size_t)cortex->width * cortex->height * sizeof(bhm_neuron_t));
     for (bhm_cortex_size_t y = 0; y < cortex->height; y++)
     {
         for (bhm_cortex_size_t x = 0; x < cortex->width; x++)
