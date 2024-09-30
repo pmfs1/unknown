@@ -35,7 +35,7 @@ bhm_error_code_t i2d_init(bhm_input2d_t **input, bhm_cortex_size_t x0, bhm_corte
     (*input)->exc_value = exc_value;
 
     // Allocate values.
-    (*input)->values = (bhm_ticks_count_t *)malloc((x1 - x0) * (y1 - y0) * sizeof(bhm_ticks_count_t));
+    (*input)->values = (bhm_ticks_count_t *)malloc((size_t)(x1 - x0) * (y1 - y0) * sizeof(bhm_ticks_count_t));
     if ((*input)->values == NULL)
     {
         return BHM_ERROR_FAILED_ALLOC;
@@ -64,7 +64,7 @@ bhm_error_code_t o2d_init(bhm_output2d_t **output, bhm_cortex_size_t x0, bhm_cor
     (*output)->y1 = y1;
 
     // Allocate values.
-    (*output)->values = (bhm_ticks_count_t *)malloc((x1 - x0) * (y1 - y0) * sizeof(bhm_ticks_count_t));
+    (*output)->values = (bhm_ticks_count_t *)malloc((size_t)(x1 - x0) * (y1 - y0) * sizeof(bhm_ticks_count_t));
     if ((*output)->values == NULL)
     {
         printf("ERROR_ALLOCATING_VALUES\n");
