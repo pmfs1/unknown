@@ -1,0 +1,15 @@
+#ifndef __UNKNOWN_ERROR__
+#define __UNKNOWN_ERROR__
+
+typedef enum
+{
+    BHM_ERROR_NONE = 0,
+    BHM_ERROR_NH_RADIUS_TOO_BIG = 1,
+    BHM_ERROR_FILE_DOES_NOT_EXIST = 2,
+    BHM_ERROR_FILE_SIZE_WRONG = 3,
+    BHM_ERROR_FAILED_ALLOC = 4,
+    BHM_ERROR_CORTEX_UNALLOC = 5,
+    BHM_ERROR_SIZE_WRONG = 6
+} bhm_error_code_t;
+
+#endif
