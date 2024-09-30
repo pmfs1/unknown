@@ -113,7 +113,7 @@ bhm_error_code_t c2d_init(bhm_cortex2d_t **cortex, bhm_cortex_size_t width, bhm_
     (*cortex)->pulse_mapping = BHM_PULSE_MAPPING_LINEAR;
 
     // Allocate neurons.
-    (*cortex)->neurons = (bhm_neuron_t *)malloc((*cortex)->width * (*cortex)->height * sizeof(bhm_neuron_t));
+    (*cortex)->neurons = (bhm_neuron_t *)malloc((size_t)(*cortex)->width * (*cortex)->height * sizeof(bhm_neuron_t));
     if ((*cortex)->neurons == NULL)
     {
         return BHM_ERROR_FAILED_ALLOC;
