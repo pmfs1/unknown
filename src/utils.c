@@ -198,7 +198,7 @@ void c2d_from_file(bhm_cortex2d_t *cortex, char *file_name)
     fread(&(cortex->pulse_mapping), sizeof(bhm_pulse_mapping_t), 1, in_file);
 
     // Read all neurons.
-    cortex->neurons = (bhm_neuron_t *)malloc(cortex->width * cortex->height * sizeof(bhm_neuron_t));
+    cortex->neurons = (bhm_neuron_t *)malloc((size_t)cortex->width * cortex->height * sizeof(bhm_neuron_t));
     for (bhm_cortex_size_t y = 0; y < cortex->height; y++)
     {
         for (bhm_cortex_size_t x = 0; x < cortex->width; x++)
