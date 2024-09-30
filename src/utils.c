@@ -53,7 +53,7 @@ bhm_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
     ignoreComments(pgmfile);
 
     // Allocate memory to store data in the struct.
-    pgm->data = (uint8_t *)malloc(pgm->width * pgm->height * sizeof(uint8_t));
+    pgm->data = (uint8_t *)malloc((unsigned long)pgm->width * pgm->height * sizeof(uint8_t));
 
     // Store data in the struct.
     if (!strcmp(pgm->pgmType, "P2"))
