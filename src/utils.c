@@ -70,7 +70,7 @@ bhm_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
     else if (!strcmp(pgm->pgmType, "P5"))
     {
         // Raw data.
-        fread(pgm->data, sizeof(uint8_t), pgm->width * pgm->height, pgmfile);
+        fread(pgm->data, sizeof(uint8_t), (size_t)pgm->width * pgm->height, pgmfile);
     }
     else
     {
