@@ -101,7 +101,6 @@
     >           return BHM_ERROR_NONE;
     >       }
     >       ``` -->
-- ~~_In `src/utils.c -> c2d_to_file`, make the function return `ERROR_FILE_NOT_FOUND` when the file doesn't exist instead of the current `printf`._~~
 - _In `src/unknown_std.c` implement `value_to_pulse_dfprop` which is currently a placeholder._
     > 1. _Define the logic for the `value_to_pulse_dfprop` function similar to other mapping functions._
     > 2. _Ensure that the function correctly handles the `sample_window`, `sample_step`, and `input` parameters to produce the desired pulse mapping._
@@ -133,7 +132,6 @@
     - _Implement `i2d_to_host` frunction which is currently a placeholder;_
     - _Finish the implementation of `c2d_read2d`;_
     - _Make sure there's no overflow in three (marked) instances of `c2d_tick` function._
-- _In `src/population.c` implement `p2d_crossover` which is currently a placeholder._
 - _In `src/cortex.h` implement with the consideration for other data in the `bhm_cortex3d_t` struct._
 - _In `src/cortex.c`:_
     - _Check for the maximum value in `c2d_set_syngen_chance` and `c2d_set_synstr_chance`;_
