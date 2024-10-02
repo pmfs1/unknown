@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
         if ((i + 1) % 1000 == 0) {
             uint64_t elapsed = millis() - start_time;
             double fps = i /(elapsed / 1000.0f);
-            printf("\nPerformed %d iterations in %llums; %.2f ticks per second\n", i + 1, elapsed, fps);
+            printf("\nPerformed %d iterations in %lums; %.2f ticks per second\n", i + 1, elapsed, fps);
             c2d_to_file(even_cortex, (char*) "out/test.c2d");
         }
 
