@@ -429,3 +429,30 @@ bhm_error_code_t o2d_mean(bhm_output2d_t *output, bhm_ticks_count_t *target)
 
     return BHM_ERROR_NONE;
 }
+
+// ########################################## Action functions ##################################################
+
+bhm_error_code_t c2d_crossover(bhm_cortex2d_t *offspring, const bhm_cortex2d_t *parent1, const bhm_cortex2d_t *parent2) {
+    if (!offspring || !parent1 || !parent2) {
+        return BHM_ERROR_INVALID_ARGUMENT;
+    }
+    // Initialize the offspring cortex
+    bhm_error_code_t error = c2d_init(offspring, parent1->width, parent1->height, parent1->nh_radius);
+    if (error != BHM_ERROR_NONE) {
+        return error;
+    }
+    // Perform the crossover by combining properties from both parents
+    for (bhm_cortex_size_t y = 0; y < offspring->height; y++) {
+        for (bhm_cortex_size_t x = 0; x < offspring->width; x++) {
+            bhm_neuron_t *neuron = &offspring->neurons[IDX2D(x, y, offspring->width)];
+            const bhm_neuron_t *neuron1 = &parent1->neurons[IDX2D(x, y, parent1->width)];
+            const bhm_neuron_t *neuron2 = &parent2->neurons[IDX2D(x, y, parent2->width)];
+            // Example crossover logic: average the properties of the parent neurons
+            neuron->value = (neuron1->value + neuron2->value) / 2;
+            neuron->synac_mask = (neuron1->synac_mask & neuron2->synac_mask);
+            neuron->synex_mask = (neuron1->synex_mask | neuron2->synex_mask);
+            // Add more crossover logic as needed
+        }
+    }
+    return BHM_ERROR_NONE;
+}

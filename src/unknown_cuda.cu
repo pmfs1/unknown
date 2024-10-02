@@ -69,9 +69,33 @@ bhm_error_code_t i2d_to_device(bhm_input2d_t *device_input, bhm_input2d_t *host_
     return BHM_ERROR_NONE;
 }
 
-bhm_error_code_t i2d_to_host(bhm_input2d_t *host_input, bhm_input2d_t *device_input)
-{
-    // TODO
+bhm_error_code_t i2d_to_host(bhm_input2d_t *host_input, bhm_input2d_t *device_input) {
+    // Allocate tmp input on the host.
+    bhm_input2d_t *tmp_input = (bhm_input2d_t *)malloc(sizeof(bhm_input2d_t));
+    if (tmp_input == NULL) {
+        return BHM_ERROR_FAILED_ALLOC;
+    }
+    // Copy device input to tmp input.
+    cudaMemcpy(tmp_input, device_input, sizeof(bhm_input2d_t), cudaMemcpyDeviceToHost);
+    cudaCheckError();
+    // Allocate values on the host.
+    host_input->values = (bhm_ticks_count_t *)malloc((tmp_input->x1 - tmp_input->x0) * (tmp_input->y1 - tmp_input->y0) * sizeof(bhm_ticks_count_t));
+    if (host_input->values == NULL) {
+        free(tmp_input);
+        return BHM_ERROR_FAILED_ALLOC;
+    }
+    // Copy values from device to host.
+    cudaMemcpy(
+        host_input->values,
+        tmp_input->values,
+        ((tmp_input->x1 - tmp_input->x0) * (tmp_input->y1 - tmp_input->y0)) * sizeof(bhm_ticks_count_t),
+        cudaMemcpyDeviceToHost
+    );
+    cudaCheckError();
+    // Copy tmp input to host input.
+    *host_input = *tmp_input;
+    // Cleanup.
+    free(tmp_input);
     return BHM_ERROR_NONE;
 }
 

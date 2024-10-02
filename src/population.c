@@ -126,32 +126,26 @@ bhm_error_code_t p2d_select(population2d_t *population)
     return BHM_ERROR_NONE;
 }
 
-bhm_error_code_t p2d_crossover(population2d_t *population)
-{
+bhm_error_code_t p2d_crossover(population2d_t *population) {
     // Ensure the population and survivors are properly initialized.
-    if (!population || !population->survivors || population->sel_pool_size < 2)
-    {
+    if (!population || !population->survivors || population->sel_pool_size < 2) {
         return BHM_ERROR_INVALID_ARGUMENT;
     }
     // Create a new array to hold the offspring.
     bhm_cortex2d_t *new_cortices = (bhm_cortex2d_t *)malloc(population->size * sizeof(bhm_cortex2d_t));
-    if (!new_cortices)
-    {
+    if (!new_cortices) {
         return BHM_ERROR_FAILED_ALLOC;
     }
-    // Perform crossover operations to create new population.
-    for (population_size_t i = 0; i < population->size; i++)
-    {
+    // Perform crossover operations to create a new population.
+    for (population_size_t i = 0; i < population->size; i++) {
         // Select two random parents from the survivors.
         population_size_t parent1_idx = population->survivors[rand() % population->sel_pool_size];
         population_size_t parent2_idx = population->survivors[rand() % population->sel_pool_size];
         // Create a new cortex by combining the two parents.
         bhm_error_code_t error = c2d_crossover(&(new_cortices[i]), &(population->cortices[parent1_idx]), &(population->cortices[parent2_idx]));
-        if (error != BHM_ERROR_NONE)
-        {
+        if (error != BHM_ERROR_NONE) {
             // Clean up and return the error if crossover fails.
-            for (population_size_t j = 0; j < i; j++)
-            {
+            for (population_size_t j = 0; j < i; j++) {
                 c2d_destroy(&(new_cortices[j]));
             }
             free(new_cortices);
@@ -159,10 +153,6 @@ bhm_error_code_t p2d_crossover(population2d_t *population)
         }
     }
     // Replace the old population with the new one.
-    for (population_size_t i = 0; i < population->size; i++)
-    {
-        c2d_destroy(&(population->cortices[i]));
-    }
     free(population->cortices);
     population->cortices = new_cortices;
     return BHM_ERROR_NONE;
