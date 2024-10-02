@@ -101,30 +101,6 @@
     >           return BHM_ERROR_NONE;
     >       }
     >       ``` -->
-- _In `src/unknown_std.c` implement `value_to_pulse_dfprop` which is currently a placeholder._
-    > 1. _Define the logic for the `value_to_pulse_dfprop` function similar to other mapping functions._
-    > 2. _Ensure that the function correctly handles the `sample_window`, `sample_step`, and `input` parameters to produce the desired pulse mapping._
-    > 3. _Test the implementation to verify its correctness._
-    > 
-    > _This logic applies a double floored proportional mapping, ensuring that the pulse pattern is mapped correctly based on the `input` and `sample_step` within the `sample_window`._
-  <!-- > ```cpp
-  > bhm_bool_t value_to_pulse_dfprop(bhm_ticks_count_t sample_window, bhm_ticks_count_t sample_step, bhm_ticks_count_t input) {
-  >     bhm_bool_t result = BHM_FALSE;
-  >     bhm_ticks_count_t upper = sample_window - 1;
-  >     // Double floored proportional mapping logic
-  >     if (input < sample_window / 2) {
-  >         if ((sample_step <= 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0)) {
-  >            result = BHM_TRUE;
-  >        }
-  >     }
-  >     else {
-  >        if (input >= upper || sample_step % (upper / ((upper - input) * 2)) != 0) {
-  >             result = BHM_TRUE;
-  >         }
-  >     }
-  >     return result;
-  > }
-  > ``` -->
 - _In `src/unknown_std.h` remove `#include <stdio.h>` in release._
 - _In `src/unknown_cuda.cu`:_
     - _Implement `i2d_to_host` frunction which is currently a placeholder;_
