@@ -120,7 +120,7 @@ uint64_t nanos()
     return ns;
 }
 
-void c2d_to_file(bhm_cortex2d_t *cortex, char *file_name)
+bhm_error_code_t c2d_to_file(bhm_cortex2d_t *cortex, char *file_name)
 {
     // Open output file if possible.
     FILE *out_file = fopen(file_name, "wb");
@@ -164,6 +164,7 @@ void c2d_to_file(bhm_cortex2d_t *cortex, char *file_name)
     }
 
     fclose(out_file);
+    return BHM_ERROR_NONE;
 }
 
 void c2d_from_file(bhm_cortex2d_t *cortex, char *file_name)
