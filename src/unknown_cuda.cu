@@ -170,7 +170,16 @@ bhm_error_code_t c2d_to_host(bhm_cortex2d_t *host_cortex, bhm_cortex2d_t *device
 
 bhm_error_code_t i2d_device_destroy(bhm_input2d_t *input)
 {
-    // TODO
+    // Free device memory for the values array.
+    cudaError_t cuda_error = cudaFree(input->values);
+    if (cuda_error != cudaSuccess) {
+        return BHM_ERROR_FAILED_ALLOC;
+    }
+    // Free the input structure itself.
+    cuda_error = cudaFree(input);
+    if (cuda_error != cudaSuccess) {
+        return BHM_ERROR_FAILED_ALLOC;
+    }
     return BHM_ERROR_NONE;
 }
 
