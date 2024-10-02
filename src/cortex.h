@@ -385,6 +385,15 @@ extern "C"
     /// @return The code for the occurred error, [BHM_ERROR_NONE] if none.
     bhm_error_code_t o2d_mean(bhm_output2d_t *output, bhm_ticks_count_t *target);
 
+    // ########################################## Action functions ##################################################
+
+    /// @brief Crossover between two cortices.
+    /// @param offspring The cortex to store the crossover result.
+    /// @param parent1 The first parent cortex.
+    /// @param parent2 The second parent cortex.
+    /// @return The code for the occurred error, [BHM_ERROR_NONE] if none.
+    bhm_error_code_t c2d_crossover(bhm_cortex2d_t *offspring, const bhm_cortex2d_t *parent1, const bhm_cortex2d_t *parent2);
+
 #ifdef __cplusplus
 }
 #endif
