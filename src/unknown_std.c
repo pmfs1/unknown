@@ -374,8 +374,19 @@ bhm_bool_t value_to_pulse_rprop(bhm_ticks_count_t sample_window, bhm_ticks_count
     return result;
 }
 
-bhm_bool_t value_to_pulse_dfprop(bhm_ticks_count_t sample_window, bhm_ticks_count_t sample_step, bhm_ticks_count_t input)
-{
-    // TODO
-    return BHM_FALSE;
+bhm_bool_t value_to_pulse_dfprop(bhm_ticks_count_t sample_window, bhm_ticks_count_t sample_step, bhm_ticks_count_t input) {
+    bhm_bool_t result = BHM_FALSE;
+    bhm_ticks_count_t upper = sample_window - 1;
+    // Double floored proportional mapping logic
+    if (input < sample_window / 2) {
+        if ((sample_step <= 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0)) {
+           result = BHM_TRUE;
+       }
+    }
+    else {
+       if (input >= upper || sample_step % (upper / ((upper - input) * 2)) != 0) {
+            result = BHM_TRUE;
+        }
+    }
+    return result;
 }
