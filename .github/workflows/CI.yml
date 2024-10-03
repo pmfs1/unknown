@@ -16,14 +16,14 @@ jobs:
       packages: write
       contents: read
       attestations: write
-    concurrency:
-      group: "${{ github.ref_name }}-${{ github.run_id }}"
-      cancel-in-progress: true
     environment: ${{ github.ref_name }}
     strategy:
       matrix:
         os: [ ubuntu-24.04, ubuntu-22.04, ubuntu-20.04, macos-12, macos-13, macos-14, macos-15 ]
     runs-on: ${{ matrix.os }}
+    concurrency:
+      group: "${{ github.ref_name }}-${{ matrix.os }}-${{ github.run_id }}"
+      cancel-in-progress: false
     steps:
       - name: 'CHECKOUT'
         uses: actions/checkout@v4
