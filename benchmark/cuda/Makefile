@@ -19,7 +19,7 @@ CUDA_STD_LIBS=-lcudart -lstdc++
 unknown_LIBS=-lunknown
 
 SRC_DIR=./src
-BLD_DIR=./built
+BLD_DIR=./bin
 BIN_DIR=./bin
 OUT_DIR=./out
 

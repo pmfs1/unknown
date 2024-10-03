@@ -11,7 +11,7 @@ TIME_CUDA_LIBS=-lcuda -lcudart -lcublas -lcurand
 UNKNOWN_LIBS=-lunknown
 
 SRC_DIR=./src
-BLD_DIR=./built
+BLD_DIR=./bin
 BIN_DIR=./bin
 OUT_DIR=./out
 
