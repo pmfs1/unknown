@@ -1,14 +1,14 @@
 #include "unknown_std.h"
 
-void c2d_feed2d(bhm_cortex2d_t *cortex, bhm_input2d_t *input)
+void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
 {
 #pragma omp parallel for collapse(2)
-    for (bhm_cortex_size_t y = input->y0; y < input->y1; y++)
+    for (unk_cortex_size_t y = input->y0; y < input->y1; y++)
     {
-        for (bhm_cortex_size_t x = input->x0; x < input->x1; x++)
+        for (unk_cortex_size_t x = input->x0; x < input->x1; x++)
         {
             // Check whether the current input neuron should be excited or not.
-            bhm_bool_t excite = value_to_pulse(
+            unk_bool_t excite = value_to_pulse(
                 cortex->sample_window,
                 cortex->ticks_count % cortex->sample_window,
                 input->values[IDX2D(
@@ -25,12 +25,12 @@ void c2d_feed2d(bhm_cortex2d_t *cortex, bhm_input2d_t *input)
     }
 }
 
-void c2d_read2d(bhm_cortex2d_t *cortex, bhm_output2d_t *output)
+void c2d_read2d(unk_cortex2d_t *cortex, unk_output2d_t *output)
 {
 #pragma omp parallel for collapse(2)
-    for (bhm_cortex_size_t y = output->y0; y < output->y1; y++)
+    for (unk_cortex_size_t y = output->y0; y < output->y1; y++)
     {
-        for (bhm_cortex_size_t x = output->x0; x < output->x1; x++)
+        for (unk_cortex_size_t x = output->x0; x < output->x1; x++)
         {
             output->values[IDX2D(
                 x - output->x0,
@@ -43,17 +43,17 @@ void c2d_read2d(bhm_cortex2d_t *cortex, bhm_output2d_t *output)
     }
 }
 
-void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_cortex)
+void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
 {
 #pragma omp parallel for collapse(2)
-    for (bhm_cortex_size_t y = 0; y < prev_cortex->height; y++)
+    for (unk_cortex_size_t y = 0; y < prev_cortex->height; y++)
     {
-        for (bhm_cortex_size_t x = 0; x < prev_cortex->width; x++)
+        for (unk_cortex_size_t x = 0; x < prev_cortex->width; x++)
         {
             // Retrieve the involved neurons.
-            bhm_cortex_size_t neuron_index = IDX2D(x, y, prev_cortex->width);
-            bhm_neuron_t prev_neuron = prev_cortex->neurons[neuron_index];
-            bhm_neuron_t *next_neuron = &(next_cortex->neurons[neuron_index]);
+            unk_cortex_size_t neuron_index = IDX2D(x, y, prev_cortex->width);
+            unk_neuron_t prev_neuron = prev_cortex->neurons[neuron_index];
+            unk_neuron_t *next_neuron = &(next_cortex->neurons[neuron_index]);
 
             // Copy prev neuron values to the new one.
             *next_neuron = prev_neuron;
@@ -71,57 +71,57 @@ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_cortex)
               |             |
               +-|-|-|-|-|-|-+
             */
-            bhm_cortex_size_t nh_diameter = NH_DIAM_2D(prev_cortex->nh_radius);
+            unk_cortex_size_t nh_diameter = NH_DIAM_2D(prev_cortex->nh_radius);
 
-            bhm_nh_mask_t prev_ac_mask = prev_neuron.synac_mask;
-            bhm_nh_mask_t prev_exc_mask = prev_neuron.synex_mask;
-            bhm_nh_mask_t prev_str_mask_a = prev_neuron.synstr_mask_a;
-            bhm_nh_mask_t prev_str_mask_b = prev_neuron.synstr_mask_b;
-            bhm_nh_mask_t prev_str_mask_c = prev_neuron.synstr_mask_c;
+            unk_nh_mask_t prev_ac_mask = prev_neuron.synac_mask;
+            unk_nh_mask_t prev_exc_mask = prev_neuron.synex_mask;
+            unk_nh_mask_t prev_str_mask_a = prev_neuron.synstr_mask_a;
+            unk_nh_mask_t prev_str_mask_b = prev_neuron.synstr_mask_b;
+            unk_nh_mask_t prev_str_mask_c = prev_neuron.synstr_mask_c;
 
             // Defines whether to evolve or not.
             // evol_step is incremented by 1 to account for edge cases and human readable behavior:
             // 0x0000 -> 0 + 1 = 1, so the cortex evolves at every tick, meaning that there are no free ticks between evolutions.
             // 0xFFFF -> 65535 + 1 = 65536, so the cortex never evolves, meaning that there is an infinite amount of ticks between evolutions.
-            bhm_bool_t evolve = (prev_cortex->ticks_count % (((bhm_evol_step_t)prev_cortex->evol_step) + 1)) == 0;
+            unk_bool_t evolve = (prev_cortex->ticks_count % (((unk_evol_step_t)prev_cortex->evol_step) + 1)) == 0;
 
             // Increment the current neuron value by reading its connected neighbors.
-            for (bhm_nh_radius_t j = 0; j < nh_diameter; j++)
+            for (unk_nh_radius_t j = 0; j < nh_diameter; j++)
             {
-                for (bhm_nh_radius_t i = 0; i < nh_diameter; i++)
+                for (unk_nh_radius_t i = 0; i < nh_diameter; i++)
                 {
-                    bhm_cortex_size_t neighbor_x = x + (i - prev_cortex->nh_radius);
-                    bhm_cortex_size_t neighbor_y = y + (j - prev_cortex->nh_radius);
+                    unk_cortex_size_t neighbor_x = x + (i - prev_cortex->nh_radius);
+                    unk_cortex_size_t neighbor_y = y + (j - prev_cortex->nh_radius);
 
                     // Exclude the central neuron from the list of neighbors.
                     if ((j != prev_cortex->nh_radius || i != prev_cortex->nh_radius) &&
                         (neighbor_x >= 0 && neighbor_y >= 0 && neighbor_x < prev_cortex->width && neighbor_y < prev_cortex->height))
                     {
                         // The index of the current neighbor in the current neuron's neighborhood.
-                        bhm_cortex_size_t neighbor_nh_index = IDX2D(i, j, nh_diameter);
-                        bhm_cortex_size_t neighbor_index = IDX2D(WRAP(neighbor_x, prev_cortex->width),
+                        unk_cortex_size_t neighbor_nh_index = IDX2D(i, j, nh_diameter);
+                        unk_cortex_size_t neighbor_index = IDX2D(WRAP(neighbor_x, prev_cortex->width),
                                                                  WRAP(neighbor_y, prev_cortex->height),
                                                                  prev_cortex->width);
 
                         // Fetch the current neighbor.
-                        bhm_neuron_t neighbor = prev_cortex->neurons[neighbor_index];
+                        unk_neuron_t neighbor = prev_cortex->neurons[neighbor_index];
 
                         // Compute the current synapse strength.
-                        bhm_syn_strength_t syn_strength = (prev_str_mask_a & 0x01U) |
+                        unk_syn_strength_t syn_strength = (prev_str_mask_a & 0x01U) |
                                                           ((prev_str_mask_b & 0x01U) << 0x01U) |
                                                           ((prev_str_mask_c & 0x01U) << 0x02U);
 
                         // Pick a random number for each neighbor, capped to the max uint16 value.
                         next_neuron->rand_state = xorshf32(next_neuron->rand_state);
-                        bhm_chance_t random = next_neuron->rand_state % 0xFFFFU;
+                        unk_chance_t random = next_neuron->rand_state % 0xFFFFU;
 
                         // Inverse of the current synapse strength, useful when computing depression probability (synapse deletion and weakening).
-                        bhm_syn_strength_t strength_diff = BHM_MAX_SYN_STRENGTH - syn_strength;
+                        unk_syn_strength_t strength_diff = UNK_MAX_SYN_STRENGTH - syn_strength;
 
                         // Check if the last bit of the mask is 1 or 0: 1 = active synapse, 0 = inactive synapse.
                         if (prev_ac_mask & 0x01U)
                         {
-                            bhm_neuron_value_t neighbor_influence = (prev_exc_mask & 0x01U ? prev_cortex->exc_value : -prev_cortex->exc_value) * ((syn_strength / 4) + 1);
+                            unk_neuron_value_t neighbor_influence = (prev_exc_mask & 0x01U ? prev_cortex->exc_value : -prev_cortex->exc_value) * ((syn_strength / 4) + 1);
                             if (neighbor.value > prev_cortex->fire_threshold)
                             {
                                 if (next_neuron->value + neighbor_influence < prev_cortex->recovery_value)
@@ -142,7 +142,7 @@ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_cortex)
                             if (!(prev_ac_mask & 0x01U) &&
                                 prev_neuron.syn_count < next_neuron->max_syn_count &&
                                 // Frequency component.
-                                random < prev_cortex->syngen_chance * (bhm_chance_t)neighbor.pulse)
+                                random < prev_cortex->syngen_chance * (unk_chance_t)neighbor.pulse)
                             {
                                 // Add synapse.
                                 next_neuron->synac_mask |= (0x01UL << neighbor_nh_index);
@@ -181,9 +181,9 @@ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_cortex)
                             // Functional plasticity: strengthen or weaken a synapse.
                             if (prev_ac_mask & 0x01U)
                             {
-                                if (syn_strength < BHM_MAX_SYN_STRENGTH &&
+                                if (syn_strength < UNK_MAX_SYN_STRENGTH &&
                                     prev_neuron.tot_syn_strength < prev_cortex->max_tot_strength &&
-                                    random < prev_cortex->synstr_chance * (bhm_chance_t)neighbor.pulse * (bhm_chance_t)strength_diff)
+                                    random < prev_cortex->synstr_chance * (unk_chance_t)neighbor.pulse * (unk_chance_t)strength_diff)
                                 {
                                     syn_strength++;
                                     next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
@@ -254,25 +254,25 @@ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_cortex)
 
 // ########################################## Input mapping functions ##########################################
 
-bhm_bool_t value_to_pulse(bhm_ticks_count_t sample_window, bhm_ticks_count_t sample_step, bhm_ticks_count_t input, bhm_pulse_mapping_t pulse_mapping)
+unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input, unk_pulse_mapping_t pulse_mapping)
 {
-    bhm_bool_t result = BHM_FALSE;
+    unk_bool_t result = UNK_FALSE;
 
     // Make sure the provided input correctly lies inside the provided window.
     if (input < sample_window)
     {
         switch (pulse_mapping)
         {
-        case BHM_PULSE_MAPPING_LINEAR:
+        case UNK_PULSE_MAPPING_LINEAR:
             result = value_to_pulse_linear(sample_window, sample_step, input);
             break;
-        case BHM_PULSE_MAPPING_FPROP:
+        case UNK_PULSE_MAPPING_FPROP:
             result = value_to_pulse_fprop(sample_window, sample_step, input);
             break;
-        case BHM_PULSE_MAPPING_RPROP:
+        case UNK_PULSE_MAPPING_RPROP:
             result = value_to_pulse_rprop(sample_window, sample_step, input);
             break;
-        case BHM_PULSE_MAPPING_DFPROP:
+        case UNK_PULSE_MAPPING_DFPROP:
             result = value_to_pulse_dfprop(sample_window, sample_step, input);
             break;
         default:
@@ -283,7 +283,7 @@ bhm_bool_t value_to_pulse(bhm_ticks_count_t sample_window, bhm_ticks_count_t sam
     return result;
 }
 
-bhm_bool_t value_to_pulse_linear(bhm_ticks_count_t sample_window, bhm_ticks_count_t sample_step, bhm_ticks_count_t input)
+unk_bool_t value_to_pulse_linear(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input)
 {
     // sample_window = 10;
     // x = input;
@@ -300,10 +300,10 @@ bhm_bool_t value_to_pulse_linear(bhm_ticks_count_t sample_window, bhm_ticks_coun
     return sample_step % (sample_window - input) == 0;
 }
 
-bhm_bool_t value_to_pulse_fprop(bhm_ticks_count_t sample_window, bhm_ticks_count_t sample_step, bhm_ticks_count_t input)
+unk_bool_t value_to_pulse_fprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input)
 {
-    bhm_bool_t result = BHM_FALSE;
-    bhm_ticks_count_t upper = sample_window - 1;
+    unk_bool_t result = UNK_FALSE;
+    unk_ticks_count_t upper = sample_window - 1;
 
     // sample_window = 10;
     // upper = sample_window - 1 = 9;
@@ -323,23 +323,23 @@ bhm_bool_t value_to_pulse_fprop(bhm_ticks_count_t sample_window, bhm_ticks_count
         if ((sample_step <= 0) ||
             (input > 0 && sample_step % (upper / input) == 0))
         {
-            result = BHM_TRUE;
+            result = UNK_TRUE;
         }
     }
     else
     {
         if (input >= upper || sample_step % (upper / (upper - input)) != 0)
         {
-            result = BHM_TRUE;
+            result = UNK_TRUE;
         }
     }
 
     return result;
 }
 
-bhm_bool_t value_to_pulse_rprop(bhm_ticks_count_t sample_window, bhm_ticks_count_t sample_step, bhm_ticks_count_t input)
+unk_bool_t value_to_pulse_rprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input)
 {
-    bhm_bool_t result = BHM_FALSE;
+    unk_bool_t result = UNK_FALSE;
     double upper = sample_window - 1;
     double d_input = input;
 
@@ -358,34 +358,34 @@ bhm_bool_t value_to_pulse_rprop(bhm_ticks_count_t sample_window, bhm_ticks_count
     if ((double)input < ((double)sample_window) / 2)
     {
         if ((sample_step <= 0) ||
-            (input > 0 && sample_step % (bhm_ticks_count_t)round(upper / d_input) == 0))
+            (input > 0 && sample_step % (unk_ticks_count_t)round(upper / d_input) == 0))
         {
-            result = BHM_TRUE;
+            result = UNK_TRUE;
         }
     }
     else
     {
-        if (input >= upper || sample_step % (bhm_ticks_count_t)round(upper / (upper - d_input)) != 0)
+        if (input >= upper || sample_step % (unk_ticks_count_t)round(upper / (upper - d_input)) != 0)
         {
-            result = BHM_TRUE;
+            result = UNK_TRUE;
         }
     }
 
     return result;
 }
 
-bhm_bool_t value_to_pulse_dfprop(bhm_ticks_count_t sample_window, bhm_ticks_count_t sample_step, bhm_ticks_count_t input) {
-    bhm_bool_t result = BHM_FALSE;
-    bhm_ticks_count_t upper = sample_window - 1;
+unk_bool_t value_to_pulse_dfprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input) {
+    unk_bool_t result = UNK_FALSE;
+    unk_ticks_count_t upper = sample_window - 1;
     // Double floored proportional mapping logic
     if (input < sample_window / 2) {
         if ((sample_step <= 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0)) {
-           result = BHM_TRUE;
+           result = UNK_TRUE;
        }
     }
     else {
        if (input >= upper || sample_step % (upper / ((upper - input) * 2)) != 0) {
-            result = BHM_TRUE;
+            result = UNK_TRUE;
         }
     }
     return result;

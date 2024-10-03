@@ -1,0 +1,41 @@
+name: 'CODE SECURITY'
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  push:
+    branches: [ "trunk" ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ "trunk" ]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  CODE_SECURITY:
+    name: 'CODE SECURITY'
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: c-cpp
+          build-mode: autobuild
+    steps:
+      - name: 'CHECKOUT'
+        uses: actions/checkout@v4
+      - name: 'INIT'
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended,security-and-quality
+      - name: 'RUN'
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
