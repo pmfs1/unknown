@@ -363,7 +363,7 @@ bhm_error_code_t c2d_mutate(bhm_cortex2d_t *cortex, bhm_chance_t mut_chance)
     if (new_width > 0 && new_height > 0) {
         cortex->width = new_width;
         cortex->height = new_height;
-        cortex->neurons = (bhm_neuron_t *)realloc(cortex->neurons, new_width * new_height * sizeof(bhm_neuron_t));
+        cortex->neurons = (bhm_neuron_t *)realloc(cortex->neurons, (size_t)new_width * (size_t)new_height * sizeof(bhm_neuron_t));
     }
     // Mutate pulse window.
     cortex->rand_state = xorshf32(cortex->rand_state);
