@@ -357,8 +357,14 @@ bhm_error_code_t c2d_syn_disable(bhm_cortex2d_t *cortex, bhm_cortex_size_t x0, b
 bhm_error_code_t c2d_mutate(bhm_cortex2d_t *cortex, bhm_chance_t mut_chance)
 {
     // Start by mutating the network itself, then go on to single neurons.
-    // TODO Mutate the cortex shape.
-
+    // Mutate cortex shape.
+    bhm_cortex_size_t new_width = cortex->width + (rand() % 3 - 1); // Random change -1, 0, or +1
+    bhm_cortex_size_t new_height = cortex->height + (rand() % 3 - 1); // Random change -1, 0, or +1
+    if (new_width > 0 && new_height > 0) {
+        cortex->width = new_width;
+        cortex->height = new_height;
+        cortex->neurons = (bhm_neuron_t *)realloc(cortex->neurons, new_width * new_height * sizeof(bhm_neuron_t));
+    }
     // Mutate pulse window.
     cortex->rand_state = xorshf32(cortex->rand_state);
     if (cortex->rand_state > mut_chance)
@@ -366,7 +372,6 @@ bhm_error_code_t c2d_mutate(bhm_cortex2d_t *cortex, bhm_chance_t mut_chance)
         // Decide whether to increase or decrease the pulse window.
         cortex->pulse_window += cortex->rand_state % 2 == 0 ? 1 : -1;
     }
-
     // Mutate syngen chance.
     cortex->rand_state = xorshf32(cortex->rand_state);
     if (cortex->rand_state > mut_chance)
@@ -374,7 +379,6 @@ bhm_error_code_t c2d_mutate(bhm_cortex2d_t *cortex, bhm_chance_t mut_chance)
         // Decide whether to increase or decrease the syngen chance.
         cortex->syngen_chance += cortex->rand_state % 2 == 0 ? 1 : -1;
     }
-
     // Mutate synstr chance.
     cortex->rand_state = xorshf32(cortex->rand_state);
     if (cortex->rand_state > mut_chance)
@@ -382,9 +386,17 @@ bhm_error_code_t c2d_mutate(bhm_cortex2d_t *cortex, bhm_chance_t mut_chance)
         // Decide whether to increase or decrease the syngen chance.
         cortex->synstr_chance += cortex->rand_state % 2 == 0 ? 1 : -1;
     }
-
-    // TODO Mutate neurons.
-
+    // Mutate neurons.
+    for (bhm_cortex_size_t y = 0; y < cortex->height; y++) {
+        for (bhm_cortex_size_t x = 0; x < cortex->width; x++) {
+            bhm_neuron_t *neuron = &cortex->neurons[IDX2D(x, y, cortex->width)];
+            // Randomly mutate neuron properties
+            neuron->max_syn_count = (rand() % cortex->max_syn_count) + 1;
+            neuron->inhexc_ratio = rand() % cortex->inhexc_range;
+            neuron->syn_count = rand() % neuron->max_syn_count;
+            neuron->tot_syn_strength = rand() % cortex->max_tot_strength;
+        }
+    }
     return BHM_ERROR_NONE;
 }
 
