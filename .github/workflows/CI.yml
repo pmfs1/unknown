@@ -1,0 +1,88 @@
+name: 'CI'
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  push:
+    branches: [ "trunk" ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ "trunk" ]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  CODE_SECURITY:
+    name: 'CODE SECURITY'
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: c-cpp
+          build-mode: autobuild
+    steps:
+      - name: 'CHECKOUT'
+        uses: actions/checkout@v4
+      - name: 'INIT'
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended,security-and-quality
+      - name: 'RUN'
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+  DEPENDENCY_REVIEW:
+    name: 'DEPENDENCY REVIEW'
+    runs-on: ubuntu-latest
+    needs: CODE_SECURITY
+    steps:
+      - name: 'CHECKOUT'
+        uses: actions/checkout@v4
+      - name: 'REVIEW'
+        uses: actions/dependency-review-action@v4
+        with:
+          comment-summary-in-pr: always
+          fail-on-severity: moderate
+  OSSAR:
+    name: 'OSSAR'
+    needs: CODE_SECURITY
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    runs-on: windows-latest
+    steps:
+      - name: 'CHECKOUT'
+        uses: actions/checkout@v4
+      - name: 'RUN'
+        uses: github/ossar-action@v1
+        id: ossar
+      - name: 'UPLOAD RESULTS'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.ossar.outputs.sarifFile }}
+  BUILD:
+    name: 'BUILD'
+    needs: [ DEPENDENCY_REVIEW, OSSAR, CODE_SECURITY ]
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'CHECKOUT'
+        uses: actions/checkout@v4
+      - name: 'SETUP'
+        run: sudo apt-get update -y && sudo apt install software-properties-common make gcc g++ opencl-headers ocl-icd-opencl-dev libopencv-videoio-dev libopencv-core-dev nvidia-cuda-toolkit -y
+      - name: 'INSTALL STD_LIB'
+        run: make install
+      - name: 'INSTALL CUDA_LIB'
+        run: make cuda-install CUDA_ARCH=sm_61
+      - name: 'UNINSTALL'
+        run: make uninstall

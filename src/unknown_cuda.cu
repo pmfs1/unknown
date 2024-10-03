@@ -243,16 +243,14 @@ __global__ void c2d_feed2d(bhm_cortex2d_t *cortex, bhm_input2d_t *input)
     }
 }
 
-__global__ void c2d_read2d(bhm_cortex2d_t *cortex, bhm_output2d_t *output)
-{
+__global__ void c2d_read2d(bhm_cortex2d_t *cortex, bhm_output2d_t *output) {
     bhm_cortex_size_t x = threadIdx.x + blockIdx.x * blockDim.x;
     bhm_cortex_size_t y = threadIdx.y + blockIdx.y * blockDim.y;
     // Avoid accessing unallocated memory.
-    if (x >= output->x1 - output->x0 || y >= output->y1 - output->y0)
-    {
+    if (x >= output->x1 - output->x0 || y >= output->y1 - output->y0) {
         return;
     }
-    // TODO.
+    output->values[IDX2D(x, y, output->x1 - output->x0)] = cortex->neurons[IDX2D(x + output->x0, y + output->y0, cortex->width)].pulse;
 }
 
 __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_cortex)
