@@ -9,14 +9,11 @@ on:
     branches: [ "trunk" ]
   workflow_dispatch:
 jobs:
-  CI:
-    name: 'CI'
+  BUILD:
+    name: 'BUILD'
     permissions:
       contents: read
-    strategy:
-      matrix:
-        os: [ ubuntu-24.04, ubuntu-22.04, ubuntu-20.04 ]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - name: 'CHECKOUT'
         uses: actions/checkout@v4
@@ -26,3 +23,26 @@ jobs:
         run: make install
       - name: 'INSTALL CUDA_LIB'
         run: make cuda-install CUDA_ARCH=sm_61
+      - name: 'UNINSTALL'
+        run: make uninstall
+  TEST:
+    name: 'TEST'
+    needs: BUILD
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'CHECKOUT'
+        uses: actions/checkout@v4
+      - name: 'SETUP'
+        run: sudo apt-get update -y && sudo apt install software-properties-common make gcc g++ opencl-headers ocl-icd-opencl-dev libopencv-videoio-dev libopencv-core-dev nvidia-cuda-toolkit -y
+      - name: 'INSTALL STD_LIB'
+        run: make install
+      - name: 'INSTALL CUDA_LIB'
+        run: make cuda-install CUDA_ARCH=sm_61
+      - name: 'BENCHMARK CUDA'
+        run: cd benchmark/cuda && make && ./bin/bench
+      - name: 'BENCHMARK STD'
+        run: cd benchmark/std && make && ./bin/bench
+      - name: 'UNINSTALL'
+        run: make uninstall
