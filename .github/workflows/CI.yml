@@ -14,7 +14,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
     steps:
       - name: 'CHECKOUT'
         uses: actions/checkout@v4
@@ -32,7 +31,6 @@ jobs:
     permissions:
       contents: read
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name }}
     steps:
       - name: 'CHECKOUT'
         uses: actions/checkout@v4
