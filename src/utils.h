@@ -1,5 +1,5 @@
-#ifndef __unknown_UTILS__
-#define __unknown_UTILS__
+#ifndef __UNKNOWN_UTILS__
+#define __UNKNOWN_UTILS__
 
 // This line **must** come **before** including <time.h> in order to
 // bring in the POSIX functions such as `clock_gettime() from <time.h>`!
@@ -12,6 +12,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include "cortex.h"
 #include "error.h"
 
@@ -63,17 +66,17 @@ extern "C"
     /// The file is created if not already present, overwritten otherwise.
     /// @param cortex The cortex to be written to file.
     /// @param file_name The destination file to write the cortex to.
-    bhm_error_code_t c2d_to_file(bhm_cortex2d_t *cortex, char *file_name);
+    unk_error_code_t c2d_to_file(unk_cortex2d_t *cortex, char *file_name);
 
     /// Reads the content from a file and initializes the provided cortex accordingly.
     /// @param cortex The cortex to init from file.
     /// @param file_name The file to read the cortex from.
-    void c2d_from_file(bhm_cortex2d_t *cortex, char *file_name);
+    void c2d_from_file(unk_cortex2d_t *cortex, char *file_name);
 
     /// Sets each neurons's touch from a pgm map file
-    bhm_error_code_t c2d_touch_from_map(bhm_cortex2d_t *cortex, char *map_file_name);
+    unk_error_code_t c2d_touch_from_map(unk_cortex2d_t *cortex, char *map_file_name);
 
-    bhm_error_code_t c2d_inhexc_from_map(bhm_cortex2d_t *cortex, char *map_file_name);
+    unk_error_code_t c2d_inhexc_from_map(unk_cortex2d_t *cortex, char *map_file_name);
 
 #ifdef __cplusplus
 }
