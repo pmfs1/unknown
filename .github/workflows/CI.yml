@@ -13,10 +13,7 @@ jobs:
     name: 'BUILD'
     permissions:
       contents: read
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     steps:
       - name: 'CHECKOUT'
@@ -34,10 +31,7 @@ jobs:
     needs: BUILD
     permissions:
       contents: read
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     steps:
       - name: 'CHECKOUT'
