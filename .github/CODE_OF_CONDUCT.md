@@ -34,14 +34,14 @@ reported to the community leaders responsible for enforcement at [pedromiguelfil
 ###### _Enforcement Guidelines_
  - _Community leaders will follow these community impact guidelines in determining the consequences for any action they deem in violation of this Code of Conduct:_
     1. _**Correction**_
-        - _**Community Impact**_: Use of inappropriate language or other behavior deemed unprofessional or unwelcome in the community.
-        - _**Consequence**_: A private, written warning from community leaders, providing clarity around the nature of the violation and an explanation of why the behavior was inappropriate. A public apology may be requested.
+        - _**Community Impact**_: _Use of inappropriate language or other behavior deemed unprofessional or unwelcome in the community._
+        - _**Consequence**_: _A private, written warning from community leaders, providing clarity around the nature of the violation and an explanation of why the behavior was inappropriate. A public apology may be requested._
     2. _**Warning**_
-        - _**Community Impact**_: A violation through a single incident or series of actions.
-        - _**Consequence**_: A warning with consequences for continued behavior. No interaction with the people involved, including unsolicited interaction with those enforcing the Code of Conduct, for a specified period of time. This includes avoiding interactions in community spaces as well as external channels like social media. Violating these terms may lead to a temporary or permanent ban.
+        - _**Community Impact**_: _A violation through a single incident or series of actions._
+        - _**Consequence**_: _A warning with consequences for continued behavior. No interaction with the people involved, including unsolicited interaction with those enforcing the Code of Conduct, for a specified period of time. This includes avoiding interactions in community spaces as well as external channels like social media. Violating these terms may lead to a temporary or permanent ban._
     3. _**Temporary Ban**_
-        - _**Community Impact**_: A serious violation of community standards, including sustained inappropriate behavior.
-        - _**Consequence**_: A temporary ban from any sort of interaction or public communication with the community for a specified period of time. No public or private interaction with the people involved, including unsolicited interaction with those enforcing the Code of Conduct, is allowed during this period. Violating these terms may lead to a permanent ban.
+        - _**Community Impact**_: _A serious violation of community standards, including sustained inappropriate behavior._
+        - _**Consequence**_: _A temporary ban from any sort of interaction or public communication with the community for a specified period of time. No public or private interaction with the people involved, including unsolicited interaction with those enforcing the Code of Conduct, is allowed during this period. Violating these terms may lead to a permanent ban._
     4. _**Permanent Ban**_
-        - _**Community Impact**_: Demonstrating a pattern of violation of community standards, including sustained inappropriate behavior, harassment of an individual, or aggression toward or disparagement of classes of individuals.
-        - _**Consequence**_: A permanent ban from any sort of public interaction within the community.
+        - _**Community Impact**_: _Demonstrating a pattern of violation of community standards, including sustained inappropriate behavior, harassment of an individual, or aggression toward or disparagement of classes of individuals._
+        - _**Consequence**_: _A permanent ban from any sort of public interaction within the community._
