@@ -19,7 +19,7 @@ jobs:
     environment: ${{ github.ref_name }}
     strategy:
       matrix:
-        os: [ ubuntu-24.04, ubuntu-22.04, ubuntu-20.04, macos-12, macos-13, macos-14, macos-15 ]
+        os: [ ubuntu-24.04, ubuntu-22.04, ubuntu-20.04, macos-15 ]
     runs-on: ${{ matrix.os }}
     concurrency:
       group: "${{ github.ref_name }}-${{ matrix.os }}-${{ github.run_id }}"
@@ -28,12 +28,17 @@ jobs:
       - name: 'CHECKOUT'
         uses: actions/checkout@v4
       - name: 'SETUP'
-        run: sudo apt-get update -y && sudo apt install software-properties-common make gcc g++ opencl-headers ocl-icd-opencl-dev libopencv-videoio-dev libopencv-core-dev nvidia-cuda-toolkit -y
+        run: |
+          if [ ${{ matrix.os }} == 'macos-15' ]; then
+            brew install make gcc opencl nvidia-cuda
+          else
+            sudo apt-get update -y && sudo apt install software-properties-common make gcc g++ opencl-headers ocl-icd-opencl-dev libopencv-videoio-dev libopencv-core-dev nvidia-cuda-toolkit -y
+          fi
+      - name: 'CONFIGURE'
+        run: ./configure --enable-cuda --enable-opencl
       - name: 'INSTALL STD_LIB'
         run: make install
       - name: 'INSTALL CUDA_LIB'
         run: make cuda-install CUDA_ARCH=sm_61
       - name: 'CHECK'
-        run: |
-          make check && make distcheck
-      
+        run: make check && make distcheck
