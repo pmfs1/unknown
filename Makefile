@@ -22,7 +22,7 @@ STD_LIBS=-lm
 CUDA_STD_LIBS=-lcudart
 
 SRC_DIR=./src
-BLD_DIR=./built
+BLD_DIR=./bin
 BIN_DIR=./bin
 
 SYSTEM_INCLUDE_DIR=
