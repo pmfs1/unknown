@@ -22,13 +22,12 @@ STD_LIBS=-lm
 CUDA_STD_LIBS=-lcudart
 
 SRC_DIR=./src
-BLD_DIR=./built
 BIN_DIR=./bin
 
 SYSTEM_INCLUDE_DIR=
 SYSTEM_LIB_DIR=
 
-OBJS=$(patsubst %.o,$(BLD_DIR)/%.o,$^)
+OBJS=$(patsubst %.o,$(BIN_DIR)/%.o,$^)
 
 MKDIR=mkdir -p
 RM=rm -rf
@@ -56,10 +55,10 @@ install-headers:
 
 install-lib:
 ifneq ($(MODE), archive)
-	sudo cp $(BLD_DIR)/libunknown.so $(SYSTEM_LIB_DIR)
+	sudo cp $(BIN_DIR)/libunknown.so $(SYSTEM_LIB_DIR)
 endif
 ifeq ($(MODE), archive)
-	sudo cp $(BLD_DIR)/libunknown.a $(SYSTEM_LIB_DIR)
+	sudo cp $(BIN_DIR)/libunknown.a $(SYSTEM_LIB_DIR)
 endif
 
 std-install: std install-headers install-lib
@@ -75,23 +74,23 @@ std: create std-build
 cuda: create cuda-build
 
 std-build: cortex.o utils.o population.o unknown_std.o
-	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BLD_DIR)/libunknown.so
-	$(ARC) $(ARC_FLAGS) $(BLD_DIR)/libunknown.a $(OBJS)
+	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BIN_DIR)/libunknown.so
+	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
 
 cuda-build: cortex.o utils.o population.o unknown_cuda.o
-	$(NVCOMP) $(NVLINK_FLAGS) -shared $(OBJS) $(CUDA_STD_LIBS) -o $(BLD_DIR)/libunknown.so
-	$(ARC) $(ARC_FLAGS) $(BLD_DIR)/libunknown.a $(OBJS)
+	$(NVCOMP) $(NVLINK_FLAGS) -shared $(OBJS) $(CUDA_STD_LIBS) -o $(BIN_DIR)/libunknown.so
+	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
 
 %.o: $(SRC_DIR)/%.c
-	$(CCOMP) $(CCOMP_FLAGS) -c $^ -o $(BLD_DIR)/$@
+	$(CCOMP) $(CCOMP_FLAGS) -c $^ -o $(BIN_DIR)/$@
 
 %.o: $(SRC_DIR)/%.cu
-	$(NVCOMP) $(NVCOMP_FLAGS) -c $^ -o $(BLD_DIR)/$@
+	$(NVCOMP) $(NVCOMP_FLAGS) -c $^ -o $(BIN_DIR)/$@
 
 create:
-	$(MKDIR) $(BLD_DIR)
+	$(MKDIR) $(BIN_DIR)
 	$(MKDIR) $(BIN_DIR)
 
 clean:
-	$(RM) $(BLD_DIR)
+	$(RM) $(BIN_DIR)
 	$(RM) $(BIN_DIR)

@@ -1,0 +1,56 @@
+name: 'CODE SECURITY'
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  push:
+    branches: [ "trunk" ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ "trunk" ]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: write
+env:
+  CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+jobs:
+  CODE_SECURITY:
+    name: 'CODE SECURITY'
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: c-cpp
+          build-mode: autobuild
+    steps:
+      - name: 'CHECKOUT'
+        uses: actions/checkout@v4
+      - name: 'INIT'
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended,security-and-quality
+      - name: 'RUN PRIMARY'
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+      - name: 'RUN SECONDARY'
+        uses: codacy/codacy-analysis-cli-action@d840f886c4bd4edc059706d09c6a1586111c540b
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          verbose: true
+          output: codacy_results.sarif
+          format: sarif
+          gh-code-scanning-compat: true
+          max-allowed-issues: 2147483647
+      - name: 'UPLOAD RESULTS'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: codacy_results.sarif
