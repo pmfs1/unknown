@@ -449,7 +449,7 @@ bhm_error_code_t c2d_crossover(bhm_cortex2d_t *offspring, const bhm_cortex2d_t *
         return BHM_ERROR_INVALID_ARGUMENT;
     }
     // Initialize the offspring cortex
-    bhm_error_code_t error = c2d_init(offspring, parent1->width, parent1->height, parent1->nh_radius);
+    bhm_error_code_t error = c2d_init(&offspring, parent1->width, parent1->height, parent1->nh_radius);
     if (error != BHM_ERROR_NONE) {
         return error;
     }
