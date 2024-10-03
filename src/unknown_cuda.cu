@@ -69,10 +69,12 @@ bhm_error_code_t i2d_to_device(bhm_input2d_t *device_input, bhm_input2d_t *host_
     return BHM_ERROR_NONE;
 }
 
-bhm_error_code_t i2d_to_host(bhm_input2d_t *host_input, bhm_input2d_t *device_input) {
+bhm_error_code_t i2d_to_host(bhm_input2d_t *host_input, bhm_input2d_t *device_input)
+{
     // Allocate tmp input on the host.
     bhm_input2d_t *tmp_input = (bhm_input2d_t *)malloc(sizeof(bhm_input2d_t));
-    if (tmp_input == NULL) {
+    if (tmp_input == NULL)
+    {
         return BHM_ERROR_FAILED_ALLOC;
     }
     // Copy device input to tmp input.
@@ -80,7 +82,8 @@ bhm_error_code_t i2d_to_host(bhm_input2d_t *host_input, bhm_input2d_t *device_in
     cudaCheckError();
     // Allocate values on the host.
     host_input->values = (bhm_ticks_count_t *)malloc((tmp_input->x1 - tmp_input->x0) * (tmp_input->y1 - tmp_input->y0) * sizeof(bhm_ticks_count_t));
-    if (host_input->values == NULL) {
+    if (host_input->values == NULL)
+    {
         free(tmp_input);
         return BHM_ERROR_FAILED_ALLOC;
     }
@@ -89,8 +92,7 @@ bhm_error_code_t i2d_to_host(bhm_input2d_t *host_input, bhm_input2d_t *device_in
         host_input->values,
         tmp_input->values,
         ((tmp_input->x1 - tmp_input->x0) * (tmp_input->y1 - tmp_input->y0)) * sizeof(bhm_ticks_count_t),
-        cudaMemcpyDeviceToHost
-    );
+        cudaMemcpyDeviceToHost);
     cudaCheckError();
     // Copy tmp input to host input.
     *host_input = *tmp_input;
@@ -172,12 +174,14 @@ bhm_error_code_t i2d_device_destroy(bhm_input2d_t *input)
 {
     // Free device memory for the values array.
     cudaError_t cuda_error = cudaFree(input->values);
-    if (cuda_error != cudaSuccess) {
+    if (cuda_error != cudaSuccess)
+    {
         return BHM_ERROR_FAILED_ALLOC;
     }
     // Free the input structure itself.
     cuda_error = cudaFree(input);
-    if (cuda_error != cudaSuccess) {
+    if (cuda_error != cudaSuccess)
+    {
         return BHM_ERROR_FAILED_ALLOC;
     }
     return BHM_ERROR_NONE;
@@ -253,21 +257,17 @@ __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_corte
 {
     bhm_cortex_size_t x = threadIdx.x + blockIdx.x * blockDim.x;
     bhm_cortex_size_t y = threadIdx.y + blockIdx.y * blockDim.y;
-
     // Avoid accessing unallocated memory.
     if (x >= prev_cortex->width || y >= prev_cortex->height)
     {
         return;
     }
-
     // Retrieve the involved neurons.
     bhm_cortex_size_t neuron_index = IDX2D(x, y, prev_cortex->width);
     bhm_neuron_t prev_neuron = prev_cortex->neurons[neuron_index];
     bhm_neuron_t *next_neuron = &(next_cortex->neurons[neuron_index]);
-
     // Copy prev neuron values to the new one.
     *next_neuron = prev_neuron;
-
     /* Compute the neighborhood diameter:
         d = 7
         <------------->
@@ -282,19 +282,16 @@ __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_corte
         +-|-|-|-|-|-|-+
     */
     bhm_cortex_size_t nh_diameter = NH_DIAM_2D(prev_cortex->nh_radius);
-
     bhm_nh_mask_t prev_ac_mask = prev_neuron.synac_mask;
     bhm_nh_mask_t prev_exc_mask = prev_neuron.synex_mask;
     bhm_nh_mask_t prev_str_mask_a = prev_neuron.synstr_mask_a;
     bhm_nh_mask_t prev_str_mask_b = prev_neuron.synstr_mask_b;
     bhm_nh_mask_t prev_str_mask_c = prev_neuron.synstr_mask_c;
-
     // Defines whether to evolve or not.
     // evol_step is incremented by 1 to account for edge cases and human readable behavior:
     // 0x0000 -> 0 + 1 = 1, so the cortex evolves at every tick, meaning that there are no free ticks between evolutions.
     // 0xFFFF -> 65535 + 1 = 65536, so the cortex never evolves, meaning that there is an infinite amount of ticks between evolutions.
     bool evolve = (prev_cortex->ticks_count % (((bhm_evol_step_t)prev_cortex->evol_step) + 1)) == 0;
-
     // Increment the current neuron value by reading its connected neighbors.
     for (bhm_nh_radius_t j = 0; j < nh_diameter; j++)
     {
@@ -302,7 +299,6 @@ __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_corte
         {
             bhm_cortex_size_t neighbor_x = x + (i - prev_cortex->nh_radius);
             bhm_cortex_size_t neighbor_y = y + (j - prev_cortex->nh_radius);
-
             // Exclude the central neuron from the list of neighbors.
             if ((j != prev_cortex->nh_radius || i != prev_cortex->nh_radius) &&
                 (neighbor_x >= 0 && neighbor_y >= 0 && neighbor_x < prev_cortex->width && neighbor_y < prev_cortex->height))
@@ -312,10 +308,8 @@ __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_corte
                 bhm_cortex_size_t neighbor_index = IDX2D(WRAP(neighbor_x, prev_cortex->width),
                                                          WRAP(neighbor_y, prev_cortex->height),
                                                          prev_cortex->width);
-
                 // Fetch the current neighbor.
                 bhm_neuron_t neighbor = prev_cortex->neurons[neighbor_index];
-
                 // Compute the current synapse strength.
                 bhm_syn_strength_t syn_strength = (prev_str_mask_a & 0x01U) |
                                                   ((prev_str_mask_b & 0x01U) << 0x01U) |
@@ -324,10 +318,8 @@ __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_corte
                 // Pick a random number for each neighbor, capped to the max uint16 value.
                 next_neuron->rand_state = cuda_xorshf32(next_neuron->rand_state);
                 bhm_chance_t random = next_neuron->rand_state % 0xFFFFU;
-
                 // Inverse of the current synapse strength, useful when computing depression probability (synapse deletion and weakening).
                 bhm_syn_strength_t strength_diff = BHM_MAX_SYN_STRENGTH - syn_strength;
-
                 // Check if the last bit of the mask is 1 or 0: 1 = active synapse, 0 = inactive synapse.
                 if (prev_ac_mask & 0x01U)
                 {
@@ -344,25 +336,21 @@ __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_corte
                         }
                     }
                 }
-
                 // Perform the evolution phase if allowed.
                 if (evolve)
                 {
                     // Structural plasticity: create or destroy a synapse.
-                    if (!(prev_ac_mask & 0x01U) &&
-                        prev_neuron.syn_count < next_neuron->max_syn_count &&
-                        // Frequency component.
-                        // TODO Make sure there's no overflow.
-                        random < prev_cortex->syngen_chance * (bhm_chance_t)neighbor.pulse)
+                    if (!(prev_ac_mask & 0x01U) && // Only inactive synapses can be created.
+                        prev_neuron.syn_count < next_neuron->max_syn_count && // The neuron can't have more synapses than its maximum.
+                        prev_cortex->syngen_chance <= UINT_MAX / (bhm_chance_t)neighbor.pulse && // Prevent overflow.
+                        random < prev_cortex->syngen_chance * (bhm_chance_t)neighbor.pulse) // Frequency component.
                     {
                         // Add synapse.
                         next_neuron->synac_mask |= (0x01UL << neighbor_nh_index);
-
                         // Set the new synapse's strength to 0.
                         next_neuron->synstr_mask_a &= ~(0x01UL << neighbor_nh_index);
                         next_neuron->synstr_mask_b &= ~(0x01UL << neighbor_nh_index);
                         next_neuron->synstr_mask_c &= ~(0x01UL << neighbor_nh_index);
-
                         // Define whether the new synapse is excitatory or inhibitory.
                         if (random % next_cortex->inhexc_range < next_neuron->inhexc_ratio)
                         {
@@ -374,7 +362,6 @@ __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_corte
                             // Excitatory.
                             next_neuron->synex_mask |= (0x01UL << neighbor_nh_index);
                         }
-
                         next_neuron->syn_count++;
                     }
                     else if (prev_ac_mask & 0x01U &&
@@ -385,43 +372,37 @@ __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_corte
                     {
                         // Delete synapse.
                         next_neuron->synac_mask &= ~(0x01UL << neighbor_nh_index);
-
                         next_neuron->syn_count--;
                     }
-
                     // Functional plasticity: strengthen or weaken a synapse.
                     if (prev_ac_mask & 0x01U)
                     {
-                        if (syn_strength < BHM_MAX_SYN_STRENGTH &&
-                            prev_neuron.tot_syn_strength < prev_cortex->max_tot_strength &&
-                            // TODO Make sure there's no overflow.
-                            random < prev_cortex->synstr_chance * (bhm_chance_t)neighbor.pulse * (bhm_chance_t)strength_diff)
+                        if (syn_strength < BHM_MAX_SYN_STRENGTH && // The synapse can't be stronger than its maximum.
+                            prev_neuron.tot_syn_strength < prev_cortex->max_tot_strength && // The neuron can't have more total strength than its maximum.
+                            prev_cortex->synstr_chance <= UINT_MAX / ((bhm_chance_t)neighbor.pulse * (bhm_chance_t)strength_diff) && // Prevent overflow.
+                            random < prev_cortex->synstr_chance * (bhm_chance_t)neighbor.pulse * (bhm_chance_t)strength_diff) // Frequency component.
                         {
                             syn_strength++;
                             next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
                             next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
                             next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
-
                             next_neuron->tot_syn_strength++;
                         }
-                        else if (syn_strength > 0x00U &&
-                                 // TODO Make sure there's no overflow.
-                                 random < prev_cortex->synstr_chance / (neighbor.pulse + syn_strength + 1))
+                        else if (syn_strength > 0x00U && // The synapse can't be weaker than 0.
+                                 neighbor.pulse + syn_strength + 1 > 0 && prev_cortex->synstr_chance <= UINT_MAX / (neighbor.pulse + syn_strength + 1) && // Prevent overflow.
+                                 random < prev_cortex->synstr_chance / (neighbor.pulse + syn_strength + 1)) // Frequency component.
                         {
                             syn_strength--;
                             next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
                             next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
                             next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
-
                             next_neuron->tot_syn_strength--;
                         }
                     }
-
                     // Increment evolutions count.
                     next_cortex->evols_count++;
                 }
             }
-
             // Shift the masks to check for the next neighbor.
             prev_ac_mask >>= 0x01U;
             prev_exc_mask >>= 0x01U;
@@ -430,7 +411,6 @@ __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_corte
             prev_str_mask_c >>= 0x01U;
         }
     }
-
     // Push to equilibrium by decaying to zero, both from above and below.
     if (prev_neuron.value > 0x00)
     {
@@ -440,33 +420,27 @@ __global__ void c2d_tick(bhm_cortex2d_t *prev_cortex, bhm_cortex2d_t *next_corte
     {
         next_neuron->value += next_cortex->decay_value;
     }
-
     if ((prev_neuron.pulse_mask >> prev_cortex->pulse_window) & 0x01U)
     {
         // Decrease pulse if the oldest recorded pulse is active.
         next_neuron->pulse--;
     }
-
     next_neuron->pulse_mask <<= 0x01U;
-
     // Bring the neuron back to recovery if it just fired, otherwise fire it if its value is over its threshold.
     if (prev_neuron.value > prev_cortex->fire_threshold + prev_neuron.pulse)
     {
         // Fired at the previous step.
         next_neuron->value = next_cortex->recovery_value;
-
         // Store pulse.
         next_neuron->pulse_mask |= 0x01U;
         next_neuron->pulse++;
     }
-
     next_cortex->ticks_count++;
 }
 
 __host__ __device__ bhm_bool_t value_to_pulse(bhm_ticks_count_t sample_window, bhm_ticks_count_t sample_step, bhm_ticks_count_t input, bhm_pulse_mapping_t pulse_mapping)
 {
     bhm_bool_t result = BHM_FALSE;
-
     // Make sure the provided input correctly lies inside the provided window.
     if (input < sample_window)
     {
@@ -485,7 +459,6 @@ __host__ __device__ bhm_bool_t value_to_pulse(bhm_ticks_count_t sample_window, b
             break;
         }
     }
-
     return result;
 }
 
@@ -510,7 +483,6 @@ __host__ __device__ bhm_bool_t value_to_pulse_fprop(bhm_ticks_count_t sample_win
 {
     bhm_bool_t result = BHM_FALSE;
     bhm_ticks_count_t upper = sample_window - 1;
-
     // sample_window = 10;
     // upper = sample_window - 1 = 9;
     // x = input;
@@ -539,7 +511,6 @@ __host__ __device__ bhm_bool_t value_to_pulse_fprop(bhm_ticks_count_t sample_win
             result = BHM_TRUE;
         }
     }
-
     return result;
 }
 
@@ -548,7 +519,6 @@ __host__ __device__ bhm_bool_t value_to_pulse_rprop(bhm_ticks_count_t sample_win
     bhm_bool_t result = BHM_FALSE;
     double upper = sample_window - 1;
     double d_input = input;
-
     // sample_window = 10;
     // upper = sample_window - 1 = 9;
     // |@| | | | | | | | | | -> x = 0;
@@ -576,6 +546,5 @@ __host__ __device__ bhm_bool_t value_to_pulse_rprop(bhm_ticks_count_t sample_win
             result = BHM_TRUE;
         }
     }
-
     return result;
 }
