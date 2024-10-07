@@ -1,0 +1,24 @@
+# .github/workflows/version.yml
+name: 'GET VERSION'
+on:
+  push:
+    branches: [ "trunk" ]
+permissions:
+  contents: read
+jobs:
+  GET_VERSION:
+    name: 'GET VERSION'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'CHECKOUT'
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0             
+      - name: 'GET VERSION'
+        id: version
+        uses: codacy/git-version@2.7.1
+      - name: 'OUTPUT VERSION'
+        run: echo ${{ steps.version.outputs.version }}
+      - name: 'OUTPUT PREVIOUS VERSION'
+        run: echo ${{ steps.version.outputs.previous-version }}
