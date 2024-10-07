@@ -8,9 +8,6 @@ on:
   pull_request:
     branches: [ "trunk" ]
   workflow_dispatch:
-permissions:
-  contents: read
-  pull-requests: write
 env:
   CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
 jobs:
@@ -22,6 +19,7 @@ jobs:
       packages: read
       actions: read
       contents: read
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:

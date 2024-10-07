@@ -3,7 +3,6 @@
 void ignoreComments(FILE *fp)
 {
     int ch;
-    char line[100];
 
     // Ignore any blank lines
     while ((ch = fgetc(fp)) != EOF && isspace(ch))
@@ -14,7 +13,10 @@ void ignoreComments(FILE *fp)
     // In a PGM image commented lines start with '#'.
     if (ch == '#')
     {
-        fgets(line, sizeof(line), fp);
+        char line[100];
+        do {
+            fgets(line, sizeof(line), fp);
+        } while (line[strlen(line) - 1] != '\n' && !feof(fp));
         ignoreComments(fp);
     }
     else
