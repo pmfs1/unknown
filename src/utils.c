@@ -43,7 +43,7 @@ unk_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
     // Read file type.
     if (fgets(pgm->pgmType, sizeof(pgm->pgmType), pgmfile) == NULL) {
         fclose(pgmfile);
-        return UNK_ERROR_FILE_READ;
+        return UNK_ERROR_FILE_DOES_NOT_EXIST;
     }
     pgm->pgmType[strcspn(pgm->pgmType, "\n")] = '\0'; // Remove newline character if present
 
