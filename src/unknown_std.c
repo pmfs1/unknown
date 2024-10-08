@@ -121,7 +121,7 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
                         // Check if the last bit of the mask is 1 or 0: 1 = active synapse, 0 = inactive synapse.
                         if (prev_ac_mask & 0x01U)
                         {
-                            unk_neuron_value_t neighbor_influence = (prev_exc_mask & 0x01U ? prev_cortex->exc_value : -prev_cortex->exc_value) * ((syn_strength / 4) + 1);
+                            unk_neuron_value_t neighbor_influence = ((prev_exc_mask & 0x01U) ? prev_cortex->exc_value : -prev_cortex->exc_value) * ((syn_strength / 4) + 1);
                             if (neighbor.value > prev_cortex->fire_threshold)
                             {
                                 if (next_neuron->value + neighbor_influence < prev_cortex->recovery_value)
@@ -168,7 +168,7 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
                             }
                             else if (prev_ac_mask & 0x01U &&
                                      // Only 0-strength synapses can be deleted.
-                                     syn_strength <= 0x00U &&
+                                     syn_strength == 0x00U &&
                                      // Frequency component.
                                      random < prev_cortex->syngen_chance / (neighbor.pulse + 1))
                             {
@@ -320,7 +320,7 @@ unk_bool_t value_to_pulse_fprop(unk_ticks_count_t sample_window, unk_ticks_count
     // | |@|@|@|@|@|@|@|@|@| -> x = 9;
     if (input < sample_window / 2)
     {
-        if ((sample_step <= 0) ||
+        if ((sample_step = 0) ||
             (input > 0 && sample_step % (upper / input) == 0))
         {
             result = UNK_TRUE;
@@ -357,7 +357,7 @@ unk_bool_t value_to_pulse_rprop(unk_ticks_count_t sample_window, unk_ticks_count
     // | |@|@|@|@|@|@|@|@|@| -> x = 9;
     if ((double)input < ((double)sample_window) / 2)
     {
-        if ((sample_step <= 0) ||
+        if ((sample_step == 0) ||
             (input > 0 && sample_step % (unk_ticks_count_t)round(upper / d_input) == 0))
         {
             result = UNK_TRUE;
@@ -379,7 +379,7 @@ unk_bool_t value_to_pulse_dfprop(unk_ticks_count_t sample_window, unk_ticks_coun
     unk_ticks_count_t upper = sample_window - 1;
     // Double floored proportional mapping logic
     if (input < sample_window / 2) {
-        if ((sample_step <= 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0)) {
+        if ((sample_step == 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0)) {
            result = UNK_TRUE;
        }
     }

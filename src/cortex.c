@@ -406,21 +406,7 @@ unk_error_code_t c2d_mutate(unk_cortex2d_t *cortex, unk_chance_t mut_chance)
 
 unk_error_code_t c2d_to_string(unk_cortex2d_t *cortex, char *target)
 {
-    int string_length = 0;
-
-    // Header.
-    string_length += sprintf(target + string_length, "\ncortex(\n");
-
-    // Data.
-    string_length += sprintf(target + string_length, "\twidth:%d\n", cortex->width);
-    string_length += sprintf(target + string_length, "\theight:%d\n", cortex->height);
-    string_length += sprintf(target + string_length, "\tnh_radius:%d\n", cortex->nh_radius);
-    string_length += sprintf(target + string_length, "\tpulse_window:%d\n", cortex->pulse_window);
-    string_length += sprintf(target + string_length, "\tsample_window:%d\n", cortex->sample_window);
-
-    // Footer.
-    string_length += sprintf(target + string_length, ")\n");
-
+    snprintf(target, 256, "cortex(\n\twidth:%d\n\theight:%d\n\tnh_radius:%d\n\tpulse_window:%d\n\tsample_window:%d\n)", cortex->width, cortex->height, cortex->nh_radius, cortex->pulse_window, cortex->sample_window);
     return UNK_ERROR_NONE;
 }
 

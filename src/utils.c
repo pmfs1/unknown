@@ -3,23 +3,24 @@
 void ignoreComments(FILE *fp)
 {
     int ch;
-    char line[100];
-
     // Ignore any blank lines
     while ((ch = fgetc(fp)) != EOF && isspace(ch))
     {
     }
-
     // Recursively ignore comments.
-    // In a PGM image commented lines start with '#'.
     if (ch == '#')
     {
-        fgets(line, sizeof(line), fp);
-        ignoreComments(fp);
+        char line[100];
+        do { // Read until newline or EOF
+            if (fgets(line, sizeof(line), fp) != NULL) { // If line is read successfully
+                line[sizeof(line) - 1] = '\0'; // Ensure null-termination
+            }
+        } while (strchr(line, '\n') == NULL && !feof(fp)); // Check if newline is present or EOF is reached
+        ignoreComments(fp); // Recursively ignore comments
     }
-    else
+    else // If the character is not a comment
     {
-        fseek(fp, -1, SEEK_CUR);
+        fseek(fp, -1, SEEK_CUR); // Move the file pointer back by one character
     }
 }
 
@@ -37,7 +38,11 @@ unk_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
     ignoreComments(pgmfile);
 
     // Read file type.
-    fscanf(pgmfile, "%s", pgm->pgmType);
+    if (fgets(pgm->pgmType, sizeof(pgm->pgmType), pgmfile) == NULL) {
+        fclose(pgmfile);
+        return UNK_ERROR_FILE_DOES_NOT_EXIST;
+    }
+    pgm->pgmType[strcspn(pgm->pgmType, "\n")] = '\0'; // Remove newline character if present
 
     ignoreComments(pgmfile);
 

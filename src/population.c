@@ -12,7 +12,7 @@ int idf_compare(const void *a, const void *b)
 unk_error_code_t p2d_init(population2d_t **population, population_size_t size, population_size_t sel_pool_size, unk_chance_t mut_chance, cortex_fitness_t (*eval_function)(unk_cortex2d_t *cortex))
 {
     // Allocate the population.
-    (*population) = (population2d_t *)malloc(sizeof(unk_cortex2d_t));
+    (*population) = (population2d_t *)malloc(sizeof(population2d_t));
     if ((*population) == NULL)
     {
         return UNK_ERROR_FAILED_ALLOC;
