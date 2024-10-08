@@ -3,27 +3,24 @@
 void ignoreComments(FILE *fp)
 {
     int ch;
-
     // Ignore any blank lines
     while ((ch = fgetc(fp)) != EOF && isspace(ch))
     {
     }
-
     // Recursively ignore comments.
-    // In a PGM image commented lines start with '#'.
     if (ch == '#')
     {
         char line[100];
-        do {
-            if (fgets(line, sizeof(line), fp) != NULL) {
+        do { // Read until newline or EOF
+            if (fgets(line, sizeof(line), fp) != NULL) { // If line is read successfully
                 line[sizeof(line) - 1] = '\0'; // Ensure null-termination
             }
-        } while (line[strlen(line) - 1] != '\n' && !feof(fp));
-        ignoreComments(fp);
+        } while (strchr(line, '\n') == NULL && !feof(fp)); // Check if newline is present or EOF is reached
+        ignoreComments(fp); // Recursively ignore comments
     }
-    else
+    else // If the character is not a comment
     {
-        fseek(fp, -1, SEEK_CUR);
+        fseek(fp, -1, SEEK_CUR); // Move the file pointer back by one character
     }
 }
 
