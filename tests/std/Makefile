@@ -11,11 +11,10 @@ TIME_CUDA_LIBS=-lcuda -lcudart -lcublas -lcurand
 UNKNOWN_LIBS=-lunknown
 
 SRC_DIR=./src
-BLD_DIR=./bin
 BIN_DIR=./bin
 OUT_DIR=./out
 
-OBJS=$(patsubst %.o,$(BLD_DIR)/%.o,$@.o)
+OBJS=$(patsubst %.o,$(BIN_DIR)/%.o,$@.o)
 
 MKDIR=mkdir -p
 RM=rm -rf
@@ -31,26 +30,18 @@ ifeq ($(UNAME_S),Darwin)
 	CLINK_FLAGS+=-L/usr/local/lib
 endif
 
-all: clean bench sampled output
+all: bench
 
 bench: create
-	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
-	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(STD_LIBS) $(UNKNOWN_LIBS)
-
-sampled: create
-	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
-	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(STD_LIBS) $(UNKNOWN_LIBS)
-
-output: create
-	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BLD_DIR)/$@.o
+	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BIN_DIR)/$@.o
 	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(STD_LIBS) $(UNKNOWN_LIBS)
 
 create:
-	$(MKDIR) $(BLD_DIR)
+	$(MKDIR) $(BIN_DIR)
 	$(MKDIR) $(BIN_DIR)
 	$(MKDIR) $(OUT_DIR)
 
 clean:
-	$(RM) $(BLD_DIR)
+	$(RM) $(BIN_DIR)
 	$(RM) $(BIN_DIR)
 	$(RM) $(OUT_DIR)

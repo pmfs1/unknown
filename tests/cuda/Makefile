@@ -19,11 +19,10 @@ CUDA_STD_LIBS=-lcudart -lstdc++
 unknown_LIBS=-lunknown
 
 SRC_DIR=./src
-BLD_DIR=./bin
 BIN_DIR=./bin
 OUT_DIR=./out
 
-OBJS=$(patsubst %.o,$(BLD_DIR)/%.o,$@.o)
+OBJS=$(patsubst %.o,$(BIN_DIR)/%.o,$@.o)
 
 MKDIR=mkdir -p
 RM=rm -rf
@@ -31,15 +30,15 @@ RM=rm -rf
 all: bench
 
 bench: create
-	$(NVCOMP) $(NVCOMP_FLAGS) -c $(SRC_DIR)/$@.cu -o $(BLD_DIR)/$@.o
+	$(NVCOMP) $(NVCOMP_FLAGS) -c $(SRC_DIR)/$@.cu -o $(BIN_DIR)/$@.o
 	$(NVCOMP) $(NVLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(CUDA_STD_LIBS) $(unknown_LIBS)
 
 create:
-	$(MKDIR) $(BLD_DIR)
+	$(MKDIR) $(BIN_DIR)
 	$(MKDIR) $(BIN_DIR)
 	$(MKDIR) $(OUT_DIR)
 
 clean:
-	$(RM) $(BLD_DIR)
+	$(RM) $(BIN_DIR)
 	$(RM) $(BIN_DIR)
 	$(RM) $(OUT_DIR)
