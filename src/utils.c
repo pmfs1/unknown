@@ -15,7 +15,9 @@ void ignoreComments(FILE *fp)
     {
         char line[100];
         do {
-            fgets(line, sizeof(line), fp);
+            if (fgets(line, sizeof(line), fp) != NULL) {
+                line[sizeof(line) - 1] = '\0'; // Ensure null-termination
+            }
         } while (line[strlen(line) - 1] != '\n' && !feof(fp));
         ignoreComments(fp);
     }
@@ -39,7 +41,11 @@ unk_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
     ignoreComments(pgmfile);
 
     // Read file type.
-    fscanf(pgmfile, "%s", pgm->pgmType);
+    if (fgets(pgm->pgmType, sizeof(pgm->pgmType), pgmfile) == NULL) {
+        fclose(pgmfile);
+        return UNK_ERROR_FILE_READ;
+    }
+    pgm->pgmType[strcspn(pgm->pgmType, "\n")] = '\0'; // Remove newline character if present
 
     ignoreComments(pgmfile);
 

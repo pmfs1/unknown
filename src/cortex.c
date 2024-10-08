@@ -407,17 +407,18 @@ unk_error_code_t c2d_mutate(unk_cortex2d_t *cortex, unk_chance_t mut_chance)
 unk_error_code_t c2d_to_string(unk_cortex2d_t *cortex, char *target)
 {
     // Header.
-    sprintf(target, "\ncortex(\n");
+    strncpy(target, "\ncortex(\n", sizeof(target) - 1);
+    target[sizeof(target) - 1] = '\0';
 
     // Data.
-    sprintf(target + strlen(target), "\twidth:%d\n", cortex->width);
-    sprintf(target + strlen(target), "\theight:%d\n", cortex->height);
-    sprintf(target + strlen(target), "\tnh_radius:%d\n", cortex->nh_radius);
-    sprintf(target + strlen(target), "\tpulse_window:%d\n", cortex->pulse_window);
-    sprintf(target + strlen(target), "\tsample_window:%d\n", cortex->sample_window);
+    snprintf(target + strlen(target), sizeof(target) - strlen(target) - 1, "\twidth:%d\n", cortex->width);
+    snprintf(target + strlen(target), sizeof(target) - strlen(target) - 1, "\theight:%d\n", cortex->height);
+    snprintf(target + strlen(target), sizeof(target) - strlen(target) - 1, "\tnh_radius:%d\n", cortex->nh_radius);
+    snprintf(target + strlen(target), sizeof(target) - strlen(target) - 1, "\tpulse_window:%d\n", cortex->pulse_window);
+    snprintf(target + strlen(target), sizeof(target) - strlen(target) - 1, "\tsample_window:%d\n", cortex->sample_window);
 
     // Footer.
-    sprintf(target + strlen(target), ")\n");
+    strncat(target, ")\n", sizeof(target) - strlen(target) - 1);
 
     return UNK_ERROR_NONE;
 }
