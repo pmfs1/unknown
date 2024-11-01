@@ -10,6 +10,7 @@ Copyright (C) 2021 Pedro Simões
 #define __BEHEMA__
 
 #include "cortex.h"
+#include "population.h"
 #include "utils.h"
 
 #ifdef __CUDACC__
