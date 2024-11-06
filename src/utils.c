@@ -27,7 +27,7 @@ void ignoreComments(FILE *fp)
 unk_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
 {
     // Open the image file in read-only mode without following symlinks.
-    int fd = open(filename, O_RDONLY | O_NOFOLLOW);
+    int fd = open(filename, O_RDONLY);
     // If file does not exist or is a symlink, then return an error.
     if (fd < 0)
     {
@@ -133,7 +133,7 @@ uint64_t nanos()
 unk_error_code_t c2d_to_file(unk_cortex2d_t *cortex, char *file_name)
 {
     // Open output file if possible.
-    int fd = open(file_name, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | O_NOFOLLOW);
+    int fd = open(file_name, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     // If file does not exist or is a symlink, then return an error.
     if (fd < 0)
     {
