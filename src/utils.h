@@ -1,5 +1,5 @@
-#ifndef __behema_UTILS__
-#define __behema_UTILS__
+#ifndef __UNKNOWN_UTILS__
+#define __UNKNOWN_UTILS__
 
 // This line **must** come **before** including <time.h> in order to
 // bring in the POSIX functions such as `clock_gettime() from <time.h>`!
@@ -12,11 +12,16 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/stat.h>
 #include "cortex.h"
 #include "error.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 /// Convert seconds to milliseconds
@@ -33,58 +38,61 @@ extern "C" {
 /// Convert nanoseconds to microseconds
 #define NS_TO_US(ns) ((ns) / 1e3)
 
-// Structure for storing the
-// image data
-typedef struct pgm_content_t {
-    char pgmType[3];
-    uint8_t* data;
-    uint32_t width;
-    uint32_t height;
-    uint32_t max_value;
-} pgm_content_t;
+    // Structure for storing the
+    // image data
+    typedef struct pgm_content_t
+    {
+        char pgmType[3];
+        uint8_t *data;
+        uint32_t width;
+        uint32_t height;
+        uint32_t max_value;
+    } pgm_content_t;
 
-// Maps a value to the specified output domain.
-uint32_t map(uint32_t input, uint32_t input_start, uint32_t input_end, uint32_t output_start, uint32_t output_end);
-// Maps a value to the specified output domain while preserving decimal integrity.
-uint32_t fmap(uint32_t input, uint32_t input_start, uint32_t input_end, uint32_t output_start, uint32_t output_end);
+    // Maps a value to the specified output domain.
+    uint32_t map(uint32_t input, uint32_t input_start, uint32_t input_end, uint32_t output_start, uint32_t output_end);
+    // Maps a value to the specified output domain while preserving decimal integrity.
+    uint32_t fmap(uint32_t input, uint32_t input_start, uint32_t input_end, uint32_t output_start, uint32_t output_end);
 
-/// Get a time stamp in milliseconds.
-uint64_t millis();
+    /// Get a time stamp in milliseconds.
+    uint64_t millis();
 
-/// Get a time stamp in microseconds.
-uint64_t micros();
+    /// Get a time stamp in microseconds.
+    uint64_t micros();
 
-/// Get a time stamp in nanoseconds.
-uint64_t nanos();
+    /// Get a time stamp in nanoseconds.
+    uint64_t nanos();
 
-/// Dumps the cortex' content to a file.
-/// The file is created if not already present, overwritten otherwise.
-/// @param cortex The cortex to be written to file.
-/// @param file_name The destination file to write the cortex to.
-void c2d_to_file(bhm_cortex2d_t* cortex, char* file_name);
+    /// Dumps the cortex' content to a file.
+    /// The file is created if not already present, overwritten otherwise.
+    /// @param cortex The cortex to be written to file.
+    /// @param file_name The destination file to write the cortex to.
+    /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
+    unk_error_code_t c2d_to_file(unk_cortex2d_t* cortex, char* file_name);
 
-/// Reads the content from a file and initializes the provided cortex accordingly.
-/// @param cortex The cortex to init from file.
-/// @param file_name The file to read the cortex from.
-void c2d_from_file(bhm_cortex2d_t* cortex, char* file_name);
+    /// Reads the content from a file and initializes the provided cortex accordingly.
+    /// @param cortex The cortex to init from file.
+    /// @param file_name The file to read the cortex from.
+    void c2d_from_file(unk_cortex2d_t* cortex, char* file_name);
 
-/// @brief Sets touch for each neuron in the provided cortex by reading it from a pgm map file.
-/// @param cortex The cortex to apply changes to.
-/// @param map_file_name The path to the pgm map file to read.
-/// @return The code for the occurred error, [BHM_ERROR_NONE] if none.
-bhm_error_code_t c2d_touch_from_map(bhm_cortex2d_t* cortex, char* map_file_name);
+    /// Sets each neurons's touch from a pgm map file
+    /// @brief Sets touch for each neuron in the provided cortex by reading it from a pgm map file.
+    /// @param cortex The cortex to apply changes to.
+    /// @param map_file_name The path to the pgm map file to read.
+    /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
+    unk_error_code_t c2d_touch_from_map(unk_cortex2d_t* cortex, char* map_file_name);
 
-/// @brief Sets inhexc ratio for each neuron in the provided cortex by reading it from a pgm map file.
-/// @param cortex The cortex to apply changes to.
-/// @param map_file_name The path to the pgm map file to read.
-/// @return The code for the occurred error, [BHM_ERROR_NONE] if none.
-bhm_error_code_t c2d_inhexc_from_map(bhm_cortex2d_t* cortex, char* map_file_name);
+    /// @brief Sets inhexc ratio for each neuron in the provided cortex by reading it from a pgm map file.
+    /// @param cortex The cortex to apply changes to.
+    /// @param map_file_name The path to the pgm map file to read.
+    /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
+    unk_error_code_t c2d_inhexc_from_map(unk_cortex2d_t* cortex, char* map_file_name);
 
-/// @brief Sets fire threshold for each neuron in the provided cortex by reading it from a pgm map file.
-/// @param cortex The cortex to apply changes to.
-/// @param map_file_name The path to the pgm map file to read.
-/// @return The code for the occurred error, [BHM_ERROR_NONE] if none.
-bhm_error_code_t c2d_fthold_from_map(bhm_cortex2d_t* cortex, char* map_file_name);
+    /// @brief Sets fire threshold for each neuron in the provided cortex by reading it from a pgm map file.
+    /// @param cortex The cortex to apply changes to.
+    /// @param map_file_name The path to the pgm map file to read.
+    /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
+    unk_error_code_t c2d_fthold_from_map(unk_cortex2d_t* cortex, char* map_file_name);
 
 #ifdef __cplusplus
 }
