@@ -353,25 +353,30 @@ unk_error_code_t c2d_syn_disable(unk_cortex2d_t *cortex, unk_cortex_size_t x0, u
     return UNK_ERROR_NONE;
 }
 
-unk_error_code_t c2d_mutate_shape(unk_cortex2d_t *cortex, unk_chance_t mut_chance) {
+unk_error_code_t c2d_mutate_shape(unk_cortex2d_t *cortex, unk_chance_t mut_chance)
+{
     unk_cortex_size_t new_width = cortex->width;
     unk_cortex_size_t new_height = cortex->height;
     // Mutate the cortex width.
     cortex->rand_state = xorshf32(cortex->rand_state);
-    if (cortex->rand_state > mut_chance) {
+    if (cortex->rand_state > mut_chance)
+    {
         // Decide whether to increase or decrease the cortex width.
         new_width += cortex->rand_state % 2 == 0 ? 1 : -1;
     }
     // Mutate the cortex height.
     cortex->rand_state = xorshf32(cortex->rand_state);
-    if (cortex->rand_state > mut_chance) {
+    if (cortex->rand_state > mut_chance)
+    {
         // Decide whether to increase or decrease the cortex height.
         new_height += cortex->rand_state % 2 == 0 ? 1 : -1;
     }
-    if (new_width != cortex->width || new_height != cortex->height) {
+    if (new_width != cortex->width || new_height != cortex->height)
+    {
         // Resize neurons.
-        cortex->neurons = (unk_neuron_t*) realloc(cortex->neurons, (size_t)new_width * (size_t)new_height * sizeof(unk_neuron_t));
-        if (cortex->neurons == NULL) {
+        cortex->neurons = (unk_neuron_t *)realloc(cortex->neurons, (size_t)new_width * (size_t)new_height * sizeof(unk_neuron_t));
+        if (cortex->neurons == NULL)
+        {
             return UNK_ERROR_FAILED_ALLOC;
         }
         // TODO Handle neurons' properties.
@@ -383,7 +388,8 @@ unk_error_code_t c2d_mutate_shape(unk_cortex2d_t *cortex, unk_chance_t mut_chanc
     return UNK_ERROR_NONE;
 }
 
-unk_error_code_t c2d_mutate(unk_cortex2d_t *cortex, unk_chance_t mut_chance) {
+unk_error_code_t c2d_mutate(unk_cortex2d_t *cortex, unk_chance_t mut_chance)
+{
     // Start by mutating the network itself, then go on to single neurons.
 
     // TODO Mutate the cortex shape.
@@ -415,28 +421,33 @@ unk_error_code_t c2d_mutate(unk_cortex2d_t *cortex, unk_chance_t mut_chance) {
     }
 
     // Mutate neurons.
-    for (unk_cortex_size_t y = 0; y < cortex->height; y++) {
-        for (unk_cortex_size_t x = 0; x < cortex->width; x++) {
+    for (unk_cortex_size_t y = 0; y < cortex->height; y++)
+    {
+        for (unk_cortex_size_t x = 0; x < cortex->width; x++)
+        {
             n2d_mutate(&(cortex->neurons[IDX2D(x, y, cortex->width)]), mut_chance);
         }
     }
     return UNK_ERROR_NONE;
 }
 
-unk_error_code_t n2d_mutate(unk_neuron_t* neuron, unk_chance_t mut_chance) {
+unk_error_code_t n2d_mutate(unk_neuron_t *neuron, unk_chance_t mut_chance)
+{
     // Mutate max syn count.
     neuron->rand_state = xorshf32(neuron->rand_state);
-    if (neuron->rand_state > mut_chance) {
+    if (neuron->rand_state > mut_chance)
+    {
         // Decide whether to increase or decrease the max syn count.
         neuron->max_syn_count += neuron->rand_state % 2 == 0 ? 1 : -1;
     }
 
     // Mutate inhexc ratio.
     neuron->rand_state = xorshf32(neuron->rand_state);
-    if (neuron->rand_state > mut_chance) {
+    if (neuron->rand_state > mut_chance)
+    {
         // Decide whether to increase or decrease the inhexc ratio.
         neuron->inhexc_ratio += neuron->rand_state % 2 == 0 ? 1 : -1;
-    }   
+    }
     return UNK_ERROR_NONE;
 }
 

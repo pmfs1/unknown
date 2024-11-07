@@ -68,31 +68,31 @@ extern "C"
     /// @param cortex The cortex to be written to file.
     /// @param file_name The destination file to write the cortex to.
     /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
-    unk_error_code_t c2d_to_file(unk_cortex2d_t* cortex, char* file_name);
+    unk_error_code_t c2d_to_file(unk_cortex2d_t *cortex, char *file_name);
 
     /// Reads the content from a file and initializes the provided cortex accordingly.
     /// @param cortex The cortex to init from file.
     /// @param file_name The file to read the cortex from.
-    void c2d_from_file(unk_cortex2d_t* cortex, char* file_name);
+    void c2d_from_file(unk_cortex2d_t *cortex, char *file_name);
 
     /// Sets each neurons's touch from a pgm map file
     /// @brief Sets touch for each neuron in the provided cortex by reading it from a pgm map file.
     /// @param cortex The cortex to apply changes to.
     /// @param map_file_name The path to the pgm map file to read.
     /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
-    unk_error_code_t c2d_touch_from_map(unk_cortex2d_t* cortex, char* map_file_name);
+    unk_error_code_t c2d_touch_from_map(unk_cortex2d_t *cortex, char *map_file_name);
 
     /// @brief Sets inhexc ratio for each neuron in the provided cortex by reading it from a pgm map file.
     /// @param cortex The cortex to apply changes to.
     /// @param map_file_name The path to the pgm map file to read.
     /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
-    unk_error_code_t c2d_inhexc_from_map(unk_cortex2d_t* cortex, char* map_file_name);
+    unk_error_code_t c2d_inhexc_from_map(unk_cortex2d_t *cortex, char *map_file_name);
 
     /// @brief Sets fire threshold for each neuron in the provided cortex by reading it from a pgm map file.
     /// @param cortex The cortex to apply changes to.
     /// @param map_file_name The path to the pgm map file to read.
     /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
-    unk_error_code_t c2d_fthold_from_map(unk_cortex2d_t* cortex, char* map_file_name);
+    unk_error_code_t c2d_fthold_from_map(unk_cortex2d_t *cortex, char *map_file_name);
 
 #ifdef __cplusplus
 }

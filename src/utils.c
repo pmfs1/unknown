@@ -11,8 +11,10 @@ void ignoreComments(FILE *fp)
     if (ch == '#')
     {
         char line[100];
-        do { // Read until newline or EOF
-            if (fgets(line, sizeof(line), fp) != NULL) { // If line is read successfully
+        do
+        { // Read until newline or EOF
+            if (fgets(line, sizeof(line), fp) != NULL)
+            {                                  // If line is read successfully
                 line[sizeof(line) - 1] = '\0'; // Ensure null-termination
             }
         } while (strchr(line, '\n') == NULL && !feof(fp)); // Check if newline is present or EOF is reached
@@ -44,7 +46,8 @@ unk_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
     ignoreComments(pgmfile);
 
     // Read file type.
-    if (fgets(pgm->pgmType, sizeof(pgm->pgmType), pgmfile) == NULL) {
+    if (fgets(pgm->pgmType, sizeof(pgm->pgmType), pgmfile) == NULL)
+    {
         fclose(pgmfile);
         return UNK_ERROR_FILE_DOES_NOT_EXIST;
     }
@@ -141,7 +144,8 @@ unk_error_code_t c2d_to_file(unk_cortex2d_t *cortex, char *file_name)
     }
     // Associate the file descriptor with a FILE stream.
     FILE *out_file = fdopen(fd, "wb");
-    if (out_file == NULL) {
+    if (out_file == NULL)
+    {
         close(fd);
         return UNK_ERROR_FILE_DOES_NOT_EXIST;
     }
@@ -213,7 +217,7 @@ void c2d_from_file(unk_cortex2d_t *cortex, char *file_name)
     fread(&(cortex->pulse_mapping), sizeof(unk_pulse_mapping_t), 1, in_file);
 
     // Read all neurons.
-    cortex->neurons = (unk_neuron_t *)malloc((size_t)cortex->width * cortex->height * sizeof(unk_neuron_t));
+    cortex->neurons = (unk_neuron_t *)malloc((size_t)cortex->width * (size_t)cortex->height * sizeof(unk_neuron_t));
     for (unk_cortex_size_t y = 0; y < cortex->height; y++)
     {
         for (unk_cortex_size_t x = 0; x < cortex->width; x++)

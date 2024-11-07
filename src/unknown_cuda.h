@@ -6,13 +6,15 @@
 #include "utils.h"
 
 // Checks whether or not a CUDA error occurred, if so prints it and exits.
-#define cudaCheckError() {\
-            cudaError_t e = cudaGetLastError();\
-            if (e != cudaSuccess) {\
-                printf("CUDA FAILURE %s(%d): %d(%s)\n", __FILE__, __LINE__ - 1, e, cudaGetErrorString(e));\
-                exit(0);\
-            }\
-        }
+#define cudaCheckError()                                                                               \
+    {                                                                                                  \
+        cudaError_t e = cudaGetLastError();                                                            \
+        if (e != cudaSuccess)                                                                          \
+        {                                                                                              \
+            printf("CUDA FAILURE %s(%d): %d(%s)\n", __FILE__, __LINE__ - 1, e, cudaGetErrorString(e)); \
+            exit(0);                                                                                   \
+        }                                                                                              \
+    }
 
 // Default block size for kernel executions.
 // Block sizes are designed not to exceed the 1024 thread per block limit in the CUDA architecture.
@@ -31,49 +33,47 @@ __host__ __device__ uint32_t cuda_xorshf32(uint32_t state);
 
 /// Computes and returns the grid size to allocate on device.
 /// Warning: the passed cortex must be initialized before this function is called, otherwise an error may occur.
-dim3 c2d_get_grid_size(unk_cortex2d_t* cortex);
+dim3 c2d_get_grid_size(unk_cortex2d_t *cortex);
 
 /// Computes and returns the block size to allocate on device.
 /// Warning: the passed cortex must be initialized before this function is called, otherwise an error may occur.
-dim3 c2d_get_block_size(unk_cortex2d_t* cortex);
+dim3 c2d_get_block_size(unk_cortex2d_t *cortex);
 
 /// Copies an input2d from host to device.
-unk_error_code_t i2d_to_device(unk_input2d_t* device_input, unk_input2d_t* host_input);
+unk_error_code_t i2d_to_device(unk_input2d_t *device_input, unk_input2d_t *host_input);
 
 /// Copies an input2d from device to host.
-unk_error_code_t i2d_to_host(unk_input2d_t* host_input, unk_input2d_t* device_input);
+unk_error_code_t i2d_to_host(unk_input2d_t *host_input, unk_input2d_t *device_input);
 
 /// Copies a cortex2d from host to device.
-unk_error_code_t c2d_to_device(unk_cortex2d_t* device_cortex, unk_cortex2d_t* host_cortex);
+unk_error_code_t c2d_to_device(unk_cortex2d_t *device_cortex, unk_cortex2d_t *host_cortex);
 
 /// Copies a cortex2d from device to host.
-unk_error_code_t c2d_to_host(unk_cortex2d_t* host_cortex, unk_cortex2d_t* device_cortex);
+unk_error_code_t c2d_to_host(unk_cortex2d_t *host_cortex, unk_cortex2d_t *device_cortex);
 
 /// Destroys the given cortex (on device) and frees memory.
-unk_error_code_t i2d_device_destroy(unk_input2d_t* input);
+unk_error_code_t i2d_device_destroy(unk_input2d_t *input);
 
 /// Destroys the given cortex (on device) and frees memory.
-unk_error_code_t c2d_device_destroy(unk_cortex2d_t* cortex);
-
+unk_error_code_t c2d_device_destroy(unk_cortex2d_t *cortex);
 
 // ########################################## Execution functions ##########################################
 
 /// @brief Feeds a cortex through the provided input2d. Input data should already be in the provided input2d by the time this function is called.
 /// @param cortex The cortex to feed.
 /// @param input The input to feed the cortex.
-__global__ void c2d_feed2d(unk_cortex2d_t* cortex, unk_input2d_t* input);
+__global__ void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input);
 
 /// @brief Reads data from a cortex through the provided output2d. When the mapping is done, output data is stored in the provided output2d.
 /// @param cortex The cortex to read values from.
 /// @param output The output used to read data from the cortex.
-__global__ void c2d_read2d(unk_cortex2d_t* cortex, unk_output2d_t* output);
+__global__ void c2d_read2d(unk_cortex2d_t *cortex, unk_output2d_t *output);
 
 /// @brief Performs a full run cycle over the provided cortex.
 /// @param prev_cortex The cortex at its current state.
 /// @param next_cortex The cortex that will be updated by the tick cycle.
 /// @warning prev_cortex and next_cortex should contain the same data (aka be copies one of the other), otherwise this operation may lead to unexpected behavior.
-__global__ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex);
-
+__global__ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex);
 
 // ########################################## Input mapping functions ##########################################
 

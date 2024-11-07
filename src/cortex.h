@@ -372,7 +372,7 @@ extern "C"
     /// @param cortex The cortex to edit.
     /// @param mut_chance The probability of applying a mutation to the cortex shape.
     /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
-    unk_error_code_t c2d_mutate_shape(unk_cortex2d_t* cortex, unk_chance_t mut_chance);
+    unk_error_code_t c2d_mutate_shape(unk_cortex2d_t *cortex, unk_chance_t mut_chance);
 
     /// @brief Randomly mutates the cortex.
     /// @param cortex The cortex to edit.
@@ -384,7 +384,7 @@ extern "C"
     /// @param neuron The neuron to mutate.
     /// @param mut_chance The probability of applying a mutation to any mutable property of the neuron.
     /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
-    unk_error_code_t n2d_mutate(unk_neuron_t* neuron, unk_chance_t mut_chance);
+    unk_error_code_t n2d_mutate(unk_neuron_t *neuron, unk_chance_t mut_chance);
 
     // ########################################## Getter functions ##################################################
 
@@ -399,7 +399,6 @@ extern "C"
     /// @param target Pointer to the result of the computation. The mean value will be stored here.
     /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
     unk_error_code_t o2d_mean(unk_output2d_t *output, unk_ticks_count_t *target);
-
 
     // ########################################## Action functions ##################################################
 
