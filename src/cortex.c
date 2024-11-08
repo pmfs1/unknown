@@ -196,7 +196,7 @@ unk_error_code_t c2d_rand_init(unk_cortex2d_t **cortex, unk_cortex_size_t width,
     (*cortex)->pulse_mapping = pulse_mapping;
 
     // Allocate neurons.
-    (*cortex)->neurons = (unk_neuron_t *)malloc((*cortex)->width * (*cortex)->height * sizeof(unk_neuron_t));
+    (*cortex)->neurons = (unk_neuron_t *)malloc((size_t)(*cortex)->width * (*cortex)->height * sizeof(unk_neuron_t));
     if ((*cortex)->neurons == NULL)
     {
         return UNK_ERROR_FAILED_ALLOC;
