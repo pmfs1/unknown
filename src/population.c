@@ -56,8 +56,8 @@ unk_error_code_t p2d_populate(unk_population2d_t *population, unk_cortex_size_t 
         // Allocate a temporary pointer to the ith cortex.
         unk_cortex2d_t *cortex = &(population->cortices[i]);
 
-        // Init the ith cortex.
-        unk_error_code_t error = c2d_init(&cortex, width, height, nh_radius);
+        // Randomly init the ith cortex.
+        unk_error_code_t error = c2d_rand_init(&cortex, width, height, nh_radius);
 
         if (error != UNK_ERROR_NONE)
         {
@@ -220,7 +220,21 @@ unk_error_code_t p2d_breed(unk_population2d_t *population, unk_cortex2d_t *child
     {
         return error;
     }
-    // TODO Pick neuron values from parents.
+    // Pick neurons' max syn count from a random parent.
+    population->rand_state = xorshf32(population->rand_state);
+    winner_parent_index = population->rand_state % population->parents_count;
+    unk_cortex2d_t msc_parent = parents[winner_parent_index];
+    // Pick neurons' inhexc ratio from a random parent.
+    population->rand_state = xorshf32(population->rand_state);
+    winner_parent_index = population->rand_state % population->parents_count;
+    unk_cortex2d_t inhexc_parent = parents[winner_parent_index];
+    // Pick neuron values from parents.
+    for (unk_cortex_size_t y = 0; y < child->height; y++) {
+        for (unk_cortex_size_t x = 0; x < child->width; x++) {
+            child->neurons[IDX2D(x, y, child->width)].max_syn_count = msc_parent.neurons[IDX2D(x, y, child->width)].max_syn_count;
+            child->neurons[IDX2D(x, y, child->width)].inhexc_ratio = inhexc_parent.neurons[IDX2D(x, y, child->width)].inhexc_ratio;
+        }
+    }
     // Free up temp array.
     free(parents);
     return UNK_ERROR_NONE;

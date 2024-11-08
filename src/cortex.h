@@ -69,8 +69,19 @@ extern "C"
 #define UNK_DEFAULT_SYNGEN_CHANCE 0x02A0U
 #define UNK_DEFAULT_SYNSTR_CHANCE 0x00A0U
 
+#define UNK_MAX_EVOL_STEP UNK_EVOL_STEP_NEVER
+#define UNK_MAX_PULSE_WINDOW 0xFFU
+#define UNK_MAX_THRESHOLD 0xFFU
+/// Recovery value should vary between -0xFF and 0x00. This value is a convenience value used to scale
+#define UNK_MAX_RECOVERY_VALUE 0xFFU
+#define UNK_MAX_EXC_VALUE 0xFFU
+#define UNK_MAX_DECAY_RATE 0xFFU
 #define UNK_MAX_SYNGEN_CHANCE 0xFFFFU
 #define UNK_MAX_SYNSTR_CHANCE 0xFFFFU
+#define UNK_MAX_MAX_TOT_STRENGTH 0xFFU
+#define UNK_MAX_MAX_TOUCH 0xFFU
+#define UNK_MAX_INHEXC_RANGE 0xFFU
+#define UNK_MAX_SAMPLE_WINDOW 0xFFU
 
     typedef uint8_t unk_byte;
 
@@ -100,13 +111,13 @@ extern "C"
     {
         // Values are forced to 32 bit integers by using big enough values: 100000 is 17 bits long, so 32 bits are automatically allocated.
         // Linear.
-        UNK_PULSE_MAPPING_LINEAR = 0x100000,
+        UNK_PULSE_MAPPING_LINEAR = 0x100000U,
         // Floored proportional.
-        UNK_PULSE_MAPPING_FPROP = 0x100001,
+        UNK_PULSE_MAPPING_FPROP = 0x100001U,
         // Rounded proportional.
-        UNK_PULSE_MAPPING_RPROP = 0x100002,
+        UNK_PULSE_MAPPING_RPROP = 0x100002U,
         // Double floored proportional.
-        UNK_PULSE_MAPPING_DFPROP = 0x100003,
+        UNK_PULSE_MAPPING_DFPROP = 0x100003U,
     } unk_pulse_mapping_t;
 
     /// @brief Convenience data structure for input handling (cortex feeding).
@@ -282,6 +293,14 @@ extern "C"
     /// @param nh_radius The neighborhood radius for each individual cortex neuron.
     /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
     unk_error_code_t c2d_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius);
+
+    /// @brief Initializes the given cortex with random values.
+    /// @param cortex The cortex to initialize.
+    /// @param width The width of the cortex.
+    /// @param height The height of the cortex.
+    /// @param nh_radius The neighborhood radius for each individual cortex neuron.
+    /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.
+    unk_error_code_t c2d_rand_init(unk_cortex2d_t** cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius);
 
     /// @brief Destroys the given input2d and frees memory.
     /// @return The code for the occurred error, [UNK_ERROR_NONE] if none.

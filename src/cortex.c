@@ -123,25 +123,110 @@ unk_error_code_t c2d_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_
     {
         for (unk_cortex_size_t x = 0; x < (*cortex)->width; x++)
         {
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].synac_mask = 0x00U;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].synex_mask = 0x00U;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].synstr_mask_a = 0x00U;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].synstr_mask_b = 0x00U;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].synstr_mask_c = 0x00U;
-
+            unk_neuron_t *neuron = &(*cortex)->neurons[IDX2D(x, y, (*cortex)->width)];
+            neuron->synac_mask = 0x00U;
+            neuron->synex_mask = 0x00U;
+            neuron->synstr_mask_a = 0x00U;
+            neuron->synstr_mask_b = 0x00U;
+            neuron->synstr_mask_c = 0x00U;
             // The starting random state should be different for each neuron, otherwise repeting patterns occur.
             // Also the starting state should never be 0, so an arbitrary integer is added to every state.
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].rand_state = 31 + x * y;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].pulse_mask = 0x00U;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].pulse = 0x00U;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].value = UNK_DEFAULT_STARTING_VALUE;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].max_syn_count = (*cortex)->max_syn_count;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].syn_count = 0x00U;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].tot_syn_strength = 0x00U;
-            (*cortex)->neurons[IDX2D(x, y, (*cortex)->width)].inhexc_ratio = UNK_DEFAULT_INHEXC_RATIO;
+            neuron->rand_state = 31 + x * y;
+            neuron->pulse_mask = 0x00U;
+            neuron->pulse = 0x00U;
+            neuron->value = UNK_DEFAULT_STARTING_VALUE;
+            neuron->max_syn_count = (*cortex)->max_syn_count;
+            neuron->syn_count = 0x00U;
+            neuron->tot_syn_strength = 0x00U;
+            neuron->inhexc_ratio = UNK_DEFAULT_INHEXC_RATIO;
         }
     }
+    return UNK_ERROR_NONE;
+}
 
+unk_error_code_t c2d_rand_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius)
+{
+    if (NH_COUNT_2D(NH_DIAM_2D(nh_radius)) > sizeof(unk_nh_mask_t) * 8)
+    {
+        // The provided radius makes for too many neighbors, which will end up in overflows, resulting in unexpected behavior during syngen.
+        return UNK_ERROR_NH_RADIUS_TOO_BIG;
+    }
+    
+    // Allocate the cortex.
+    (*cortex) = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
+    if ((*cortex) == NULL)
+    {
+        return UNK_ERROR_FAILED_ALLOC;
+    }
+
+    // Setup cortex properties.
+    (*cortex)->width = width;
+    (*cortex)->height = height;
+    (*cortex)->ticks_count = 0x00U;
+    (*cortex)->evols_count = 0x00U;
+    (*cortex)->rand_state = (unk_rand_state_t)time(NULL);
+    (*cortex)->evol_step = (*cortex)->rand_state % UNK_EVOL_STEP_NEVER;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->pulse_window = (*cortex)->rand_state % UNK_MAX_PULSE_WINDOW;
+    (*cortex)->nh_radius = nh_radius;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->fire_threshold = (*cortex)->rand_state % UNK_MAX_THRESHOLD;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->recovery_value = ((*cortex)->rand_state % UNK_MAX_RECOVERY_VALUE) - UNK_MAX_RECOVERY_VALUE;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->exc_value = (*cortex)->rand_state % UNK_MAX_EXC_VALUE;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->decay_value = (*cortex)->rand_state % UNK_MAX_DECAY_RATE;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->syngen_chance = (*cortex)->rand_state % UNK_MAX_SYNGEN_CHANCE;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->synstr_chance = (*cortex)->rand_state % UNK_MAX_SYNSTR_CHANCE;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->max_tot_strength = (*cortex)->rand_state % UNK_MAX_MAX_TOT_STRENGTH;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->max_syn_count = (*cortex)->rand_state % ((unk_syn_count_t)(UNK_MAX_MAX_TOUCH * NH_COUNT_2D(NH_DIAM_2D(nh_radius))));
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->inhexc_range = (*cortex)->rand_state % UNK_MAX_INHEXC_RANGE;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+    (*cortex)->sample_window = (*cortex)->rand_state % UNK_MAX_SAMPLE_WINDOW;
+    (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
+
+    // There are 4 possible pulse mappings, so pick one and assign it.
+    int pulse_mapping = (*cortex)->rand_state % 4 + 0x100000;
+    (*cortex)->pulse_mapping = pulse_mapping;
+
+    // Allocate neurons.
+    (*cortex)->neurons = (unk_neuron_t *)malloc((*cortex)->width * (*cortex)->height * sizeof(unk_neuron_t));
+    if ((*cortex)->neurons == NULL)
+    {
+        return UNK_ERROR_FAILED_ALLOC;
+    }
+
+    // Setup neurons' properties.
+    for (unk_cortex_size_t y = 0; y < (*cortex)->height; y++)
+    {
+        for (unk_cortex_size_t x = 0; x < (*cortex)->width; x++)
+        {
+            unk_neuron_t *neuron = &(*cortex)->neurons[IDX2D(x, y, (*cortex)->width)];
+            neuron->synac_mask = 0x00U;
+            neuron->synex_mask = 0x00U;
+            neuron->synstr_mask_a = 0x00U;
+            neuron->synstr_mask_b = 0x00U;
+            neuron->synstr_mask_c = 0x00U;
+            // The starting random state should be different for each neuron, otherwise repeting patterns occur.
+            // Also the starting state should never be 0, so an arbitrary integer is added to every state.
+            neuron->rand_state = 31 + x * y;
+            neuron->pulse_mask = 0x00U;
+            neuron->pulse = 0x00U;
+            neuron->value = UNK_DEFAULT_STARTING_VALUE;
+            neuron->rand_state = xorshf32(neuron->rand_state);
+            neuron->max_syn_count = neuron->rand_state % (*cortex)->max_syn_count;
+            neuron->syn_count = 0x00U;
+            neuron->tot_syn_strength = 0x00U;
+            neuron->rand_state = xorshf32(neuron->rand_state);
+            neuron->inhexc_ratio = neuron->rand_state % (*cortex)->inhexc_range;
+        }
+    }
     return UNK_ERROR_NONE;
 }
 
