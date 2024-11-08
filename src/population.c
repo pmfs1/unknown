@@ -253,7 +253,11 @@ unk_error_code_t p2d_crossover(unk_population2d_t *population, unk_bool_t mutate
     for (unk_population_size_t i = 0; i < population->size; i++)
     {
         // Create a new child by breeding parents from the population's selection pool.
-        unk_cortex2d_t *child;
+        unk_cortex2d_t *child = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
+        if (child == NULL)
+        {
+            return UNK_ERROR_FAILED_ALLOC;
+        }
         error = p2d_breed(population, child);
         if (error != UNK_ERROR_NONE)
         {
