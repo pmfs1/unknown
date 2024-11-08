@@ -1,6 +1,6 @@
 #include "unknown_std.h"
 
-void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
+void c2d_feed2d(unk_cortex2d_t* cortex, unk_input2d_t* input)
 {
 #pragma omp parallel for collapse(2)
     for (unk_cortex_size_t y = input->y0; y < input->y1; y++)
@@ -25,7 +25,7 @@ void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
     }
 }
 
-void c2d_read2d(unk_cortex2d_t *cortex, unk_output2d_t *output)
+void c2d_read2d(unk_cortex2d_t* cortex, unk_output2d_t* output)
 {
 #pragma omp parallel for collapse(2)
     for (unk_cortex_size_t y = output->y0; y < output->y1; y++)
@@ -33,17 +33,17 @@ void c2d_read2d(unk_cortex2d_t *cortex, unk_output2d_t *output)
         for (unk_cortex_size_t x = output->x0; x < output->x1; x++)
         {
             output->values[IDX2D(
-                x - output->x0,
-                y - output->y0,
-                output->x1 - output->x0)] = cortex->neurons[IDX2D(x,
-                                                                  y,
-                                                                  cortex->width)]
-                                                .pulse;
+                    x - output->x0,
+                    y - output->y0,
+                    output->x1 - output->x0)] = cortex->neurons[IDX2D(x,
+                                                                      y,
+                                                                      cortex->width)]
+                .pulse;
         }
     }
 }
 
-void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
+void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
 {
 #pragma omp parallel for collapse(2)
     for (unk_cortex_size_t y = 0; y < prev_cortex->height; y++)
@@ -53,7 +53,7 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
             // Retrieve the involved neurons.
             unk_cortex_size_t neuron_index = IDX2D(x, y, prev_cortex->width);
             unk_neuron_t prev_neuron = prev_cortex->neurons[neuron_index];
-            unk_neuron_t *next_neuron = &(next_cortex->neurons[neuron_index]);
+            unk_neuron_t* next_neuron = &(next_cortex->neurons[neuron_index]);
 
             // Copy prev neuron values to the new one.
             *next_neuron = prev_neuron;
@@ -95,7 +95,8 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
 
                     // Exclude the central neuron from the list of neighbors.
                     if ((j != prev_cortex->nh_radius || i != prev_cortex->nh_radius) &&
-                        (neighbor_x >= 0 && neighbor_y >= 0 && neighbor_x < prev_cortex->width && neighbor_y < prev_cortex->height))
+                        (neighbor_x >= 0 && neighbor_y >= 0 && neighbor_x < prev_cortex->width && neighbor_y <
+                            prev_cortex->height))
                     {
                         // The index of the current neighbor in the current neuron's neighborhood.
                         unk_cortex_size_t neighbor_nh_index = IDX2D(i, j, nh_diameter);
@@ -108,8 +109,8 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
 
                         // Compute the current synapse strength.
                         unk_syn_strength_t syn_strength = (prev_str_mask_a & 0x01U) |
-                                                          ((prev_str_mask_b & 0x01U) << 0x01U) |
-                                                          ((prev_str_mask_c & 0x01U) << 0x02U);
+                            ((prev_str_mask_b & 0x01U) << 0x01U) |
+                            ((prev_str_mask_c & 0x01U) << 0x02U);
 
                         // Pick a random number for each neighbor, capped to the max uint16 value.
                         next_neuron->rand_state = xorshf32(next_neuron->rand_state);
@@ -121,7 +122,10 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
                         // Check if the last bit of the mask is 1 or 0: 1 = active synapse, 0 = inactive synapse.
                         if (prev_ac_mask & 0x01U)
                         {
-                            unk_neuron_value_t neighbor_influence = ((prev_exc_mask & 0x01U) ? prev_cortex->exc_value : -prev_cortex->exc_value) * ((syn_strength / 4) + 1);
+                            unk_neuron_value_t neighbor_influence = ((prev_exc_mask & 0x01U)
+                                                                         ? prev_cortex->exc_value
+                                                                         : -prev_cortex->exc_value) * ((syn_strength /
+                                4) + 1);
                             if (neighbor.value > prev_cortex->fire_threshold)
                             {
                                 if (next_neuron->value + neighbor_influence < prev_cortex->recovery_value)
@@ -167,10 +171,10 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
                                 next_neuron->syn_count++;
                             }
                             else if (prev_ac_mask & 0x01U &&
-                                     // Only 0-strength synapses can be deleted.
-                                     syn_strength == 0x00U &&
-                                     // Frequency component.
-                                     random < prev_cortex->syngen_chance / (neighbor.pulse + 1))
+                                // Only 0-strength synapses can be deleted.
+                                syn_strength == 0x00U &&
+                                // Frequency component.
+                                random < prev_cortex->syngen_chance / (neighbor.pulse + 1))
                             {
                                 // Delete synapse.
                                 next_neuron->synac_mask &= ~(0x01UL << neighbor_nh_index);
@@ -183,22 +187,29 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
                             {
                                 if (syn_strength < UNK_MAX_SYN_STRENGTH &&
                                     prev_neuron.tot_syn_strength < prev_cortex->max_tot_strength &&
-                                    random < prev_cortex->synstr_chance * (unk_chance_t)neighbor.pulse * (unk_chance_t)strength_diff)
+                                    random < prev_cortex->synstr_chance * (unk_chance_t)neighbor.pulse * (unk_chance_t)
+                                    strength_diff)
                                 {
                                     syn_strength++;
-                                    next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL <<
+                                        neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL <<
+                                        neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL <<
+                                        neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
 
                                     next_neuron->tot_syn_strength++;
                                 }
                                 else if (syn_strength > 0x00U &&
-                                         random < prev_cortex->synstr_chance / (neighbor.pulse + syn_strength + 1))
+                                    random < prev_cortex->synstr_chance / (neighbor.pulse + syn_strength + 1))
                                 {
                                     syn_strength--;
-                                    next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL <<
+                                        neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL <<
+                                        neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL <<
+                                        neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
 
                                     next_neuron->tot_syn_strength--;
                                 }
@@ -254,7 +265,8 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
 
 // ########################################## Input mapping functions ##########################################
 
-unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input, unk_pulse_mapping_t pulse_mapping)
+unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input,
+                          unk_pulse_mapping_t pulse_mapping)
 {
     unk_bool_t result = UNK_FALSE;
 
@@ -283,7 +295,8 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
     return result;
 }
 
-unk_bool_t value_to_pulse_linear(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input)
+unk_bool_t value_to_pulse_linear(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
+                                 unk_ticks_count_t input)
 {
     // sample_window = 10;
     // x = input;
@@ -374,17 +387,23 @@ unk_bool_t value_to_pulse_rprop(unk_ticks_count_t sample_window, unk_ticks_count
     return result;
 }
 
-unk_bool_t value_to_pulse_dfprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input) {
+unk_bool_t value_to_pulse_dfprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
+                                 unk_ticks_count_t input)
+{
     unk_bool_t result = UNK_FALSE;
     unk_ticks_count_t upper = sample_window - 1;
     // Double floored proportional mapping logic
-    if (input < sample_window / 2) {
-        if ((sample_step == 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0)) {
-           result = UNK_TRUE;
-       }
+    if (input < sample_window / 2)
+    {
+        if ((sample_step == 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0))
+        {
+            result = UNK_TRUE;
+        }
     }
-    else {
-       if (input >= upper || sample_step % (upper / ((upper - input) * 2)) != 0) {
+    else
+    {
+        if (input >= upper || sample_step % (upper / ((upper - input) * 2)) != 0)
+        {
             result = UNK_TRUE;
         }
     }

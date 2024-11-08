@@ -2,17 +2,19 @@
 
 // ########################################## Initialization functions ##########################################
 
-int idf_compare(const void *a, const void *b)
+int idf_compare(const void* a, const void* b)
 {
-    return (*(unk_indexed_fitness_t *)a).fitness - (*(unk_indexed_fitness_t *)b).fitness;
+    return (*(unk_indexed_fitness_t*)a).fitness - (*(unk_indexed_fitness_t*)b).fitness;
 }
 
 // ########################################## Initialization functions ##########################################
 
-unk_error_code_t p2d_init(unk_population2d_t **population, unk_population_size_t size, unk_population_size_t selection_pool_size, unk_chance_t mut_chance, unk_error_code_t (*eval_function)(unk_cortex2d_t *cortex, unk_cortex_fitness_t *fitness))
+unk_error_code_t p2d_init(unk_population2d_t** population, unk_population_size_t size,
+                          unk_population_size_t selection_pool_size, unk_chance_t mut_chance,
+                          unk_error_code_t (*eval_function)(unk_cortex2d_t* cortex, unk_cortex_fitness_t* fitness))
 {
     // Allocate the population.
-    (*population) = (unk_population2d_t *)malloc(sizeof(unk_population2d_t));
+    (*population) = (unk_population2d_t*)malloc(sizeof(unk_population2d_t));
     if ((*population) == NULL)
     {
         return UNK_ERROR_FAILED_ALLOC;
@@ -26,21 +28,22 @@ unk_error_code_t p2d_init(unk_population2d_t **population, unk_population_size_t
     (*population)->eval_function = eval_function;
 
     // Allocate cortices.
-    (*population)->cortices = (unk_cortex2d_t *)malloc((*population)->size * sizeof(unk_cortex2d_t));
+    (*population)->cortices = (unk_cortex2d_t*)malloc((*population)->size * sizeof(unk_cortex2d_t));
     if ((*population)->cortices == NULL)
     {
         return UNK_ERROR_FAILED_ALLOC;
     }
 
     // Allocate fitnesses.
-    (*population)->cortices_fitness = (unk_cortex_fitness_t *)malloc((*population)->size * sizeof(unk_cortex_fitness_t));
+    (*population)->cortices_fitness = (unk_cortex_fitness_t*)malloc((*population)->size * sizeof(unk_cortex_fitness_t));
     if ((*population)->cortices_fitness == NULL)
     {
         return UNK_ERROR_FAILED_ALLOC;
     }
 
     // Allocate selection pool.
-    (*population)->selection_pool = (unk_population_size_t *)malloc((*population)->selection_pool_size * sizeof(unk_population_size_t));
+    (*population)->selection_pool = (unk_population_size_t*)malloc(
+        (*population)->selection_pool_size * sizeof(unk_population_size_t));
     if ((*population)->selection_pool == NULL)
     {
         return UNK_ERROR_FAILED_ALLOC;
@@ -49,12 +52,13 @@ unk_error_code_t p2d_init(unk_population2d_t **population, unk_population_size_t
     return UNK_ERROR_NONE;
 }
 
-unk_error_code_t p2d_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius)
+unk_error_code_t p2d_populate(unk_population2d_t* population, unk_cortex_size_t width, unk_cortex_size_t height,
+                              unk_nh_radius_t nh_radius)
 {
     for (unk_population_size_t i = 0; i < population->size; i++)
     {
         // Allocate a temporary pointer to the ith cortex.
-        unk_cortex2d_t *cortex = &(population->cortices[i]);
+        unk_cortex2d_t* cortex = &(population->cortices[i]);
 
         // Randomly init the ith cortex.
         unk_error_code_t error = c2d_rand_init(&cortex, width, height, nh_radius);
@@ -76,7 +80,7 @@ unk_error_code_t p2d_populate(unk_population2d_t *population, unk_cortex_size_t 
 
 // ########################################## Setter functions ##################################################
 
-unk_error_code_t p2d_set_mut_rate(unk_population2d_t *population, unk_chance_t mut_chance)
+unk_error_code_t p2d_set_mut_rate(unk_population2d_t* population, unk_chance_t mut_chance)
 {
     population->mut_chance = mut_chance;
 
@@ -85,14 +89,15 @@ unk_error_code_t p2d_set_mut_rate(unk_population2d_t *population, unk_chance_t m
 
 // ########################################## Action functions ##################################################
 
-unk_error_code_t p2d_evaluate(unk_population2d_t *population)
+unk_error_code_t p2d_evaluate(unk_population2d_t* population)
 {
     // Loop through all cortices to evaluate each of them.
     for (unk_population_size_t i = 0; i < population->size; i++)
     {
         // Evaluate the current cortex by using the population evaluation function.
         // The computed fitness is stored in the population itself.
-        unk_error_code_t error = population->eval_function(&(population->cortices[i]), &(population->cortices_fitness[i]));
+        unk_error_code_t error = population->eval_function(&(population->cortices[i]),
+                                                           &(population->cortices_fitness[i]));
         if (error != UNK_ERROR_NONE)
         {
             return error;
@@ -102,10 +107,11 @@ unk_error_code_t p2d_evaluate(unk_population2d_t *population)
     return UNK_ERROR_NONE;
 }
 
-unk_error_code_t p2d_select(unk_population2d_t *population)
+unk_error_code_t p2d_select(unk_population2d_t* population)
 {
     // Allocate temporary fitnesses.
-    unk_indexed_fitness_t *sorted_indexes = (unk_indexed_fitness_t *)malloc(population->size * sizeof(unk_indexed_fitness_t));
+    unk_indexed_fitness_t* sorted_indexes = (unk_indexed_fitness_t*)malloc(
+        population->size * sizeof(unk_indexed_fitness_t));
     // Populate temp indexes.
     for (unk_population_size_t i = 0; i < population->size; i++)
     {
@@ -126,15 +132,16 @@ unk_error_code_t p2d_select(unk_population2d_t *population)
     return UNK_ERROR_NONE;
 }
 
-unk_error_code_t p2d_breed(unk_population2d_t *population, unk_cortex2d_t *child)
+unk_error_code_t p2d_breed(unk_population2d_t* population, unk_cortex2d_t* child)
 {
     // Allocate parents.
-    unk_cortex2d_t *parents = (unk_cortex2d_t *)malloc(population->parents_count * sizeof(unk_cortex2d_t));
+    unk_cortex2d_t* parents = (unk_cortex2d_t*)malloc(population->parents_count * sizeof(unk_cortex2d_t));
     if (parents == NULL)
     {
         return UNK_ERROR_FAILED_ALLOC;
     }
-    unk_population_size_t *parents_indexes = (unk_population_size_t *)malloc(population->parents_count * sizeof(unk_population_size_t));
+    unk_population_size_t* parents_indexes = (unk_population_size_t*)malloc(
+        population->parents_count * sizeof(unk_population_size_t));
     if (parents_indexes == NULL)
     {
         return UNK_ERROR_FAILED_ALLOC;
@@ -157,7 +164,8 @@ unk_error_code_t p2d_breed(unk_population2d_t *population, unk_cortex2d_t *child
                     index_is_valid = UNK_FALSE;
                 }
             }
-        } while (!index_is_valid);
+        }
+        while (!index_is_valid);
         parents_indexes[i] = parent_index;
         parents[i] = population->cortices[parent_index];
     }
@@ -229,10 +237,14 @@ unk_error_code_t p2d_breed(unk_population2d_t *population, unk_cortex2d_t *child
     winner_parent_index = population->rand_state % population->parents_count;
     unk_cortex2d_t inhexc_parent = parents[winner_parent_index];
     // Pick neuron values from parents.
-    for (unk_cortex_size_t y = 0; y < child->height; y++) {
-        for (unk_cortex_size_t x = 0; x < child->width; x++) {
-            child->neurons[IDX2D(x, y, child->width)].max_syn_count = msc_parent.neurons[IDX2D(x, y, child->width)].max_syn_count;
-            child->neurons[IDX2D(x, y, child->width)].inhexc_ratio = inhexc_parent.neurons[IDX2D(x, y, child->width)].inhexc_ratio;
+    for (unk_cortex_size_t y = 0; y < child->height; y++)
+    {
+        for (unk_cortex_size_t x = 0; x < child->width; x++)
+        {
+            child->neurons[IDX2D(x, y, child->width)].max_syn_count = msc_parent.neurons[IDX2D(x, y, child->width)].
+                max_syn_count;
+            child->neurons[IDX2D(x, y, child->width)].inhexc_ratio = inhexc_parent.neurons[IDX2D(x, y, child->width)].
+                inhexc_ratio;
         }
     }
     // Free up temp array.
@@ -240,11 +252,11 @@ unk_error_code_t p2d_breed(unk_population2d_t *population, unk_cortex2d_t *child
     return UNK_ERROR_NONE;
 }
 
-unk_error_code_t p2d_crossover(unk_population2d_t *population, unk_bool_t mutate)
+unk_error_code_t p2d_crossover(unk_population2d_t* population, unk_bool_t mutate)
 {
     unk_error_code_t error;
     // Create a temp population to hold the new generation.
-    unk_cortex2d_t *offspring = (unk_cortex2d_t *)malloc(population->size * sizeof(unk_cortex2d_t));
+    unk_cortex2d_t* offspring = (unk_cortex2d_t*)malloc(population->size * sizeof(unk_cortex2d_t));
     if (offspring == NULL)
     {
         return UNK_ERROR_FAILED_ALLOC;
@@ -253,7 +265,7 @@ unk_error_code_t p2d_crossover(unk_population2d_t *population, unk_bool_t mutate
     for (unk_population_size_t i = 0; i < population->size; i++)
     {
         // Create a new child by breeding parents from the population's selection pool.
-        unk_cortex2d_t *child = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
+        unk_cortex2d_t* child = (unk_cortex2d_t*)malloc(sizeof(unk_cortex2d_t));
         if (child == NULL)
         {
             return UNK_ERROR_FAILED_ALLOC;
@@ -288,7 +300,7 @@ unk_error_code_t p2d_crossover(unk_population2d_t *population, unk_bool_t mutate
     return UNK_ERROR_NONE;
 }
 
-unk_error_code_t p2d_mutate(unk_population2d_t *population)
+unk_error_code_t p2d_mutate(unk_population2d_t* population)
 {
     // Mutate each cortex in the population.
     for (unk_population_size_t i = 0; i < population->size; i++)

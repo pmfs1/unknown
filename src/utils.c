@@ -1,6 +1,6 @@
 #include "utils.h"
 
-void ignoreComments(FILE *fp)
+void ignoreComments(FILE* fp)
 {
     int ch;
     // Ignore any blank lines
@@ -12,12 +12,15 @@ void ignoreComments(FILE *fp)
     {
         char line[100];
         do
-        { // Read until newline or EOF
+        {
+            // Read until newline or EOF
             if (fgets(line, sizeof(line), fp) != NULL)
-            {                                  // If line is read successfully
+            {
+                // If line is read successfully
                 line[sizeof(line) - 1] = '\0'; // Ensure null-termination
             }
-        } while (strchr(line, '\n') == NULL && !feof(fp)); // Check if newline is present or EOF is reached
+        }
+        while (strchr(line, '\n') == NULL && !feof(fp)); // Check if newline is present or EOF is reached
         ignoreComments(fp); // Recursively ignore comments
     }
     else // If the character is not a comment
@@ -26,7 +29,7 @@ void ignoreComments(FILE *fp)
     }
 }
 
-unk_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
+unk_error_code_t pgm_read(pgm_content_t* pgm, const char* filename)
 {
     // Open the image file in read-only mode without following symlinks.
     int fd = open(filename, O_RDONLY);
@@ -36,7 +39,7 @@ unk_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
         return UNK_ERROR_FILE_DOES_NOT_EXIST;
     }
     // Associate the file descriptor with a FILE stream.
-    FILE *pgmfile = fdopen(fd, "r");
+    FILE* pgmfile = fdopen(fd, "r");
     if (pgmfile == NULL)
     {
         close(fd);
@@ -66,7 +69,7 @@ unk_error_code_t pgm_read(pgm_content_t *pgm, const char *filename)
     ignoreComments(pgmfile);
 
     // Allocate memory to store data in the struct.
-    pgm->data = (uint8_t *)malloc((unsigned long)pgm->width * pgm->height * sizeof(uint8_t));
+    pgm->data = (uint8_t*)malloc((unsigned long)pgm->width * pgm->height * sizeof(uint8_t));
 
     // Store data in the struct.
     if (!strcmp(pgm->pgmType, "P2"))
@@ -133,7 +136,7 @@ uint64_t nanos()
     return ns;
 }
 
-unk_error_code_t c2d_to_file(unk_cortex2d_t *cortex, char *file_name)
+unk_error_code_t c2d_to_file(unk_cortex2d_t* cortex, char* file_name)
 {
     // Open output file if possible.
     int fd = open(file_name, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
@@ -143,7 +146,7 @@ unk_error_code_t c2d_to_file(unk_cortex2d_t *cortex, char *file_name)
         return UNK_ERROR_FILE_DOES_NOT_EXIST;
     }
     // Associate the file descriptor with a FILE stream.
-    FILE *out_file = fdopen(fd, "wb");
+    FILE* out_file = fdopen(fd, "wb");
     if (out_file == NULL)
     {
         close(fd);
@@ -187,10 +190,10 @@ unk_error_code_t c2d_to_file(unk_cortex2d_t *cortex, char *file_name)
     return UNK_ERROR_NONE;
 }
 
-void c2d_from_file(unk_cortex2d_t *cortex, char *file_name)
+void c2d_from_file(unk_cortex2d_t* cortex, char* file_name)
 {
     // Open output file if possible.
-    FILE *in_file = fopen(file_name, "rb");
+    FILE* in_file = fopen(file_name, "rb");
 
     // Read cortex metadata from the output file.
     fread(&(cortex->width), sizeof(unk_cortex_size_t), 1, in_file);
@@ -217,7 +220,7 @@ void c2d_from_file(unk_cortex2d_t *cortex, char *file_name)
     fread(&(cortex->pulse_mapping), sizeof(unk_pulse_mapping_t), 1, in_file);
 
     // Read all neurons.
-    cortex->neurons = (unk_neuron_t *)malloc((size_t)cortex->width * (size_t)cortex->height * sizeof(unk_neuron_t));
+    cortex->neurons = (unk_neuron_t*)malloc((size_t)cortex->width * (size_t)cortex->height * sizeof(unk_neuron_t));
     for (unk_cortex_size_t y = 0; y < cortex->height; y++)
     {
         for (unk_cortex_size_t x = 0; x < cortex->width; x++)
@@ -229,7 +232,7 @@ void c2d_from_file(unk_cortex2d_t *cortex, char *file_name)
     fclose(in_file);
 }
 
-unk_error_code_t c2d_touch_from_map(unk_cortex2d_t *cortex, char *map_file_name)
+unk_error_code_t c2d_touch_from_map(unk_cortex2d_t* cortex, char* map_file_name)
 {
     pgm_content_t pgm_content;
 
@@ -245,7 +248,8 @@ unk_error_code_t c2d_touch_from_map(unk_cortex2d_t *cortex, char *map_file_name)
     {
         for (unk_cortex_size_t i = 0; i < cortex->width * cortex->height; i++)
         {
-            cortex->neurons[i].max_syn_count = fmap(pgm_content.data[i], 0, pgm_content.max_value, 0, cortex->max_syn_count);
+            cortex->neurons[i].max_syn_count = fmap(pgm_content.data[i], 0, pgm_content.max_value, 0,
+                                                    cortex->max_syn_count);
         }
     }
     else
@@ -257,7 +261,7 @@ unk_error_code_t c2d_touch_from_map(unk_cortex2d_t *cortex, char *map_file_name)
     return UNK_ERROR_NONE;
 }
 
-unk_error_code_t c2d_inhexc_from_map(unk_cortex2d_t *cortex, char *map_file_name)
+unk_error_code_t c2d_inhexc_from_map(unk_cortex2d_t* cortex, char* map_file_name)
 {
     pgm_content_t pgm_content;
 
@@ -273,7 +277,8 @@ unk_error_code_t c2d_inhexc_from_map(unk_cortex2d_t *cortex, char *map_file_name
     {
         for (unk_cortex_size_t i = 0; i < cortex->width * cortex->height; i++)
         {
-            cortex->neurons[i].inhexc_ratio = fmap(pgm_content.data[i], 0, pgm_content.max_value, 0, cortex->inhexc_range);
+            cortex->neurons[i].inhexc_ratio = fmap(pgm_content.data[i], 0, pgm_content.max_value, 0,
+                                                   cortex->inhexc_range);
         }
     }
     else
