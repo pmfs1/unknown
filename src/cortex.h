@@ -90,18 +90,18 @@ extern "C"
 
     // A MASK MADE OF 8 BYTES CAN HOLD UP TO 48 NEIGHBORS (I.E. RADIUS = 3).
     // USING 16 BYTES THE RADIUS CAN BE UP TO 5 (120 NEIGHBORS).
-    typedef uint8_t unk_byte;                   // BASIC BYTE TYPE
-    typedef int16_t unk_neuron_value_t;         // INTERNAL NEURON VALUE TYPE
-    typedef uint64_t unk_nh_mask_t;             // NEIGHBORHOOD MASK TYPE (48-120 NEIGHBORS)
-    typedef int8_t unk_nh_radius_t;             // NEIGHBORHOOD RADIUS TYPE
-    typedef uint8_t unk_syn_count_t;            // SYNAPSE COUNT TYPE
-    typedef uint8_t unk_syn_strength_t;         // SYNAPSE STRENGTH TYPE
-    typedef uint16_t unk_ticks_count_t;         // TICK COUNTER TYPE
-    typedef uint32_t unk_evol_step_t;           // EVOLUTION STEP TYPE
-    typedef uint64_t unk_pulse_mask_t;          // PULSE HISTORY MASK TYPE
-    typedef uint32_t unk_chance_t;              // PROBABILITY VALUE TYPE
-    typedef uint32_t unk_rand_state_t;          // RANDOM STATE TYPE
-    typedef int32_t unk_cortex_size_t;          // CORTEX DIMENSION TYPE
+    typedef uint8_t unk_byte;           // BASIC BYTE TYPE
+    typedef int16_t unk_neuron_value_t; // INTERNAL NEURON VALUE TYPE
+    typedef uint64_t unk_nh_mask_t;     // NEIGHBORHOOD MASK TYPE (48-120 NEIGHBORS)
+    typedef int8_t unk_nh_radius_t;     // NEIGHBORHOOD RADIUS TYPE
+    typedef uint8_t unk_syn_count_t;    // SYNAPSE COUNT TYPE
+    typedef uint8_t unk_syn_strength_t; // SYNAPSE STRENGTH TYPE
+    typedef uint16_t unk_ticks_count_t; // TICK COUNTER TYPE
+    typedef uint32_t unk_evol_step_t;   // EVOLUTION STEP TYPE
+    typedef uint64_t unk_pulse_mask_t;  // PULSE HISTORY MASK TYPE
+    typedef uint32_t unk_chance_t;      // PROBABILITY VALUE TYPE
+    typedef uint32_t unk_rand_state_t;  // RANDOM STATE TYPE
+    typedef int32_t unk_cortex_size_t;  // CORTEX DIMENSION TYPE
 
     typedef enum
     {
@@ -307,7 +307,7 @@ extern "C"
     /// @param height THE HEIGHT OF THE CORTEX.
     /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON.
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_rand_init(unk_cortex2d_t** cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius);
+    unk_error_code_t c2d_rand_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius);
 
     /// @brief DESTROYS THE GIVEN INPUT2D AND FREES MEMORY.
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.

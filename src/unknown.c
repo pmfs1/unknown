@@ -1,16 +1,16 @@
 #include "unknown.h"
 
-/* 
+/*
  * MAIN FEED FUNCTION FOR 2D CORTEX (c2d_feed2d)
  * PURPOSE: PROCESSES INPUT VALUES AND CONVERTS THEM TO NEURAL EXCITATION PATTERNS
- * 
+ *
  * FEATURES:
  * - PARALLEL PROCESSING FOR PERFORMANCE OPTIMIZATION
  * - SPATIAL INPUT MAPPING TO CORTEX COORDINATES
  * - CONFIGURABLE EXCITATION VALUES AND PULSE PATTERNS
  * - AUTOMATIC BOUNDARY HANDLING
  */
-void c2d_feed2d(unk_cortex2d_t* cortex, unk_input2d_t* input)
+void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
 {
 #pragma omp parallel for collapse(2)
     for (unk_cortex_size_t y = input->y0; y < input->y1; y++)
@@ -34,17 +34,17 @@ void c2d_feed2d(unk_cortex2d_t* cortex, unk_input2d_t* input)
     }
 }
 
-/* 
+/*
  * READ FUNCTION FOR 2D CORTEX OUTPUT (c2d_read2d)
  * PURPOSE: EXTRACTS PULSE STATES FROM SPECIFIED REGION OF NEURONS
- * 
+ *
  * FEATURES:
  * - PARALLEL PROCESSING FOR HIGH-SPEED DATA EXTRACTION
  * - COORDINATE MAPPING BETWEEN OUTPUT AND CORTEX SPACE
  * - EFFICIENT MEMORY ACCESS PATTERNS
  * - DIRECT PULSE STATE READING
  */
-void c2d_read2d(unk_cortex2d_t* cortex, unk_output2d_t* output)
+void c2d_read2d(unk_cortex2d_t *cortex, unk_output2d_t *output)
 {
 #pragma omp parallel for collapse(2)
     for (unk_cortex_size_t y = output->y0; y < output->y1; y++)
@@ -52,12 +52,12 @@ void c2d_read2d(unk_cortex2d_t* cortex, unk_output2d_t* output)
         for (unk_cortex_size_t x = output->x0; x < output->x1; x++)
         {
             output->values[IDX2D(
-                    x - output->x0,
-                    y - output->y0,
-                    output->x1 - output->x0)] = cortex->neurons[IDX2D(x,
-                                                                      y,
-                                                                      cortex->width)]
-                .pulse;
+                x - output->x0,
+                y - output->y0,
+                output->x1 - output->x0)] = cortex->neurons[IDX2D(x,
+                                                                  y,
+                                                                  cortex->width)]
+                                                .pulse;
         }
     }
 }
@@ -65,29 +65,29 @@ void c2d_read2d(unk_cortex2d_t* cortex, unk_output2d_t* output)
 /*
  * CORE PROCESSING FUNCTION FOR 2D CORTEX (c2d_tick)
  * PURPOSE: ADVANCES THE CORTEX STATE BY ONE TIME STEP
- * 
+ *
  * KEY COMPONENTS:
  * 1. NEURON STATE MANAGEMENT:
  *    - STATE TRANSITIONS AND VALUE UPDATES
  *    - MEMBRANE POTENTIAL TRACKING
  *    - REFRACTORY PERIOD HANDLING
- * 
+ *
  * 2. SYNAPTIC OPERATIONS:
  *    - PLASTICITY RULES APPLICATION
  *    - WEIGHT MODIFICATIONS
  *    - CONNECTION MANAGEMENT
- * 
+ *
  * 3. NETWORK DYNAMICS:
  *    - PULSE PROPAGATION
  *    - FIRING PATTERNS
  *    - NEIGHBORHOOD INTERACTIONS
- * 
+ *
  * 4. PERFORMANCE OPTIMIZATIONS:
  *    - PARALLEL EXECUTION
  *    - EFFICIENT MEMORY ACCESS
  *    - OPTIMIZED COMPUTATIONS
  */
-void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
+void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
 {
 #pragma omp parallel for collapse(2)
     for (unk_cortex_size_t y = 0; y < prev_cortex->height; y++)
@@ -97,7 +97,7 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
             // RETRIEVE THE NEURONS FROM PREVIOUS AND NEXT CORTEX STATES
             unk_cortex_size_t neuron_index = IDX2D(x, y, prev_cortex->width);
             unk_neuron_t prev_neuron = prev_cortex->neurons[neuron_index];
-            unk_neuron_t* next_neuron = &(next_cortex->neurons[neuron_index]);
+            unk_neuron_t *next_neuron = &(next_cortex->neurons[neuron_index]);
             // COPY PREVIOUS NEURON STATE TO THE NEW ONE
             *next_neuron = prev_neuron;
             /* NEIGHBORHOOD CONFIGURATION AND NEURAL CONNECTIVITY:
@@ -105,7 +105,7 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
              * - CONFIGURABLE RADIUS FOR FLEXIBLE CONNECTIVITY PATTERNS
              * - SYMMETRIC CONNECTIVITY FOR UNIFORM SIGNAL PROPAGATION
              * - BOUNDARY HANDLING FOR EDGE CASES
-             * 
+             *
              * ARCHITECTURE VISUALIZATION:
              *    TOTAL DIAMETER (d) = 2r + 1
              * <----------------------->
@@ -119,7 +119,7 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
              *    |    RADIUS    | |
              *    |               | |
              *    +-|-|-|-|-|-|-|-|+
-             *    
+             *
              * WHERE:
              * - X: CURRENT NEURON BEING PROCESSED
              * - ACTIVE ZONE: REGION OF POTENTIAL SYNAPTIC CONNECTIONS
@@ -146,8 +146,7 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
                     unk_cortex_size_t neighbor_y = y + (j - prev_cortex->nh_radius);
                     // SKIP CENTER NEURON AND CHECK BOUNDARY CONDITIONS
                     if ((j != prev_cortex->nh_radius || i != prev_cortex->nh_radius) &&
-                        (neighbor_x >= 0 && neighbor_y >= 0 && neighbor_x < prev_cortex->width && neighbor_y <
-                            prev_cortex->height))
+                        (neighbor_x >= 0 && neighbor_y >= 0 && neighbor_x < prev_cortex->width && neighbor_y < prev_cortex->height))
                     {
                         // THE INDEX OF THE CURRENT NEIGHBOR IN THE CURRENT NEURON'S NEIGHBORHOOD
                         unk_cortex_size_t neighbor_nh_index = IDX2D(i, j, nh_diameter);
@@ -158,8 +157,8 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
                         unk_neuron_t neighbor = prev_cortex->neurons[neighbor_index];
                         // COMPUTE THE CURRENT SYNAPSE STRENGTH
                         unk_syn_strength_t syn_strength = (prev_str_mask_a & 0x01U) |
-                            ((prev_str_mask_b & 0x01U) << 0x01U) |
-                            ((prev_str_mask_c & 0x01U) << 0x02U);
+                                                          ((prev_str_mask_b & 0x01U) << 0x01U) |
+                                                          ((prev_str_mask_c & 0x01U) << 0x02U);
                         // PICK A RANDOM NUMBER FOR EACH NEIGHBOR, CAPPED TO THE MAX UINT16 VALUE
                         next_neuron->rand_state = xorshf32(next_neuron->rand_state);
                         unk_chance_t random = next_neuron->rand_state % 0xFFFFU;
@@ -170,8 +169,10 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
                         {
                             unk_neuron_value_t neighbor_influence = ((prev_exc_mask & 0x01U)
                                                                          ? prev_cortex->exc_value
-                                                                         : -prev_cortex->exc_value) * ((syn_strength /
-                                4) + 1);
+                                                                         : -prev_cortex->exc_value) *
+                                                                    ((syn_strength /
+                                                                      4) +
+                                                                     1);
                             if (neighbor.value > prev_cortex->fire_threshold)
                             {
                                 if (next_neuron->value + neighbor_influence < prev_cortex->recovery_value)
@@ -185,9 +186,9 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
                             }
                         }
                         /* SYNAPTIC PLASTICITY IMPLEMENTATION:
-                         * 
+                         *
                          * 1. STRUCTURAL PLASTICITY:
-                         *    - SYNAPSE CREATION: 
+                         *    - SYNAPSE CREATION:
                          *      * ACTIVITY-DEPENDENT FORMATION
                          *      * PROBABILITY-BASED GENERATION
                          *      * CAPACITY-LIMITED GROWTH
@@ -195,7 +196,7 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
                          *      * WEAKNESS-BASED REMOVAL
                          *      * ACTIVITY-DEPENDENT SURVIVAL
                          *      * HOMEOSTATIC REGULATION
-                         * 
+                         *
                          * 2. FUNCTIONAL PLASTICITY:
                          *    - STRENGTH MODULATION:
                          *      * DISCRETE STRENGTH LEVELS
@@ -245,10 +246,10 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
                             // 2. STRENGTH IS ZERO
                             // 3. PASSES PROBABILITY CHECK BASED ON NEIGHBOR ACTIVITY
                             else if (prev_ac_mask & 0x01U &&
-                                // ONLY 0-STRENGTH SYNAPSES CAN BE DELETED
-                                syn_strength == 0x00U &&
-                                // FREQUENCY COMPONENT
-                                random < prev_cortex->syngen_chance / (neighbor.pulse + 1))
+                                     // ONLY 0-STRENGTH SYNAPSES CAN BE DELETED
+                                     syn_strength == 0x00U &&
+                                     // FREQUENCY COMPONENT
+                                     random < prev_cortex->syngen_chance / (neighbor.pulse + 1))
                             {
                                 // DELETE SYNAPSE
                                 next_neuron->synac_mask &= ~(0x01UL << neighbor_nh_index);
@@ -264,29 +265,22 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
                                 // 3. PASSES PROBABILITY CHECK
                                 if (syn_strength < UNK_MAX_SYN_STRENGTH &&
                                     prev_neuron.tot_syn_strength < prev_cortex->max_tot_strength &&
-                                    random < prev_cortex->synstr_chance * (unk_chance_t)neighbor.pulse * (unk_chance_t)
-                                    strength_diff)
+                                    random < prev_cortex->synstr_chance * (unk_chance_t)neighbor.pulse * (unk_chance_t)strength_diff)
                                 {
                                     syn_strength++;
-                                    next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL <<
-                                        neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL <<
-                                        neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL <<
-                                        neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
                                     next_neuron->tot_syn_strength++;
                                 }
                                 // WEAKEN SYNAPSE IF PASSES PROBABILITY CHECK
                                 else if (syn_strength > 0x00U &&
-                                    random < prev_cortex->synstr_chance / (neighbor.pulse + syn_strength + 1))
+                                         random < prev_cortex->synstr_chance / (neighbor.pulse + syn_strength + 1))
                                 {
                                     syn_strength--;
-                                    next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL <<
-                                        neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL <<
-                                        neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL <<
-                                        neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
                                     next_neuron->tot_syn_strength--;
                                 }
                             }
@@ -303,17 +297,17 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
                 }
             }
             /* PULSE PROCESSING AND NEURAL DYNAMICS:
-             * 
+             *
              * 1. DECAY PHASE:
              *    - LEAKY INTEGRATE-AND-FIRE MODEL
              *    - BIDIRECTIONAL VALUE DECAY
              *    - EQUILIBRIUM TARGETING
-             * 
+             *
              * 2. PULSE MANAGEMENT:
              *    - TEMPORAL PULSE TRACKING
              *    - SLIDING WINDOW HISTORY
              *    - FREQUENCY MONITORING
-             * 
+             *
              * 3. FIRING MECHANICS:
              *    - ADAPTIVE THRESHOLDING
              *    - REFRACTORY ENFORCEMENT
@@ -362,22 +356,22 @@ void c2d_tick(unk_cortex2d_t* prev_cortex, unk_cortex2d_t* next_cortex)
  */
 
 /* VALUE TO PULSE MAPPING STRATEGIES:
- * 
+ *
  * 1. LINEAR (UNK_PULSE_MAPPING_LINEAR):
  *    - UNIFORM TEMPORAL DISTRIBUTION
  *    - DIRECT VALUE-TO-FREQUENCY MAPPING
  *    - CONSISTENT TEMPORAL SPACING
- * 
+ *
  * 2. FLOOR PROPORTIONAL (UNK_PULSE_MAPPING_FPROP):
  *    - ENHANCED LOW-VALUE RESOLUTION
  *    - DISCRETE FREQUENCY STEPPING
  *    - FLOOR-BASED VALUE QUANTIZATION
- * 
+ *
  * 3. ROUNDED PROPORTIONAL (UNK_PULSE_MAPPING_RPROP):
  *    - SMOOTH FREQUENCY TRANSITIONS
  *    - BALANCED VALUE REPRESENTATION
  *    - IMPROVED NUMERICAL STABILITY
- * 
+ *
  * 4. DOUBLE FLOOR PROPORTIONAL (UNK_PULSE_MAPPING_DFPROP):
  *    - HIGH-PRECISION EDGE HANDLING
  *    - SYMMETRIC VALUE PROCESSING
