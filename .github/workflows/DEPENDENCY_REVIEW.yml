@@ -1,0 +1,19 @@
+name: 'DEPENDENCY REVIEW'
+on:
+  pull_request:
+    branches: [ "trunk" ]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  DEPENDENCY_REVIEW:
+    name: 'DEPENDENCY REVIEW'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'CHECKOUT'
+        uses: actions/checkout@v4
+      - name: 'REVIEW'
+        uses: actions/dependency-review-action@v4
+        with:
+          comment-summary-in-pr: always
+          fail-on-severity: moderate

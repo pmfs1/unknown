@@ -1,0 +1,3 @@
+𝓁𝒾𝒷𝓾𝓷𝓴𝓷𝓸𝔀𝓷 _is a spiking neural network library leveraging grid layouts and kernels to enhance efficiency in highly parallel environments; and striving to closely mimic a biological brain without compromising performance. By being constantly influenced by its inputs, the network leads to potentially unexpected (emergent) outcomes._
+
+ <!-- - _Before installing the library please make sure you have all of the required dependencies installed by running the following command: `sudo apt-get update -y && sudo apt install make gcc g++ -y`._ ***To install the default (CPU) package in a system-wide dynamic or static library, use: `make install`.*** -->
