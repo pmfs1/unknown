@@ -11,7 +11,6 @@ permissions:
   contents: read
   issues: write
   pull-requests: write
-  projects: write
 jobs:
   PROJECT_MANAGEMENT:
     name: 'PROJECT MANAGEMENT'
@@ -44,55 +43,107 @@ jobs:
       # THE LABEL FORMAT IS "FIELD:VALUE"
       # THE EXISTING LABELS ARE: "STATUS:TODO", "STATUS:WORK-IN-PROGRESS", "STATUS:DONE", "PRIORITY:TRIVIAL", "PRIORITY:MINOR", "PRIORITY:MAJOR", "PRIORITY:CRITICAL", "TYPE:PATCH", "TYPE:FEATURE"
       - name: 'UPDATE PROJECT FIELDS (ON EDIT, LABEL, OR UNLABEL)'
-        if: ${{ github.event_name == 'issues' && (github.event.action == 'edited' || github.event.action == 'labeled' || github.event.action == 'unlabeled' || github.event.action == 'milestoned' || github.event.action == 'demilestoned' || github.event.action == 'assigned' || github.event.action == 'unassigned') || github.event_name == 'pull_request' && (github.event.action == 'edited' || github.event.action == 'labeled' || github.event.action == 'unlabeled' || github.event.action == 'milestoned' || github.event.action == 'demilestoned' || github.event.action == 'assigned' || github.event.action == 'unassigned') }}
+        # if: ${{ github.event_name == 'issues' && (github.event.action == 'edited' || github.event.action == 'labeled' || github.event.action == 'unlabeled' || github.event.action == 'milestoned' || github.event.action == 'demilestoned' || github.event.action == 'assigned' || github.event.action == 'unassigned') || github.event_name == 'pull_request' && (github.event.action == 'edited' || github.event.action == 'labeled' || github.event.action == 'unlabeled' || github.event.action == 'milestoned' || github.event.action == 'demilestoned' || github.event.action == 'assigned' || github.event.action == 'unassigned') }}
         run: |
-          ISSUE_NUMBER=$(echo "${{ github.event.issue.number }}")
-          ISSUE_LABELS=$(curl -s -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/${ISSUE_NUMBER}/labels" | jq -r '.[].name')
-          for LABEL in $ISSUE_LABELS; do
-            FIELD=$(echo "${LABEL}" | awk -F ':' '{print $1}')
-            VALUE=$(echo "${LABEL}" | awk -F ':' '{print $2}')
-            case "${FIELD}" in
-              "STATUS")
-                case "${VALUE}" in
-                  "TODO")
-                    curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"status": "TODO"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
-                    ;;
-                  "WORK-IN-PROGRESS")
-                    curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"status": "WORK-IN-PROGRESS"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
-                    ;;
-                  "DONE")
-                    curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"status": "DONE"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
-                    ;;
-                esac
-                ;;
-              "PRIORITY")
-                case "${VALUE}" in
-                  "TRIVIAL")
-                    curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "TRIVIAL"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
-                    ;;
-                  "MINOR")
-                    curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "MINOR"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
-                    ;;
-                  "MAJOR")
-                    curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "MAJOR"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
-                    ;;
-                  "CRITICAL")
-                    curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "CRITICAL"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
-                    ;;
-                esac
-                ;;
-              "TYPE")
-                case "${VALUE}" in
-                  "PATCH")
-                    curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"type": "PATCH"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
-                    ;;
-                  "FEATURE")
-                    curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"type": "FEATURE"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
-                    ;;
-                esac
-                ;;
-            esac
-          done
+          # IF EVENT IS ISSUE
+          if [[ "${{ github.event_name }}" == "issues" ]]; then
+            ISSUE_NUMBER=$(echo "${{ github.event.issue.number }}")
+            ISSUE_LABELS=$(curl -s -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/${ISSUE_NUMBER}/labels" | jq -r '.[].name')
+            for LABEL in $ISSUE_LABELS; do
+              FIELD=$(echo "${LABEL}" | awk -F ':' '{print $1}')
+              VALUE=$(echo "${LABEL}" | awk -F ':' '{print $2}')
+              case "${FIELD}" in
+                "STATUS")
+                  case "${VALUE}" in
+                    "TODO")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"status": "TODO"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
+                      ;;
+                    "WORK-IN-PROGRESS")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"status": "WORK-IN-PROGRESS"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
+                      ;;
+                    "DONE")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"status": "DONE"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
+                      ;;
+                  esac
+                  ;;
+                "PRIORITY")
+                  case "${VALUE}" in
+                    "TRIVIAL")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "TRIVIAL"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
+                      ;;
+                    "MINOR")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "MINOR"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
+                      ;;
+                    "MAJOR")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "MAJOR"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
+                      ;;
+                    "CRITICAL")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "CRITICAL"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
+                      ;;
+                  esac
+                  ;;
+                "TYPE")
+                  case "${VALUE}" in
+                    "PATCH")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"type": "PATCH"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
+                      ;;
+                    "FEATURE")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"type": "FEATURE"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${ISSUE_NUMBER}" > /dev/null
+                      ;;
+                  esac
+                  ;;
+              esac
+            done
+          # IF EVENT IS PULL REQUEST
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            PR_NUMBER=$(echo "${{ github.event.pull_request.number }}")
+            PR_LABELS=$(curl -s -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}/labels" | jq -r '.[].name')
+            for LABEL in $PR_LABELS; do
+              FIELD=$(echo "${LABEL}" | awk -F ':' '{print $1}')
+              VALUE=$(echo "${LABEL}" | awk -F ':' '{print $2}')
+              case "${FIELD}" in
+                "STATUS")
+                  case "${VALUE}" in
+                    "TODO")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"status": "TODO"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${PR_NUMBER}" > /dev/null
+                      ;;
+                    "WORK-IN-PROGRESS")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"status": "WORK-IN-PROGRESS"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${PR_NUMBER}" > /dev/null
+                      ;;
+                    "DONE")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"status": "DONE"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${PR_NUMBER}" > /dev/null
+                      ;;
+                  esac
+                  ;;
+                "PRIORITY")
+                  case "${VALUE}" in
+                    "TRIVIAL")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "TRIVIAL"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${PR_NUMBER}" > /dev/null
+                      ;;
+                    "MINOR")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "MINOR"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${PR_NUMBER}" > /dev/null
+                      ;;
+                    "MAJOR")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "MAJOR"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${PR_NUMBER}" > /dev/null
+                      ;;
+                    "CRITICAL")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"priority": "CRITICAL"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${PR_NUMBER}" > /dev/null
+                      ;;
+                  esac
+                  ;;
+                "TYPE")
+                  case "${VALUE}" in
+                    "PATCH")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"type": "PATCH"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${PR_NUMBER}" > /dev/null
+                      ;;
+                    "FEATURE")
+                      curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"type": "FEATURE"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${PR_NUMBER}" > /dev/null
+                      ;;
+                  esac
+                  ;;
+              esac
+            done
+          fi
       # IF ISSUE IS DELETED REMOVE IT FROM THE PROJECT BOARD
       - name: 'REMOVE ISSUE FROM PROJECT BOARD'
         if: ${{ github.event_name == 'issues' && github.event.action == 'deleted' }}
@@ -107,7 +158,7 @@ jobs:
       # - GET ALL AVAILABLE ITERATIONS IN THE PROJECTS ITERATION FIELD, CHECK WHICH ONE IS ACTIVE AND WHICH ONE INCLUDES THE CURRENT DATE; AND SET THE PROJECT ITERATION FIELD ACCORDINGLY AND THE MILESTONE OF THE ISSUE/PR
       # - IF NO ACTIVE ITERATION IS FOUND, CREATE A NEW ITERATION AND SET IT AS ACTIVE
       - name: 'UPDATE ITERATION'
-        if: ${{ github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'edited' || github.event.action == 'reopened') || github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'edited' || github.event.action == 'reopened') }}
+        # if: ${{ github.event_name == 'issues' && (github.event.action == 'opened' || github.event.action == 'edited' || github.event.action == 'reopened') || github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'edited' || github.event.action == 'reopened') }}
         run: |
           PROJECT_ID=$(curl -s -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/projects" | jq -r '.[].id')
           ITERATIONS=$(curl -s -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/projects/${PROJECT_ID}/iterations" | jq -r '.[].id')
@@ -143,7 +194,7 @@ jobs:
           fi
       # WHEN AN ISSUE OR PULL REQUEST IS ASSIGNED OR UNASSIGNED: IF THE ASSIGNMENT IS EMPTY, SET ASSIGNY TO THE REPO'S OWNER
       - name: 'UPDATE ASSIGNY'
-        if: ${{ github.event_name == 'issues' && (github.event.action == 'assigned' || github.event.action == 'unassigned') || github.event_name == 'pull_request' && (github.event.action == 'assigned' || github.event.action == 'unassigned') }}
+        # if: ${{ github.event_name == 'issues' && (github.event.action == 'assigned' || github.event.action == 'unassigned') || github.event_name == 'pull_request' && (github.event.action == 'assigned' || github.event.action == 'unassigned') }}
         run: |
           if [[ -z "${{ github.event.assignee }}" ]]; then
             curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"assignees": ["'${{ github.repository_owner }}'"]}' "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}" > /dev/null
@@ -151,7 +202,7 @@ jobs:
           fi
       # WHEN AN ISSUE/PR IS DEMILESTONED OR MILESTONED, UPDATE THE MILESTONE FIELD OF THE ISSUE/PR AND THE PROJECT ITERATION FIELD ACCORDINGLY BASED ON THE CURRENT DATE
       - name: 'UPDATE MILESTONE'
-        if: ${{ github.event_name == 'issues' && (github.event.action == 'milestoned' || github.event.action == 'demilestoned') || github.event_name == 'pull_request' && (github.event.action == 'milestoned' || github.event.action == 'demilestoned') }}
+        # if: ${{ github.event_name == 'issues' && (github.event.action == 'milestoned' || github.event.action == 'demilestoned') || github.event_name == 'pull_request' && (github.event.action == 'milestoned' || github.event.action == 'demilestoned') }}
         run: |
           PROJECT_ID=$(curl -s -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/projects" | jq -r '.[].id')
           ITERATIONS=$(curl -s -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/projects/${PROJECT_ID}/iterations" | jq -r '.[].id')
@@ -206,4 +257,3 @@ jobs:
           if [[ -n "${PR_TYPE}" ]]; then
             curl -X PATCH -H "Accept: application/vnd.github.inertia-preview+json" -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"type": "'${PR_TYPE}'"}' "https://api.github.com/projects/columns/${{ secrets.PROJECT_COLUMN_ID }}/cards/${{ github.event.pull_request.number }}" > /dev/null
           fi
-          
