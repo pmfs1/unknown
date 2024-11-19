@@ -540,38 +540,118 @@ unk_error_code_t c2d_syn_disable(unk_cortex2d_t *cortex, unk_cortex_size_t x0, u
 
 ///////////////////////////////////////////// NEURON SETTERS /////////////////////////////////////////////
 
-// ATTEMPTS TO MUTATE CORTEX SHAPE (WIDTH/HEIGHT) BASED ON MUTATION CHANCE
-// WARNING: SHAPE MUTATION IS CURRENTLY DISABLED DUE TO PENDING IMPLEMENTATION
+// CORTEX SHAPE MUTATION
+// PURPOSE: MODIFIES THE DIMENSIONS OF A CORTEX THROUGH CONTROLLED RANDOM MUTATIONS
+//
+// MUTATION PROCESS:
+//   1. INDEPENDENTLY EVALUATES MUTATIONS FOR WIDTH AND HEIGHT
+//   2. RANDOMLY INCREASES OR DECREASES DIMENSIONS BY ONE UNIT
+//   3. REALLOCATES MEMORY FOR NEW DIMENSIONS
+//   4. PRESERVES EXISTING NEURON PROPERTIES DURING RESIZE
+//
+// MEMORY MANAGEMENT:
+//   - REALLOCATES NEURON ARRAY FOR NEW DIMENSIONS
+//   - CREATES TEMPORARY BUFFER FOR SAFE PROPERTY TRANSFER
+//   - HANDLES MEMORY CLEANUP FOR OLD ARRAY
+//
+// NEURON HANDLING:
+//   - COPIES EXISTING NEURONS TO NEW POSITIONS
+//   - INITIALIZES NEW NEURONS IN EXPANDED REGIONS
+//   - MAINTAINS ALL NEURON PROPERTIES AND STATES
+//
+// SAFETY FEATURES:
+//   - VALIDATES MEMORY ALLOCATIONS
+//   - ENSURES CLEAN INITIALIZATION OF NEW NEURONS
+//   - MAINTAINS NETWORK INTEGRITY DURING RESIZE
+//
+// PARAMETERS:
+//   - CORTEX: POINTER TO CORTEX STRUCTURE TO MUTATE
+//   - MUT_CHANCE: MUTATION PROBABILITY (0-65535)
+//
+// RETURNS: ERROR CODE (UNK_ERROR_NONE ON SUCCESS)
+//
+// WARNING: SHAPE MUTATION CAN BE COMPUTATIONALLY EXPENSIVE FOR LARGE NETWORKS
+///////////////////////////////////////////////////////////////
+/////////////////////////EXPERIMENTAL//////////////////////////
+////////MIGHT BE SUJECT TO CHANGE IN THE FUTURE////////////////
+///////////////////////////////////////////////////////////////
 unk_error_code_t c2d_mutate_shape(unk_cortex2d_t *cortex, unk_chance_t mut_chance)
 {
+    // STORE CURRENT DIMENSIONS
     unk_cortex_size_t new_width = cortex->width;
     unk_cortex_size_t new_height = cortex->height;
-    // MUTATE THE CORTEX WIDTH
+    // GENERATE NEW RANDOM STATE FOR WIDTH MUTATION
     cortex->rand_state = xorshf32(cortex->rand_state);
     if (cortex->rand_state > mut_chance)
     {
-        // DECIDE WHETHER TO INCREASE OR DECREASE THE CORTEX WIDTH
+        // RANDOMLY GROW OR SHRINK WIDTH BY ONE UNIT
         new_width += cortex->rand_state % 2 == 0 ? 1 : -1;
     }
-    // MUTATE THE CORTEX HEIGHT
+    // GENERATE NEW RANDOM STATE FOR HEIGHT MUTATION
     cortex->rand_state = xorshf32(cortex->rand_state);
     if (cortex->rand_state > mut_chance)
     {
-        // DECIDE WHETHER TO INCREASE OR DECREASE THE CORTEX HEIGHT
+        // RANDOMLY GROW OR SHRINK HEIGHT BY ONE UNIT
         new_height += cortex->rand_state % 2 == 0 ? 1 : -1;
     }
+    // ONLY PROCEED IF DIMENSIONS ACTUALLY CHANGED
     if (new_width != cortex->width || new_height != cortex->height)
     {
-        // RESIZE NEURONS
+        // ATTEMPT TO RESIZE THE NEURON ARRAY FOR NEW DIMENSIONS
         cortex->neurons = (unk_neuron_t *)realloc(cortex->neurons,
                                                   (size_t)new_width * (size_t)new_height * sizeof(unk_neuron_t));
         if (cortex->neurons == NULL)
         {
             return UNK_ERROR_FAILED_ALLOC;
         }
-        // [TODO] HANDLE NEURONS' PROPERTIES
-        // LOOP
-        // STORE UPDATED CORTEX SHAPE
+        // CREATE TEMPORARY ARRAY FOR SAFE NEURON TRANSFER
+        unk_neuron_t *new_neurons = (unk_neuron_t *)calloc((size_t)new_width * new_height, sizeof(unk_neuron_t));
+        if (new_neurons == NULL)
+        {
+            return UNK_ERROR_FAILED_ALLOC;
+        }
+        // COPY EXISTING NEURONS TO NEW ARRAY, PRESERVING THEIR PROPERTIES
+        // USE SMALLER OF OLD/NEW DIMENSIONS TO PREVENT BUFFER OVERFLOW
+        for (unk_cortex_size_t y = 0; y < (new_height < cortex->height ? new_height : cortex->height); y++)
+        {
+            for (unk_cortex_size_t x = 0; x < (new_width < cortex->width ? new_width : cortex->width); x++)
+            {
+                new_neurons[IDX2D(x, y, new_width)] = cortex->neurons[IDX2D(x, y, cortex->width)];
+            }
+        }
+        // INITIALIZE ANY NEW NEURONS CREATED BY EXPANSION
+        for (unk_cortex_size_t y = 0; y < new_height; y++)
+        {
+            for (unk_cortex_size_t x = 0; x < new_width; x++)
+            {
+                // SKIP POSITIONS WHERE WE ALREADY COPIED EXISTING NEURONS
+                if (x < cortex->width && y < cortex->height)
+                    continue;
+                // GET POINTER TO NEW NEURON
+                unk_neuron_t *neuron = &new_neurons[IDX2D(x, y, new_width)];
+                // INITIALIZE SYNAPTIC MASKS TO ZERO
+                neuron->synac_mask = 0x00U;
+                neuron->synex_mask = 0x00U;
+                neuron->synstr_mask_a = 0x00U;
+                neuron->synstr_mask_b = 0x00U;
+                neuron->synstr_mask_c = 0x00U;
+                // SET UNIQUE RANDOM STATE BASED ON POSITION
+                neuron->rand_state = 31 + x * y;
+                // INITIALIZE PULSE AND VALUE PROPERTIES
+                neuron->pulse_mask = 0x00U;
+                neuron->pulse = 0x00U;
+                neuron->value = UNK_DEFAULT_STARTING_VALUE;
+                // SET SYNAPTIC PROPERTIES
+                neuron->max_syn_count = cortex->max_syn_count;
+                neuron->syn_count = 0x00U;
+                neuron->tot_syn_strength = 0x00U;
+                neuron->inhexc_ratio = UNK_DEFAULT_INHEXC_RATIO;
+            }
+        }
+        // CLEANUP AND UPDATE POINTERS
+        free(cortex->neurons);
+        cortex->neurons = new_neurons;
+        // UPDATE CORTEX DIMENSIONS
         cortex->width = new_width;
         cortex->height = new_height;
     }
