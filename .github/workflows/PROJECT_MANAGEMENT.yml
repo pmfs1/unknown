@@ -57,7 +57,7 @@ jobs:
         run: |
           # [TODO] - USE GH CLI INSTEAD OF CURL)
       # WHEN AN ISSUE OR PULL REQUEST IS ASSIGNED OR UNASSIGNED: IF THERE'S NO ASSIGNY, SET ASSIGNY TO THE REPO'S OWNER
-      - name: 'UPDATE ASSIGNY'
+      - name: 'UPDATE ASSIGNEE'
         if: ${{ github.event_name == 'issues' && (github.event.action == 'assigned' || github.event.action == 'unassigned') || github.event_name == 'pull_request' && (github.event.action == 'assigned' || github.event.action == 'unassigned') }}
         run: |
           # IF IT'S AN ISSUE
