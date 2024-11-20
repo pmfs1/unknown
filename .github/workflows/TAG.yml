@@ -18,7 +18,7 @@ jobs:
           while git tag -l "${TAG_NAME}" &> /dev/null; do
             TAG_NAME=$(echo "${TAG_NAME}" | awk -F '.' '{print $1"."$2"."$3"."$4+1}')
           done
-          echo "::set-output name=TAG_NAME::${TAG_NAME}"
+          echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
       - name: 'RENAME PULL REQUEST TITLE'
         run: |
           TAG_NAME=$(echo "${{ steps.INFER_TAG_NAME.outputs.TAG_NAME }}")
