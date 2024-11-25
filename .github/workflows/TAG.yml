@@ -1,7 +1,7 @@
 name: 'TAG'
 on:
   pull_request:
-    types: [ merged ]
+    types: [ closed ]
     branches: [ "trunk" ]
 jobs:
   TAG:
@@ -20,10 +20,12 @@ jobs:
           done
           echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
       - name: 'RENAME PULL REQUEST TITLE'
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
           TAG_NAME=$(echo "${{ steps.INFER_TAG_NAME.outputs.TAG_NAME }}")
           gh pr edit "$(gh pr view --json title --jq '.title = "TAG-'${TAG_NAME}'" | jq -r '.title')"
       - name: 'RENAME GITHUB_REF'
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
           TAG_NAME=$(echo "${{ steps.INFER_TAG_NAME.outputs.TAG_NAME }}")
           git branch -m "${{ github.GITHUB_REF }}" "TAG-${TAG_NAME}"
@@ -31,6 +33,7 @@ jobs:
           git branch -u origin/"TAG-${TAG_NAME}" "TAG-${TAG_NAME}"
           git remote set-head origin -a
       - name: 'UPDATE LAST COMMIT & CREATE TAG'
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
           TAG_NAME=$(echo "${{ steps.INFER_TAG_NAME.outputs.TAG_NAME }}")
           git checkout "${{ github.GITHUB_BASE_REF }}"

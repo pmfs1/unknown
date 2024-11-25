@@ -56,11 +56,17 @@ extern "C"
 
     // ################################## UTILITY FUNCTIONS ##################################
 
-    /// @brief COMPARISON FUNCTION FOR SORTING INDEXED FITNESS VALUES
-    /// @param a FIRST INDEXED FITNESS TO COMPARE
-    /// @param b SECOND INDEXED FITNESS TO COMPARE
-    /// @return NEGATIVE IF A < B, ZERO IF A == B, POSITIVE IF A > B
-    int idf_compare(const void *a, const void *b);
+    /// @brief COMPARES THE PROVIDED INDEXED FITNESS VALUES BY FITNESS VALUE. RESULTS IN A DESCENDING ORDER IF USED AS A COMPARATOR FOR SORTING.
+    /// @param a THE FIRST FITNESS TO COMPARE.
+    /// @param b THE SECOND FITNESS TO COMPARE.
+    /// @return 0 IF A == B, A STRICTLY NEGATIVE NUMBER IF A < B, A STRICTLY POSITIVE IF A > B.
+    int idf_compare_desc(const void* a, const void* b);
+
+    /// @brief COMPARES THE PROVIDED INDEXED FITNESS VALUES BY FITNESS VALUE. RESULTS IN AN ASCENDING ORDER IF USED AS A COMPARATOR FOR SORTING.
+    /// @param a THE FIRST FITNESS TO COMPARE.
+    /// @param b THE SECOND FITNESS TO COMPARE.
+    /// @return 0 IF A == A, A STRICTLY NEGATIVE NUMBER IF B < A, A STRICTLY POSITIVE IF B > A.
+    int idf_compare_asc(const void* a, const void* b);
 
     // ################################## INITIALIZATION FUNCTIONS ##################################
 
@@ -70,7 +76,7 @@ extern "C"
     /// @param selection_pool_size SIZE OF THE SELECTION POOL FOR BREEDING
     /// @param mut_chance MUTATION PROBABILITY (0-65535)
     /// @param eval_function POINTER TO FITNESS EVALUATION FUNCTION
-    /// @return ERROR CODE, UNK_ERROR_NONE ON SUCCESS
+    /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
     unk_error_code_t p2d_init(unk_population2d_t **population, unk_population_size_t size,
                               unk_population_size_t selection_pool_size, unk_chance_t mut_chance,
                               unk_error_code_t (*eval_function)(unk_cortex2d_t *cortex, unk_cortex_fitness_t *fitness));
@@ -80,13 +86,22 @@ extern "C"
     /// @param width THE WIDTH OF THE CORTEX
     /// @param height THE HEIGHT OF THE CORTEX
     /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON
-    /// @return ERROR CODE, UNK_ERROR_NONE ON SUCCESS
+    /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
     unk_error_code_t p2d_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height,
                                   unk_nh_radius_t nh_radius);
 
+    /// @brief POPULATES THE STARTING POOL OF CORTICES WITH RANDOM VALUES
+    /// @param population THE POPULATION WHOSE CORTICES TO SETUP
+    /// @param width THE WIDTH OF THE CORTEX
+    /// @param height THE HEIGHT OF THE CORTEX
+    /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON
+    /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
+    unk_error_code_t p2d_rand_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height,
+                                       unk_nh_radius_t nh_radius);
+
     /// @brief DESTROYS THE GIVEN CORTEX2D AND FREES MEMORY FOR IT AND ITS NEURONS
     /// @param cortex THE CORTEX TO DESTROY
-    /// @return ERROR CODE, UNK_ERROR_NONE ON SUCCESS
+    /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
     unk_error_code_t p2d_destroy(unk_population2d_t *population);
 
     // ################################## SETTER FUNCTIONS ##################################
@@ -94,37 +109,37 @@ extern "C"
     /// @brief UPDATES THE MUTATION RATE FOR THE POPULATION
     /// @param population TARGET POPULATION TO MODIFY
     /// @param mut_chance NEW MUTATION RATE (0-65535)
-    /// @return ERROR CODE, UNK_ERROR_NONE ON SUCCESS
+    /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
     unk_error_code_t p2d_set_mut_rate(unk_population2d_t *population, unk_chance_t mut_chance);
 
     // ################################## ACTION FUNCTIONS ##################################
 
     /// @brief CALCULATES FITNESS VALUES FOR ALL CORTICES IN THE POPULATION
     /// @param population POPULATION TO EVALUATE
-    /// @return ERROR CODE, UNK_ERROR_NONE ON SUCCESS
+    /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
     unk_error_code_t p2d_evaluate(unk_population2d_t *population);
 
     /// @brief IDENTIFIES AND MARKS TOP PERFORMERS FOR BREEDING
     /// @param population POPULATION TO PERFORM SELECTION ON
-    /// @return ERROR CODE, UNK_ERROR_NONE ON SUCCESS
+    /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
     unk_error_code_t p2d_select(unk_population2d_t *population);
 
     /// @brief GENERATES A SINGLE OFFSPRING FROM SELECTED PARENTS
     /// @param population SOURCE POPULATION FOR PARENTS
     /// @param child POINTER TO STORE THE GENERATED OFFSPRING
-    /// @return ERROR CODE, UNK_ERROR_NONE ON SUCCESS
-    unk_error_code_t p2d_breed(unk_population2d_t *population, unk_cortex2d_t *child);
+    /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
+    unk_error_code_t p2d_breed(unk_population2d_t *population, unk_cortex2d_t **child);
 
     /// @brief CREATES NEW GENERATION THROUGH BREEDING OF SELECTED INDIVIDUALS
     /// @param population POPULATION TO EVOLVE
     /// @param mutate FLAG TO ENABLE IMMEDIATE MUTATION OF OFFSPRING
-    /// @return ERROR CODE, UNK_ERROR_NONE ON SUCCESS
+    /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
     /// @warning WHEN mutate IS TRUE, SEPARATE MUTATION STEP IS NOT NEEDED
     unk_error_code_t p2d_crossover(unk_population2d_t *population, unk_bool_t mutate);
 
     /// @brief APPLIES RANDOM MUTATIONS TO THE POPULATION BASED ON MUTATION RATE
     /// @param population POPULATION TO MUTATE
-    /// @return ERROR CODE, UNK_ERROR_NONE ON SUCCESS
+    /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
     unk_error_code_t p2d_mutate(unk_population2d_t *population);
 
 #ifdef __cplusplus

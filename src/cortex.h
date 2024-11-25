@@ -263,7 +263,7 @@ extern "C"
         // DEPTH OF THE CORTEX.
         unk_cortex_size_t depth;
 
-        // [[TODO]] OTHER DATA.
+        // [TODO] OTHER DATA.
 
         unk_neuron_t *neurons; // NEURONS ARRAY.
     } unk_cortex3d_t;
@@ -416,15 +416,21 @@ extern "C"
 
     /// @brief STORES THE STRING REPRESENTATION OF THE GIVEN CORTEX TO THE PROVIDED STRING [TARGET].
     /// @param cortex THE CORTEX TO INSPECT.
-    /// @param target THE STRING TO FILL WITH CORTEX DATA.
+    /// @param result THE STRING TO FILL WITH CORTEX DATA.
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_to_string(unk_cortex2d_t *cortex, char *target);
+    unk_error_code_t c2d_to_string(unk_cortex2d_t *cortex, char *result);
+
+    /// @brief COMPUTES THE MEAN VALUE OF AN INPUT2D'S VALUES.
+    /// @param input THE INPUT TO COMPUTE THE MEAN VALUE FROM.
+    /// @param result POINTER TO THE RESULT OF THE COMPUTATION. THE MEAN VALUE WILL BE STORED HERE.
+    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+    unk_error_code_t i2d_mean(unk_input2d_t* input, unk_ticks_count_t* result);
 
     /// @brief COMPUTES THE MEAN VALUE OF AN OUTPUT2D'S VALUES.
     /// @param output THE OUTPUT TO COMPUTE THE MEAN VALUE FROM.
-    /// @param target POINTER TO THE RESULT OF THE COMPUTATION. THE MEAN VALUE WILL BE STORED HERE.
+    /// @param result POINTER TO THE RESULT OF THE COMPUTATION. THE MEAN VALUE WILL BE STORED HERE.
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t o2d_mean(unk_output2d_t *output, unk_ticks_count_t *target);
+    unk_error_code_t o2d_mean(unk_output2d_t *output, unk_ticks_count_t *result);
 
     // ########################################## ACTION FUNCTIONS ##################################################
 
