@@ -68,24 +68,46 @@ unk_error_code_t p2d_init(unk_population2d_t **population, unk_population_size_t
     return UNK_ERROR_NONE;
 }
 
-// POPULATE WITH RANDOMLY GENERATED CORTICES
-// CREATES AND INITIALIZES ALL CORTICES IN THE POPULATION
 unk_error_code_t p2d_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height,
                               unk_nh_radius_t nh_radius)
 {
     for (unk_population_size_t i = 0; i < population->size; i++)
     {
-        // TEMPORARY POINTER FOR CURRENT CORTEX
+        // ALLOCATE A TEMPORARY POINTER TO THE ITH CORTEX
         unk_cortex2d_t *cortex;
-        // INITIALIZE CURRENT CORTEX WITH RANDOM VALUES
+        // Randomly init the ith cortex.
+        unk_error_code_t error = c2d_init(&cortex, width, height, nh_radius);
+        population->cortices[i] = *cortex;
+        if (error != UNK_ERROR_NONE)
+        {
+            // THERE WAS AN ERROR INITIALIZING A CORTEX, SO ABORT POPULATION SETUP, CLEAN WHAT'S BEEN INITIALIZED UP TO NOW AND RETURN THE ERROR
+            for (unk_population_size_t j = 0; j < i - 1; j++)
+            {
+                // DESTROY THE JTH CORTEX
+                c2d_destroy(&(population->cortices[j]));
+            }
+            return error;
+        }
+    }
+    return UNK_ERROR_NONE;
+}
+
+unk_error_code_t p2d_rand_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height,
+                                   unk_nh_radius_t nh_radius)
+{
+    for (unk_population_size_t i = 0; i < population->size; i++)
+    {
+        // ALLOCATE A TEMPORARY POINTER TO THE ITH CORTEX
+        unk_cortex2d_t *cortex;
+        // RANDOMLY INIT THE ITH CORTEX.
         unk_error_code_t error = c2d_rand_init(&cortex, width, height, nh_radius);
         population->cortices[i] = *cortex;
         if (error != UNK_ERROR_NONE)
         {
-            // ERROR OCCURRED - CLEAN UP PREVIOUSLY INITIALIZED CORTICES
+            // THERE WAS AN ERROR INITIALIZING A CORTEX, SO ABORT POPULATION SETUP, CLEAN WHAT'S BEEN INITIALIZED UP TO NOW AND RETURN THE ERROR
             for (unk_population_size_t j = 0; j < i - 1; j++)
             {
-                // DESTROY THE JTH CORTEX
+                // Destroy the jth cortex.
                 c2d_destroy(&(population->cortices[j]));
             }
             return error;
