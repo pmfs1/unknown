@@ -11,10 +11,17 @@
 // COMPARISON FUNCTION FOR QSORT IMPLEMENTATION
 // PARAMETERS:
 //   A, B: VOID POINTERS TO INDEXED_FITNESS_T STRUCTURES TO BE COMPARED
-// RETURNS: NEGATIVE IF A < B, ZERO IF A = B, POSITIVE IF A > B
-int idf_compare(const void *a, const void *b)
-{
+// RETURNS: 0 IF A == B, A STRICTLY NEGATIVE NUMBER IF A < B, A STRICTLY POSITIVE IF A > B.
+int idf_compare_desc(const void* a, const void* b) {
     return (*(unk_indexed_fitness_t*)b).fitness - (*(unk_indexed_fitness_t*)a).fitness;
+}
+
+// COMPARISON FUNCTION FOR QSORT IMPLEMENTATION
+// PARAMETERS:
+//   A, B: VOID POINTERS TO INDEXED_FITNESS_T STRUCTURES TO BE COMPARED
+// RETURNS: 0 IF A == A, A STRICTLY NEGATIVE NUMBER IF B < A, A STRICTLY POSITIVE IF B > A.
+int idf_compare_asc(const void* a, const void* b) {
+    return (*(unk_indexed_fitness_t*)a).fitness - (*(unk_indexed_fitness_t*)b).fitness;
 }
 
 // ############################################## CORE FUNCTIONS #################################################
@@ -158,8 +165,8 @@ unk_error_code_t p2d_select(unk_population2d_t *population)
         sorted_indexes[i].index = i;
         sorted_indexes[i].fitness = population->cortices_fitness[i];
     }
-    // SORT CORTICES BY FITNESS VALUES
-    qsort(sorted_indexes, population->size, sizeof(unk_indexed_fitness_t), idf_compare);
+    // SORT CORTICES BY FITNESS VALUES, DESCENDING
+    qsort(sorted_indexes, population->size, sizeof(unk_indexed_fitness_t), idf_compare_desc);
     // SELECT TOP PERFORMERS (BEST-FITTING CORTICES) FOR BREEDING POOL
     // SURVIVORS ARE BY DEFINITION THE CORTICES CORRESPONDING TO THE FIRST ELEMENTS IN THE SORTED LIST OF FITNESS VALUES
     for (unk_population_size_t i = 0; i < population->selection_pool_size; i++)
