@@ -739,16 +739,33 @@ unk_error_code_t n2d_mutate(unk_neuron_t *neuron, unk_chance_t mut_chance)
 
 // GENERATES A STRING REPRESENTATION OF CORTEX PROPERTIES
 // TARGET BUFFER MUST BE AT LEAST 256 BYTES
-unk_error_code_t c2d_to_string(unk_cortex2d_t *cortex, char *target)
+unk_error_code_t c2d_to_string(unk_cortex2d_t *cortex, char *result)
 {
-    snprintf(target, 256, "cortex(\n\twidth:%d\n\theight:%d\n\tnh_radius:%d\n\tpulse_window:%d\n\tsample_window:%d\n)",
+    snprintf(result, 256, "cortex(\n\twidth:%d\n\theight:%d\n\tnh_radius:%d\n\tpulse_window:%d\n\tsample_window:%d\n)",
              cortex->width, cortex->height, cortex->nh_radius, cortex->pulse_window, cortex->sample_window);
     return UNK_ERROR_NONE;
 }
 
+// CALCULATES THE MEAN VALUE OF ALL INPUTS IN THE INPUT REGION
+unk_error_code_t i2d_mean(unk_input2d_t *input, unk_ticks_count_t *result)
+{
+    // COMPUTE THE INPUT SIZE BEFOREHAND
+    unk_cortex_size_t input_width = input->x1 - input->x0;
+    unk_cortex_size_t input_height = input->y1 - input->y0;
+    unk_cortex_size_t input_size = input_width * input_height;
+    // CCOMPUTE THE SUM OF THE VALUES
+    unk_ticks_count_t total = 0;
+    for (unk_cortex_size_t i = 0; i < input_size; i++)
+    {
+        total += input->values[i];
+    }
+    // STORE THE MEAN VALUE IN THE PROVIDED POINTER
+    (*result) = (unk_ticks_count_t)(total / input_size);
+    return UNK_ERROR_NONE;
+}
+
 // CALCULATES THE MEAN VALUE OF ALL OUTPUTS IN THE OUTPUT REGION
-// STORES RESULT IN TARGET POINTER
-unk_error_code_t o2d_mean(unk_output2d_t *output, unk_ticks_count_t *target)
+unk_error_code_t o2d_mean(unk_output2d_t *output, unk_ticks_count_t *result)
 {
     // COMPUTE THE OUTPUT SIZE BEFOREHAND
     unk_cortex_size_t output_width = output->x1 - output->x0;
@@ -761,7 +778,7 @@ unk_error_code_t o2d_mean(unk_output2d_t *output, unk_ticks_count_t *target)
         total += output->values[i];
     }
     // STORE THE MEAN VALUE IN THE PROVIDED POINTER
-    (*target) = (unk_ticks_count_t)(total / output_size);
+    (*result) = (unk_ticks_count_t)(total / output_size);
     return UNK_ERROR_NONE;
 }
 
