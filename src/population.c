@@ -6,7 +6,7 @@
 
 #include "population.h"
 
-// ############################################## HELPER FUNCTIONS ################################################
+// ############################################## UTILITY FUNCTIONS ################################################
 
 // COMPARISON FUNCTION FOR QSORT IMPLEMENTATION
 // PARAMETERS:
@@ -14,7 +14,7 @@
 // RETURNS: NEGATIVE IF A < B, ZERO IF A = B, POSITIVE IF A > B
 int idf_compare(const void *a, const void *b)
 {
-    return (*(unk_indexed_fitness_t *)a).fitness - (*(unk_indexed_fitness_t *)b).fitness;
+    return (*(unk_indexed_fitness_t*)b).fitness - (*(unk_indexed_fitness_t*)a).fitness;
 }
 
 // ############################################## CORE FUNCTIONS #################################################
@@ -36,10 +36,9 @@ unk_error_code_t p2d_init(unk_population2d_t **population, unk_population_size_t
 {
     // ALLOCATE THE MAIN POPULATION STRUCTURE
     (*population) = (unk_population2d_t *)malloc(sizeof(unk_population2d_t));
-    if ((*population) == NULL)
-    {
-        return UNK_ERROR_FAILED_ALLOC;
-    }
+    if ((*population) == NULL) return UNK_ERROR_FAILED_ALLOC;
+    // MAKE SURE THE SELECTION POOL SIZE DOES NOT EXCEED THE TOTAL POPULATION SIZE SINCE IT WOULD MAKE NO SENSE
+    if (selection_pool_size > size) return UNK_ERROR_SIZE_WRONG;
     // SETUP CORE POPULATION PROPERTIES
     (*population)->size = size;
     (*population)->selection_pool_size = selection_pool_size;
