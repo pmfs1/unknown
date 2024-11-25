@@ -263,7 +263,7 @@ extern "C"
         // DEPTH OF THE CORTEX.
         unk_cortex_size_t depth;
 
-        // [[TODO]] OTHER DATA.
+        // [TODO] OTHER DATA.
 
         unk_neuron_t *neurons; // NEURONS ARRAY.
     } unk_cortex3d_t;

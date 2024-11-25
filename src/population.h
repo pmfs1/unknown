@@ -128,7 +128,7 @@ extern "C"
     /// @param population SOURCE POPULATION FOR PARENTS
     /// @param child POINTER TO STORE THE GENERATED OFFSPRING
     /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
-    unk_error_code_t p2d_breed(unk_population2d_t *population, unk_cortex2d_t *child);
+    unk_error_code_t p2d_breed(unk_population2d_t *population, unk_cortex2d_t **child);
 
     /// @brief CREATES NEW GENERATION THROUGH BREEDING OF SELECTED INDIVIDUALS
     /// @param population POPULATION TO EVOLVE
