@@ -1,15 +1,5 @@
 #include "unknown.h"
 
-/*
- * MAIN FEED FUNCTION FOR 2D CORTEX (c2d_feed2d)
- * PURPOSE: PROCESSES INPUT VALUES AND CONVERTS THEM TO NEURAL EXCITATION PATTERNS
- *
- * FEATURES:
- * - PARALLEL PROCESSING FOR PERFORMANCE OPTIMIZATION
- * - SPATIAL INPUT MAPPING TO CORTEX COORDINATES
- * - CONFIGURABLE EXCITATION VALUES AND PULSE PATTERNS
- * - AUTOMATIC BOUNDARY HANDLING
- */
 void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
 {
 #pragma omp parallel for collapse(2)
@@ -17,7 +7,6 @@ void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
     {
         for (unk_cortex_size_t x = input->x0; x < input->x1; x++)
         {
-            // CHECK WHETHER THE CURRENT INPUT NEURON SHOULD BE EXCITED OR NOT.
             unk_bool_t excite = value_to_pulse(
                 cortex->sample_window,
                 cortex->ticks_count % cortex->sample_window,
@@ -34,16 +23,6 @@ void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
     }
 }
 
-/*
- * READ FUNCTION FOR 2D CORTEX OUTPUT (c2d_read2d)
- * PURPOSE: EXTRACTS PULSE STATES FROM SPECIFIED REGION OF NEURONS
- *
- * FEATURES:
- * - PARALLEL PROCESSING FOR HIGH-SPEED DATA EXTRACTION
- * - COORDINATE MAPPING BETWEEN OUTPUT AND CORTEX SPACE
- * - EFFICIENT MEMORY ACCESS PATTERNS
- * - DIRECT PULSE STATE READING
- */
 void c2d_read2d(unk_cortex2d_t *cortex, unk_output2d_t *output)
 {
 #pragma omp parallel for collapse(2)
@@ -62,31 +41,6 @@ void c2d_read2d(unk_cortex2d_t *cortex, unk_output2d_t *output)
     }
 }
 
-/*
- * CORE PROCESSING FUNCTION FOR 2D CORTEX (c2d_tick)
- * PURPOSE: ADVANCES THE CORTEX STATE BY ONE TIME STEP
- *
- * KEY COMPONENTS:
- * 1. NEURON STATE MANAGEMENT:
- *    - STATE TRANSITIONS AND VALUE UPDATES
- *    - MEMBRANE POTENTIAL TRACKING
- *    - REFRACTORY PERIOD HANDLING
- *
- * 2. SYNAPTIC OPERATIONS:
- *    - PLASTICITY RULES APPLICATION
- *    - WEIGHT MODIFICATIONS
- *    - CONNECTION MANAGEMENT
- *
- * 3. NETWORK DYNAMICS:
- *    - PULSE PROPAGATION
- *    - FIRING PATTERNS
- *    - NEIGHBORHOOD INTERACTIONS
- *
- * 4. PERFORMANCE OPTIMIZATIONS:
- *    - PARALLEL EXECUTION
- *    - EFFICIENT MEMORY ACCESS
- *    - OPTIMIZED COMPUTATIONS
- */
 void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
 {
 #pragma omp parallel for collapse(2)
@@ -346,43 +300,10 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
     next_cortex->ticks_count++;
 }
 
-// ################################## INPUT MAPPING FUNCTIONS ##################################
-
-/* ############################################################################
- * INPUT MAPPING FUNCTIONS
- * CONVERTS CONTINUOUS VALUES TO DISCRETE PULSE PATTERNS
- * IMPLEMENTS VARIOUS ENCODING SCHEMES FOR FLEXIBILITY
- * ############################################################################
- */
-
-/* VALUE TO PULSE MAPPING STRATEGIES:
- *
- * 1. LINEAR (UNK_PULSE_MAPPING_LINEAR):
- *    - UNIFORM TEMPORAL DISTRIBUTION
- *    - DIRECT VALUE-TO-FREQUENCY MAPPING
- *    - CONSISTENT TEMPORAL SPACING
- *
- * 2. FLOOR PROPORTIONAL (UNK_PULSE_MAPPING_FPROP):
- *    - ENHANCED LOW-VALUE RESOLUTION
- *    - DISCRETE FREQUENCY STEPPING
- *    - FLOOR-BASED VALUE QUANTIZATION
- *
- * 3. ROUNDED PROPORTIONAL (UNK_PULSE_MAPPING_RPROP):
- *    - SMOOTH FREQUENCY TRANSITIONS
- *    - BALANCED VALUE REPRESENTATION
- *    - IMPROVED NUMERICAL STABILITY
- *
- * 4. DOUBLE FLOOR PROPORTIONAL (UNK_PULSE_MAPPING_DFPROP):
- *    - HIGH-PRECISION EDGE HANDLING
- *    - SYMMETRIC VALUE PROCESSING
- *    - ENHANCED DYNAMIC RANGE
- */
-
 unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input,
                           unk_pulse_mapping_t pulse_mapping)
 {
     unk_bool_t result = UNK_FALSE;
-    // MAKE SURE THE PROVIDED INPUT CORRECTLY LIES INSIDE THE PROVIDED WINDOW
     if (input < sample_window)
     {
         switch (pulse_mapping)
@@ -409,17 +330,6 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
 unk_bool_t value_to_pulse_linear(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
                                  unk_ticks_count_t input)
 {
-    // SAMPLE VISUALIZATION PATTERN:
-    // |@| | | | | | | | | | -> X = 0;
-    // |@| | | | | | | | |@| -> X = 1;
-    // |@| | | | | | | |@| | -> X = 2;
-    // |@| | | | | | |@| | | -> X = 3;
-    // |@| | | | | |@| | | | -> X = 4;
-    // |@| | | | |@| | | | | -> X = 5;
-    // |@| | | |@| | | |@| | -> X = 6;
-    // |@| | |@| | |@| | |@| -> X = 7;
-    // |@| |@| |@| |@| |@| | -> X = 8;
-    // |@|@|@|@|@|@|@|@|@|@| -> X = 9;
     return sample_step % (sample_window - input) == 0;
 }
 
@@ -427,17 +337,6 @@ unk_bool_t value_to_pulse_fprop(unk_ticks_count_t sample_window, unk_ticks_count
 {
     unk_bool_t result = UNK_FALSE;
     unk_ticks_count_t upper = sample_window - 1;
-    // SAMPLE VISUALIZATION PATTERN:
-    // |@| | | | | | | | | | -> X = 0;
-    // |@| | | | | | | | |@| -> X = 1;
-    // |@| | | |@| | | |@| | -> X = 2;
-    // |@| | |@| | |@| | |@| -> X = 3;
-    // |@| |@| |@| |@| |@| | -> X = 4;
-    // | |@| |@| |@| |@| |@| -> X = 5;
-    // | |@|@| |@|@| |@|@| | -> X = 6;
-    // | |@|@|@| |@|@|@| |@| -> X = 7;
-    // | |@|@|@|@|@|@|@|@| | -> X = 8;
-    // | |@|@|@|@|@|@|@|@|@| -> X = 9;
     if (input < sample_window / 2)
     {
         if ((sample_step = 0) ||
@@ -461,17 +360,6 @@ unk_bool_t value_to_pulse_rprop(unk_ticks_count_t sample_window, unk_ticks_count
     unk_bool_t result = UNK_FALSE;
     double upper = sample_window - 1;
     double d_input = input;
-    // SAMPLE VISUALIZATION PATTERN:
-    // |@| | | | | | | | | | -> X = 0;
-    // |@| | | | | | | | |@| -> X = 1;
-    // |@| | | | |@| | | | | -> X = 2;
-    // |@| | |@| | |@| | |@| -> X = 3;
-    // |@| |@| |@| |@| |@| | -> X = 4;
-    // | |@| |@| |@| |@| |@| -> X = 5;
-    // | |@|@| |@|@| |@|@| | -> X = 6;
-    // | |@|@|@|@| |@|@|@|@| -> X = 7;
-    // | |@|@|@|@|@|@|@|@| | -> X = 8;
-    // | |@|@|@|@|@|@|@|@|@| -> X = 9;
     if ((double)input < ((double)sample_window) / 2)
     {
         if ((sample_step == 0) ||
@@ -495,7 +383,6 @@ unk_bool_t value_to_pulse_dfprop(unk_ticks_count_t sample_window, unk_ticks_coun
 {
     unk_bool_t result = UNK_FALSE;
     unk_ticks_count_t upper = sample_window - 1;
-    // DOUBLE FLOORED PROPORTIONAL MAPPING LOGIC
     if (input < sample_window / 2)
     {
         if ((sample_step == 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0))
