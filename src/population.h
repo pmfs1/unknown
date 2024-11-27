@@ -54,7 +54,7 @@ extern "C"
         unk_population_size_t *selection_pool;
     } unk_population2d_t;
 
-    // ################################## UTILITY FUNCTIONS ##################################
+    // ################################################ UTILITY FUNCTIONS ################################################
 
     /// @brief COMPARES THE PROVIDED INDEXED FITNESS VALUES BY FITNESS VALUE. RESULTS IN A DESCENDING ORDER IF USED AS A COMPARATOR FOR SORTING.
     /// @param a THE FIRST FITNESS TO COMPARE.
@@ -68,7 +68,7 @@ extern "C"
     /// @return 0 IF A == A, A STRICTLY NEGATIVE NUMBER IF B < A, A STRICTLY POSITIVE IF B > A.
     int idf_compare_asc(const void* a, const void* b);
 
-    // ################################## INITIALIZATION FUNCTIONS ##################################
+    // ################################################ INITIALIZATION FUNCTIONS ################################################
 
     /// @brief CREATES AND INITIALIZES A NEW POPULATION WITH SPECIFIED PARAMETERS
     /// @param population POINTER TO POPULATION POINTER TO INITIALIZE
@@ -104,7 +104,7 @@ extern "C"
     /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
     unk_error_code_t p2d_destroy(unk_population2d_t *population);
 
-    // ################################## SETTER FUNCTIONS ##################################
+    // ################################################ SETTER FUNCTIONS ################################################
 
     /// @brief UPDATES THE MUTATION RATE FOR THE POPULATION
     /// @param population TARGET POPULATION TO MODIFY
@@ -112,7 +112,7 @@ extern "C"
     /// @return THR CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE
     unk_error_code_t p2d_set_mut_rate(unk_population2d_t *population, unk_chance_t mut_chance);
 
-    // ################################## ACTION FUNCTIONS ##################################
+    // ################################################ ACTION FUNCTIONS ################################################
 
     /// @brief CALCULATES FITNESS VALUES FOR ALL CORTICES IN THE POPULATION
     /// @param population POPULATION TO EVALUATE

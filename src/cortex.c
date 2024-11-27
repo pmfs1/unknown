@@ -1,7 +1,5 @@
 #include "cortex.h"
 
-// ############################################## HELPER FUNCTIONS ################################################
-
 // XORSHIFT RANDOM NUMBER GENERATOR (XOR32)
 // PURPOSE: GENERATES HIGH-QUALITY PSEUDO-RANDOM NUMBERS USING FAST XOR OPERATIONS
 // CHARACTERISTICS:
@@ -25,7 +23,7 @@ uint32_t xorshf32(uint32_t state)
     return x;
 }
 
-// ########################################## INITIALIZATION FUNCTIONS ##########################################
+// ################################################ INITIALIZATION FUNCTIONS ################################################
 
 // INPUT2D INITIALIZATION: CREATES AND CONFIGURES A 2D INPUT REGION FOR NEURAL PROCESSING
 unk_error_code_t i2d_init(unk_input2d_t **input, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1,
@@ -298,7 +296,7 @@ unk_error_code_t c2d_copy(unk_cortex2d_t *to, unk_cortex2d_t *from)
     return UNK_ERROR_NONE;
 }
 
-// ################################################## SETTER FUNCTIONS ###################################################
+// ################################################ SETTER FUNCTIONS ################################################
 
 // SETS THE NEIGHBORHOOD RADIUS FOR THE CORTEX
 // VALIDATES THAT RADIUS WON'T CAUSE MASK OVERFLOW
@@ -445,8 +443,6 @@ unk_error_code_t c2d_syn_disable(unk_cortex2d_t *cortex, unk_cortex_size_t x0, u
     }
     return UNK_ERROR_NONE;
 }
-
-///////////////////////////////////////////// NEURON SETTERS /////////////////////////////////////////////
 
 // MODIFIES THE DIMENSIONS OF A CORTEX THROUGH CONTROLLED RANDOM MUTATIONS
 ///////////////////////////////////////////////////////////////
@@ -598,7 +594,7 @@ unk_error_code_t n2d_mutate(unk_neuron_t *neuron, unk_chance_t mut_chance)
     return UNK_ERROR_NONE;
 }
 
-// ########################################## GETTER FUNCTIONS ##################################################
+// ################################################ GETTER FUNCTIONS ################################################
 
 // GENERATES A STRING REPRESENTATION OF CORTEX PROPERTIES
 // TARGET BUFFER MUST BE AT LEAST 256 BYTES
