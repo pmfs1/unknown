@@ -1,9 +1,3 @@
-// ################################################################################################################
-// POPULATION MANAGEMENT MODULE
-// HANDLES THE CREATION, EVOLUTION, AND MAINTENANCE OF A POPULATION OF CORTICES
-// THIS MODULE IMPLEMENTS GENETIC ALGORITHM OPERATIONS INCLUDING SELECTION, BREEDING, AND MUTATION
-// ################################################################################################################
-
 #include "population.h"
 
 // ############################################## UTILITY FUNCTIONS ################################################
@@ -30,15 +24,6 @@ int idf_compare_asc(const void *a, const void *b)
 
 // INITIALIZE A NEW POPULATION WITH SPECIFIED PARAMETERS
 // ALLOCATES ALL MEMORY AND SETS UP INITIAL POPULATION STRUCTURE
-//
-// PARAMETERS:
-//   POPULATION: DOUBLE POINTER TO STORE THE POPULATION
-//   SIZE: TOTAL NUMBER OF CORTICES TO MAINTAIN
-//   SELECTION_POOL_SIZE: NUMBER OF TOP PERFORMERS FOR BREEDING
-//   MUT_CHANCE: MUTATION PROBABILITY (0.0 TO 1.0)
-//   EVAL_FUNCTION: FITNESS EVALUATION FUNCTION POINTER
-//
-// RETURNS: ERROR CODE INDICATING SUCCESS OR FAILURE
 unk_error_code_t p2d_init(unk_population2d_t **population, unk_population_size_t size,
                           unk_population_size_t selection_pool_size, unk_chance_t mut_chance,
                           unk_error_code_t (*eval_function)(unk_cortex2d_t *cortex, unk_cortex_fitness_t *fitness))
@@ -78,6 +63,7 @@ unk_error_code_t p2d_init(unk_population2d_t **population, unk_population_size_t
     return UNK_ERROR_NONE;
 }
 
+// POPULATE THE STARTING POOL OF CORTICES WITH THE PROVIDED VALUES
 unk_error_code_t p2d_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height,
                               unk_nh_radius_t nh_radius)
 {
@@ -102,6 +88,7 @@ unk_error_code_t p2d_populate(unk_population2d_t *population, unk_cortex_size_t 
     return UNK_ERROR_NONE;
 }
 
+// POPULATE THE STARTING POOL OF CORTICES WITH RANDOM VALUES
 unk_error_code_t p2d_rand_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height,
                                    unk_nh_radius_t nh_radius)
 {

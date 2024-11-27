@@ -432,15 +432,6 @@ extern "C"
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
     unk_error_code_t o2d_mean(unk_output2d_t *output, unk_ticks_count_t *result);
 
-    // ########################################## ACTION FUNCTIONS ##################################################
-
-    /// @brief CROSSOVER BETWEEN TWO CORTICES.
-    /// @param offspring THE CORTEX TO STORE THE CROSSOVER RESULT.
-    /// @param parent1 THE FIRST PARENT CORTEX.
-    /// @param parent2 THE SECOND PARENT CORTEX.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_crossover(unk_cortex2d_t *offspring, const unk_cortex2d_t *parent1, const unk_cortex2d_t *parent2);
-
 #ifdef __cplusplus
 }
 #endif
