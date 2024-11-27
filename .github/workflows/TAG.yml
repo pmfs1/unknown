@@ -21,7 +21,7 @@ jobs:
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
           TAG_NAME=$(echo "${{ steps.INFER_TAG_NAME.outputs.TAG_NAME }}")
-          gh pr edit "$(gh pr view --json title --jq '.title = "TAG-'${TAG_NAME}'" | jq -r '.title')"
+          gh pr edit --title "TAG-${TAG_NAME}"
       # - name: 'RENAME GITHUB_REF'
       #   if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
       #   run: |

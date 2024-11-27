@@ -1,14 +1,19 @@
 #ifndef __UNKNOWN__
 #define __UNKNOWN__
 
+#include "cortex.h"
+#include "population.h"
+#include "error.h"
+
+#ifndef __CUDACC__
+#ifndef __UNKNOWN_STD__
+#define __UNKNOWN_STD__
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include <math.h>
-#include "cortex.h"
-#include "population.h"
-#include "error.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -39,6 +44,11 @@ extern "C"
     // ########################################## INPUT MAPPING FUNCTIONS ##########################################
 
     /// @brief MAPS AN INPUT VALUE TO A PULSE PATTERN USING THE SPECIFIED MAPPING ALGORITHM
+    /// ALL MAPPING ALGORITHMS ARE IMPLEMENTED WITHIN THIS SINGLE FUNCTION:
+    /// - LINEAR: SIMPLE UNIFORM DISTRIBUTION WITH MINIMUM ONE PULSE;
+    /// - FPROP: FAST PROPORTIONAL FOR SMALL WINDOWS;
+    /// - RPROP: PRECISE PROPORTIONAL FOR LARGE WINDOWS;
+    /// - DFPROP: DIFFERENTIAL FAST PROPORTIONAL FOR RATE-OF-CHANGE DETECTION (SUITABLE FOR APPLICATIONS REQUIRING SENSITIVITY TO INPUT VARIATION).
     /// @param sample_window THE WIDTH OF THE SAMPLING WINDOW (MUST BE > 0)
     /// @param sample_step THE CURRENT STEP POSITION IN THE WINDOW (MUST BE < SAMPLE_WINDOW)
     /// @param input THE INPUT VALUE TO MAP (MUST BE IN RANGE 0..(SAMPLE_WINDOW - 1))
@@ -46,44 +56,9 @@ extern "C"
     /// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
     unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input,
                               unk_pulse_mapping_t pulse_mapping);
-
-    /// @brief COMPUTES A LINEAR PULSE MAPPING. GUARANTEES AT LEAST ONE PULSE EVEN FOR ZERO INPUT.
-    /// PROVIDES THE SIMPLEST DISTRIBUTION OF PULSES.
-    /// @param sample_window THE WIDTH OF THE SAMPLING WINDOW (MUST BE > 0)
-    /// @param sample_step THE CURRENT STEP POSITION IN THE WINDOW (MUST BE < SAMPLE_WINDOW)
-    /// @param input THE INPUT VALUE TO MAP (MUST BE IN RANGE 0..SAMPLE_WINDOW)
-    /// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
-    unk_bool_t value_to_pulse_linear(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
-                                     unk_ticks_count_t input);
-
-    /// @brief COMPUTES A FAST PROPORTIONAL MAPPING. OPTIMIZED FOR PERFORMANCE WITH SMALLER WINDOWS.
-    /// @param sample_window THE WIDTH OF THE SAMPLING WINDOW (MUST BE > 0)
-    /// @param sample_step THE CURRENT STEP POSITION IN THE WINDOW (MUST BE < SAMPLE_WINDOW)
-    /// @param input THE INPUT VALUE TO MAP (MUST BE IN RANGE 0..SAMPLE_WINDOW)
-    /// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
-    unk_bool_t value_to_pulse_fprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
-                                    unk_ticks_count_t input);
-
-    /// @brief COMPUTES A PRECISE PROPORTIONAL MAPPING WITH BETTER PULSE DISTRIBUTION.
-    /// RECOMMENDED FOR LARGER WINDOWS WHERE PRECISE DISTRIBUTION IS CRITICAL.
-    /// @param sample_window THE WIDTH OF THE SAMPLING WINDOW (MUST BE > 0)
-    /// @param sample_step THE CURRENT STEP POSITION IN THE WINDOW (MUST BE < SAMPLE_WINDOW)
-    /// @param input THE INPUT VALUE TO MAP (MUST BE IN RANGE 0..SAMPLE_WINDOW)
-    /// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
-    unk_bool_t value_to_pulse_rprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
-                                    unk_ticks_count_t input);
-
-    /// @brief COMPUTES A DIFFERENTIAL FAST PROPORTIONAL MAPPING. OPTIMIZED FOR RATE-OF-CHANGE DETECTION.
-    /// SUITABLE FOR APPLICATIONS REQUIRING SENSITIVITY TO INPUT VARIATIONS.
-    /// @param sample_window THE WIDTH OF THE SAMPLING WINDOW (MUST BE > 0)
-    /// @param sample_step THE CURRENT STEP POSITION IN THE WINDOW (MUST BE < SAMPLE_WINDOW)
-    /// @param input THE INPUT VALUE TO MAP (MUST BE IN RANGE 0..SAMPLE_WINDOW)
-    /// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
-    unk_bool_t value_to_pulse_dfprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
-                                     unk_ticks_count_t input);
-
 #ifdef __cplusplus
 }
 #endif
-
+#endif // __UNKNOWN_STD__
+#endif
 #endif // __UNKNOWN__
