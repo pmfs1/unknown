@@ -1,14 +1,21 @@
 #ifndef __UNKNOWN__
 #define __UNKNOWN__
 
+#include "cortex.h"
+#include "population.h"
+#include "error.h"
+
+#ifdef __CUDACC__
+#include "unknown_cuda.h"
+#else
+#ifndef __UNKNOWN_STD__
+#define __UNKNOWN_STD__
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
 #include <math.h>
-#include "cortex.h"
-#include "population.h"
-#include "error.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -85,5 +92,6 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-
+#endif // __UNKNOWN_STD__
+#endif
 #endif // __UNKNOWN__

@@ -5,8 +5,18 @@ STD_CCOMP_FLAGS=-std=c17 -Wall -pedantic -g -fPIC
 CCOMP_FLAGS=$(STD_CCOMP_FLAGS) -fopenmp
 CLINK_FLAGS=-Wall -fopenmp
 ARC_FLAGS=-rcs
+
+ifdef CUDA_ARCH
+	CUDA_ARCH_FLAG=-arch=$(CUDA_ARCH)
+else
+	CUDA_ARCH_FLAG=
+endif
+
 MODE=
+NVCOMP_FLAGS=--compiler-options '-fPIC' -G $(CUDA_ARCH_FLAG)
+NVLINK_FLAGS=$(CUDA_ARCH_FLAG)
 STD_LIBS=-lm
+CUDA_STD_LIBS=-lcudart
 SRC_DIR=./src
 BIN_DIR=./bin
 SYSTEM_INCLUDE_DIR=
@@ -16,13 +26,11 @@ MKDIR=mkdir -p
 RM=rm -rf
 
 UNAME_S=$(shell uname -s)
-
 ifeq ($(UNAME_S),Linux)
 	SYSTEM_INCLUDE_DIR=/usr/include
 	SYSTEM_LIB_DIR=/usr/lib
 	STD_LIBS+=-lrt
 endif
-
 ifeq ($(UNAME_S),Darwin)
 	SYSTEM_INCLUDE_DIR=/usr/local/include
 	SYSTEM_LIB_DIR=/usr/local/lib
@@ -45,6 +53,7 @@ ifeq ($(MODE), archive)
 endif
 
 std-install: std install-headers install-lib
+cuda-install: cuda install-headers install-lib
 
 uninstall: clean
 	sudo $(RM) $(SYSTEM_INCLUDE_DIR)/unknown
@@ -52,9 +61,14 @@ uninstall: clean
 	sudo $(RM) $(SYSTEM_LIB_DIR)/libunknown.a
 
 std: create std-build
+cuda: create cuda-build
 
-std-build: cortex.o population.o unknown.o
+std-build: cortex.o population.o unknown_std.o
 	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BIN_DIR)/libunknown.so
+	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
+
+cuda-build: cortex.o population.o unknown_cuda.o
+	$(NVCOMP) $(NVLINK_FLAGS) -shared $(OBJS) $(CUDA_STD_LIBS) -o $(BIN_DIR)/libunknown.so
 	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
 
 %.o: $(SRC_DIR)/%.c
