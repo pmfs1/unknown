@@ -1,6 +1,6 @@
 #include "population.h"
 
-// ############################################## UTILITY FUNCTIONS ################################################
+// ################################################ UTILITY FUNCTIONS ################################################
 
 // COMPARISON FUNCTION FOR QSORT IMPLEMENTATION
 // PARAMETERS:
@@ -20,7 +20,7 @@ int idf_compare_asc(const void *a, const void *b)
     return (*(unk_indexed_fitness_t *)a).fitness - (*(unk_indexed_fitness_t *)b).fitness;
 }
 
-// ############################################## CORE FUNCTIONS #################################################
+// ################################################ INITIALIZATION FUNCTIONS ################################################
 
 // INITIALIZE A NEW POPULATION WITH SPECIFIED PARAMETERS
 // ALLOCATES ALL MEMORY AND SETS UP INITIAL POPULATION STRUCTURE
@@ -113,7 +113,7 @@ unk_error_code_t p2d_rand_populate(unk_population2d_t *population, unk_cortex_si
     return UNK_ERROR_NONE;
 }
 
-// ########################################## SETTER FUNCTIONS ##################################################
+// ################################################ SETTER FUNCTIONS ################################################
 
 // UPDATE MUTATION RATE FOR ENTIRE POPULATION
 unk_error_code_t p2d_set_mut_rate(unk_population2d_t *population, unk_chance_t mut_chance)
@@ -122,7 +122,7 @@ unk_error_code_t p2d_set_mut_rate(unk_population2d_t *population, unk_chance_t m
     return UNK_ERROR_NONE;
 }
 
-// ########################################## ACTION FUNCTIONS ##################################################
+// ################################################ ACTION FUNCTIONS ################################################
 
 // EVALUATE FITNESS FOR ALL CORTICES
 // APPLIES STORED EVALUATION FUNCTION TO EACH CORTEX

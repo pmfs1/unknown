@@ -7,8 +7,6 @@
 #include <string.h>
 #include <time.h>
 
-#include "error.h"
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -271,7 +269,7 @@ extern "C"
     /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
     uint32_t xorshf32(uint32_t state);
 
-    // ########################################## INITIALIZATION FUNCTIONS ##########################################
+    // ################################################ INITIALIZATION FUNCTIONS ################################################
 
     /// @brief INITIALIZES AN INPUT2D WITH THE GIVEN VALUES.
     /// @param input
@@ -326,7 +324,7 @@ extern "C"
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
     unk_error_code_t c2d_copy(unk_cortex2d_t *to, unk_cortex2d_t *from);
 
-    // ########################################## SETTER FUNCTIONS ##################################################
+    // ################################################ SETTER FUNCTIONS ################################################
 
     /// @brief SETS THE NEIGHBORHOOD RADIUS FOR ALL NEURONS IN THE CORTEX.
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
@@ -412,7 +410,7 @@ extern "C"
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
     unk_error_code_t n2d_mutate(unk_neuron_t *neuron, unk_chance_t mut_chance);
 
-    // ########################################## GETTER FUNCTIONS ##################################################
+    // ################################################ GETTER FUNCTIONS ################################################
 
     /// @brief STORES THE STRING REPRESENTATION OF THE GIVEN CORTEX TO THE PROVIDED STRING [TARGET].
     /// @param cortex THE CORTEX TO INSPECT.

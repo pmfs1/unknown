@@ -303,99 +303,69 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
 unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input,
                           unk_pulse_mapping_t pulse_mapping)
 {
-    unk_bool_t result = UNK_FALSE;
     if (input < sample_window)
     {
         switch (pulse_mapping)
         {
         case UNK_PULSE_MAPPING_LINEAR:
-            result = value_to_pulse_linear(sample_window, sample_step, input);
-            break;
+            return sample_step % (sample_window - input) == 0;
         case UNK_PULSE_MAPPING_FPROP:
-            result = value_to_pulse_fprop(sample_window, sample_step, input);
-            break;
+            unk_ticks_count_t upper = sample_window - 1;
+            if (input < sample_window / 2)
+            {
+                if ((sample_step = 0) ||
+                    (input > 0 && sample_step % (upper / input) == 0))
+                {
+                    return UNK_TRUE;
+                }
+            }
+            else
+            {
+                if (input >= upper || sample_step % (upper / (upper - input)) != 0)
+                {
+                    return UNK_TRUE;
+                }
+            }
+            return UNK_FALSE;
         case UNK_PULSE_MAPPING_RPROP:
-            result = value_to_pulse_rprop(sample_window, sample_step, input);
-            break;
+            double upper = sample_window - 1;
+            double d_input = input;
+            if ((double)input < ((double)sample_window) / 2)
+            {
+                if ((sample_step == 0) ||
+                    (input > 0 && sample_step % (unk_ticks_count_t)round(upper / d_input) == 0))
+                {
+                    return UNK_TRUE;
+                }
+            }
+            else
+            {
+                if (input >= upper || sample_step % (unk_ticks_count_t)round(upper / (upper - d_input)) != 0)
+                {
+                    return UNK_TRUE;
+                }
+            }
+            return UNK_FALSE;
         case UNK_PULSE_MAPPING_DFPROP:
-            result = value_to_pulse_dfprop(sample_window, sample_step, input);
-            break;
+            unk_ticks_count_t upper = sample_window - 1;
+            if (input < sample_window / 2)
+            {
+                if ((sample_step == 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0))
+                {
+                    return UNK_TRUE;
+                }
+            }
+            else
+            {
+                if (input >= upper || sample_step % (upper / ((upper - input) * 2)) != 0)
+                {
+                    return UNK_TRUE;
+                }
+            }
+            return UNK_FALSE;
         default:
-            break;
+            return UNK_FALSE;
         }
     }
-    return result;
-}
-
-unk_bool_t value_to_pulse_linear(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
-                                 unk_ticks_count_t input)
-{
-    return sample_step % (sample_window - input) == 0;
-}
-
-unk_bool_t value_to_pulse_fprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input)
-{
-    unk_bool_t result = UNK_FALSE;
-    unk_ticks_count_t upper = sample_window - 1;
-    if (input < sample_window / 2)
-    {
-        if ((sample_step = 0) ||
-            (input > 0 && sample_step % (upper / input) == 0))
-        {
-            result = UNK_TRUE;
-        }
-    }
-    else
-    {
-        if (input >= upper || sample_step % (upper / (upper - input)) != 0)
-        {
-            result = UNK_TRUE;
-        }
-    }
-    return result;
-}
-
-unk_bool_t value_to_pulse_rprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input)
-{
-    unk_bool_t result = UNK_FALSE;
-    double upper = sample_window - 1;
-    double d_input = input;
-    if ((double)input < ((double)sample_window) / 2)
-    {
-        if ((sample_step == 0) ||
-            (input > 0 && sample_step % (unk_ticks_count_t)round(upper / d_input) == 0))
-        {
-            result = UNK_TRUE;
-        }
-    }
-    else
-    {
-        if (input >= upper || sample_step % (unk_ticks_count_t)round(upper / (upper - d_input)) != 0)
-        {
-            result = UNK_TRUE;
-        }
-    }
-    return result;
-}
-
-unk_bool_t value_to_pulse_dfprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
-                                 unk_ticks_count_t input)
-{
-    unk_bool_t result = UNK_FALSE;
-    unk_ticks_count_t upper = sample_window - 1;
-    if (input < sample_window / 2)
-    {
-        if ((sample_step == 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0))
-        {
-            result = UNK_TRUE;
-        }
-    }
-    else
-    {
-        if (input >= upper || sample_step % (upper / ((upper - input) * 2)) != 0)
-        {
-            result = UNK_TRUE;
-        }
-    }
-    return result;
+    return UNK_FALSE;
 }
