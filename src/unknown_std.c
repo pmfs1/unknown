@@ -305,12 +305,12 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
 {
     if (input < sample_window)
     {
+        unk_ticks_count_t upper = sample_window - 1;
         switch (pulse_mapping)
         {
-        case UNK_PULSE_MAPPING_LINEAR:
+        case UNK_PULSE_MAPPING_LINEAR: ;
             return sample_step % (sample_window - input) == 0;
-        case UNK_PULSE_MAPPING_FPROP:
-            unk_ticks_count_t upper = sample_window - 1;
+        case UNK_PULSE_MAPPING_FPROP: ;
             if (input < sample_window / 2)
             {
                 if ((sample_step = 0) ||
@@ -327,27 +327,24 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
                 }
             }
             return UNK_FALSE;
-        case UNK_PULSE_MAPPING_RPROP:
-            double upper = sample_window - 1;
-            double d_input = input;
-            if ((double)input < ((double)sample_window) / 2)
+        case UNK_PULSE_MAPPING_RPROP: ;
+            if (input < sample_window / 2)
             {
                 if ((sample_step == 0) ||
-                    (input > 0 && sample_step % (unk_ticks_count_t)round(upper / d_input) == 0))
+                    (input > 0 && sample_step % (upper / input) == 0))
                 {
                     return UNK_TRUE;
                 }
             }
             else
             {
-                if (input >= upper || sample_step % (unk_ticks_count_t)round(upper / (upper - d_input)) != 0)
+                if (input >= upper || sample_step % (upper / (upper - input)) != 0)
                 {
                     return UNK_TRUE;
                 }
             }
             return UNK_FALSE;
-        case UNK_PULSE_MAPPING_DFPROP:
-            unk_ticks_count_t upper = sample_window - 1;
+        case UNK_PULSE_MAPPING_DFPROP: ;
             if (input < sample_window / 2)
             {
                 if ((sample_step == 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0))
@@ -362,8 +359,6 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
                     return UNK_TRUE;
                 }
             }
-            return UNK_FALSE;
-        default:
             return UNK_FALSE;
         }
     }
