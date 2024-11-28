@@ -74,33 +74,6 @@
                     exit(0);                                                                                   \
                 }                                                                                              \
             }
-        
-        // DEFAULT BLOCK SIZES FOR 1D, 2D AND 3D KERNEL EXECUTIONS.
-        // BLOCK SIZES ARE DESIGNED NOT TO EXCEED THE 1024 THREAD PER BLOCK LIMIT IN THE CUDA ARCHITECTURE.
-        // BLOCK SIZE 1D: 256 THREADS PER BLOCK.
-        // BLOCK SIZE 2D: 32x32 THREADS PER BLOCK.
-        // BLOCK SIZE 3D: 8x8x8 THREADS PER BLOCK.
-        #define BLOCK_SIZE_1D 256
-        #define BLOCK_SIZE_2D 32
-        #define BLOCK_SIZE_3D 8
-
-        // ########################################## INITIALIZATION FUNCTIONS ##########################################
-
-        dim3 c2d_get_grid_size(unk_cortex2d_t *cortex);
-        
-        dim3 c2d_get_block_size(unk_cortex2d_t *cortex);
-        
-        unk_error_code_t i2d_to_device(unk_input2d_t *device_input, unk_input2d_t *host_input);
-        
-        unk_error_code_t i2d_to_host(unk_input2d_t *host_input, unk_input2d_t *device_input);
-        
-        unk_error_code_t c2d_to_device(unk_cortex2d_t *device_cortex, unk_cortex2d_t *host_cortex);
-        
-        unk_error_code_t c2d_to_host(unk_cortex2d_t *host_cortex, unk_cortex2d_t *device_cortex);
-        
-        unk_error_code_t i2d_device_destroy(unk_input2d_t *input);
-        
-        unk_error_code_t c2d_device_destroy(unk_cortex2d_t *cortex);
 
         // ########################################## EXECUTION FUNCTIONS ##########################################
 

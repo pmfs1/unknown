@@ -1,5 +1,5 @@
-#ifndef __CORTEX_POPULATION__
-#define __CORTEX_POPULATION__
+#ifndef __POPULATION__
+#define __POPULATION__
 
 #include "cortex.h"
 
@@ -146,4 +146,4 @@ extern "C"
 }
 #endif
 
-#endif // __CORTEX_POPULATION__
+#endif // __POPULATION__

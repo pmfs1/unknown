@@ -39,6 +39,17 @@ extern "C"
 // |N| IS THE SIZE OF THE SECOND DIMENSION.
 #define IDX3D(i, j, k, m, n) (((m) * (n) * (k)) + ((m) * (j)) + (i))
 
+#ifndef __CUDACC__
+    // DEFAULT BLOCK SIZES FOR 1D, 2D AND 3D KERNEL EXECUTIONS.
+    // BLOCK SIZES ARE DESIGNED NOT TO EXCEED THE 1024 THREAD PER BLOCK LIMIT IN THE CUDA ARCHITECTURE.
+    // BLOCK SIZE 1D: 256 THREADS PER BLOCK.
+    // BLOCK SIZE 2D: 32x32 THREADS PER BLOCK.
+    // BLOCK SIZE 3D: 8x8x8 THREADS PER BLOCK.
+    #define BLOCK_SIZE_1D 256
+    #define BLOCK_SIZE_2D 32
+    #define BLOCK_SIZE_3D 8
+#endif // __CUDACC__
+
 // SPECIAL VALUE INDICATING THAT EVOLUTION STEP SHOULD NEVER OCCUR
 #define UNK_EVOL_STEP_NEVER 0x0000FFFFU
 
@@ -329,6 +340,38 @@ extern "C"
     /// @brief RETURNS A CORTEX WITH THE SAME PROPERTIES AS THE GIVEN ONE.
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
     unk_error_code_t c2d_copy(unk_cortex2d_t *to, unk_cortex2d_t *from);
+
+    #ifdef __CUDACC__
+        /// @brief COMPUTES AND RETURNS THE GRID SIZE TO ALLOCATE ON DEVICE.
+        /// @param cortex THE CORTEX TO COMPUTE THE GRID SIZE FOR.
+        /// @return THE GRID SIZE TO ALLOCATE ON DEVICE.
+        /// @note THE PASSED CORTEX MUST BE INITIALIZED BEFORE THIS FUNCTION IS CALLED, OTHERWISE AN ERROR MAY OCCUR.
+        dim3 c2d_get_grid_size(unk_cortex2d_t *cortex);
+
+        /// @brief COMPUTES AND RETURNS THE BLOCK SIZE TO ALLOCATE ON DEVICE.
+        /// @param cortex THE CORTEX TO COMPUTE THE BLOCK SIZE FOR.
+        /// @return THE BLOCK SIZE TO ALLOCATE ON DEVICE.
+        /// @note THE PASSED CORTEX MUST BE INITIALIZED BEFORE THIS FUNCTION IS CALLED, OTHERWISE AN ERROR MAY OCCUR.
+        dim3 c2d_get_block_size(unk_cortex2d_t *cortex);
+        
+        /// @brief COPIES AN INPUT2D FROM HOST TO DEVICE.
+        unk_error_code_t i2d_to_device(unk_input2d_t *device_input, unk_input2d_t *host_input);
+        
+        /// @brief COPIES AN INPUT2D FROM DEVICE TO HOST.
+        unk_error_code_t i2d_to_host(unk_input2d_t *host_input, unk_input2d_t *device_input);
+        
+        /// @brief COPIES A CORTEX2D FROM HOST TO DEVICE.
+        unk_error_code_t c2d_to_device(unk_cortex2d_t *device_cortex, unk_cortex2d_t *host_cortex);
+        
+        /// @brief COPIES A CORTEX2D FROM DEVICE TO HOST.
+        unk_error_code_t c2d_to_host(unk_cortex2d_t *host_cortex, unk_cortex2d_t *device_cortex);
+        
+        /// @brief DESTROYS AN INPUT2D ON DEVICE.
+        unk_error_code_t i2d_device_destroy(unk_input2d_t *input);
+        
+        /// @brief DESTROYS A CORTEX2D ON DEVICE.
+        unk_error_code_t c2d_device_destroy(unk_cortex2d_t *cortex);
+    #endif // __CUDACC__
 
     // ################################################ SETTER FUNCTIONS ################################################
 
