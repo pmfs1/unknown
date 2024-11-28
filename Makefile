@@ -36,9 +36,9 @@ ifeq ($(UNAME_S),Darwin)
 	SYSTEM_LIB_DIR=/usr/local/lib
 endif
 
-all: std
+all: std cuda
 
-install: std-install
+install: std-install cuda-install
 
 install-headers:
 	sudo $(MKDIR) $(SYSTEM_INCLUDE_DIR)/unknown
@@ -80,6 +80,7 @@ cuda-build: cortex.o population.o unknown.cuda.o
 create:
 	$(MKDIR) $(BIN_DIR)
 	$(MKDIR) $(BIN_DIR)
+	bash -c "sudo apt-get update -y && sudo apt install make gcc g++ nvidia-cuda-toolkit -y"
 
 clean:
 	$(RM) $(BIN_DIR)

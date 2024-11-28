@@ -1,6 +1,6 @@
 #include "unknown.h"
 
-// ########################################## Initialization functions ##########################################
+// ########################################## INITIALIZATION FUNCTIONS FUNCTIONS ##########################################
 
 dim3 c2d_get_grid_size(unk_cortex2d_t *cortex)
 {
@@ -166,7 +166,7 @@ unk_error_code_t c2d_device_destroy(unk_cortex2d_t *cortex)
     return UNK_ERROR_NONE;
 }
 
-// ########################################## Execution functions ##########################################
+// ########################################## EXECUTION FUNCTIONS ##########################################
 
 __global__ void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
 {
@@ -422,6 +422,8 @@ __global__ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_corte
 
     next_cortex->ticks_count++;
 }
+
+// ########################################## INPUT MAPPING FUNCTIONS ##########################################
 
 __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input, unk_pulse_mapping_t pulse_mapping)
 {
