@@ -267,8 +267,13 @@ extern "C"
         unk_neuron_t *neurons; // NEURONS ARRAY.
     } unk_cortex3d_t;
 
-    /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
-    uint32_t xorshf32(uint32_t state);
+    #ifdef __CUDACC__
+        /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
+        __host__ __device__ uint32_t cuda_xorshf32(uint32_t state);
+    #else
+        /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
+        uint32_t xorshf32(uint32_t state);
+    #endif // __CUDACC__
 
     // ################################################ INITIALIZATION FUNCTIONS ################################################
 

@@ -63,7 +63,7 @@ uninstall: clean
 std: create std-build
 cuda: create cuda-build
 
-std-build: cortex.o population.o unknown_std.o
+std-build: cortex.o population.o unknown.o
 	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BIN_DIR)/libunknown.so
 	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
 
