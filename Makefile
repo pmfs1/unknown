@@ -67,14 +67,14 @@ std-build: cortex.o population.o unknown.o
 	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BIN_DIR)/libunknown.so
 	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
 
-cuda-build: cortex.o population.o unknown_cuda.o
+cuda-build: cortex.o population.o unknown.cuda.o
 	$(NVCOMP) $(NVLINK_FLAGS) -shared $(OBJS) $(CUDA_STD_LIBS) -o $(BIN_DIR)/libunknown.so
 	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
 
 %.o: $(SRC_DIR)/%.c
 	$(CCOMP) $(CCOMP_FLAGS) -c $^ -o $(BIN_DIR)/$@
 
-%.o: $(SRC_DIR)/%.cu
+%.cuda.o: $(SRC_DIR)/%.cu
 	$(NVCOMP) $(NVCOMP_FLAGS) -c $^ -o $(BIN_DIR)/$@
 
 create:
