@@ -60,13 +60,13 @@ extern "C"
     /// @param a THE FIRST FITNESS TO COMPARE.
     /// @param b THE SECOND FITNESS TO COMPARE.
     /// @return 0 IF A == B, A STRICTLY NEGATIVE NUMBER IF A < B, A STRICTLY POSITIVE IF A > B.
-    int idf_compare_desc(const void* a, const void* b);
+    int idf_compare_desc(const void *a, const void *b);
 
     /// @brief COMPARES THE PROVIDED INDEXED FITNESS VALUES BY FITNESS VALUE. RESULTS IN AN ASCENDING ORDER IF USED AS A COMPARATOR FOR SORTING.
     /// @param a THE FIRST FITNESS TO COMPARE.
     /// @param b THE SECOND FITNESS TO COMPARE.
     /// @return 0 IF A == A, A STRICTLY NEGATIVE NUMBER IF B < A, A STRICTLY POSITIVE IF B > A.
-    int idf_compare_asc(const void* a, const void* b);
+    int idf_compare_asc(const void *a, const void *b);
 
     // ################################################ INITIALIZATION FUNCTIONS ################################################
 

@@ -308,9 +308,9 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
         unk_ticks_count_t upper = sample_window - 1;
         switch (pulse_mapping)
         {
-        case UNK_PULSE_MAPPING_LINEAR: ;
+        case UNK_PULSE_MAPPING_LINEAR:;
             return sample_step % (sample_window - input) == 0;
-        case UNK_PULSE_MAPPING_FPROP: ;
+        case UNK_PULSE_MAPPING_FPROP:;
             if (input < sample_window / 2)
             {
                 if ((sample_step = 0) ||
@@ -327,7 +327,7 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
                 }
             }
             return UNK_FALSE;
-        case UNK_PULSE_MAPPING_RPROP: ;
+        case UNK_PULSE_MAPPING_RPROP:;
             if (input < sample_window / 2)
             {
                 if ((sample_step == 0) ||
@@ -344,7 +344,7 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
                 }
             }
             return UNK_FALSE;
-        case UNK_PULSE_MAPPING_DFPROP: ;
+        case UNK_PULSE_MAPPING_DFPROP:;
             if (input < sample_window / 2)
             {
                 if ((sample_step == 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0))
