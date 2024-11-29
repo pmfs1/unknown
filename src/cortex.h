@@ -278,13 +278,13 @@ uint32_t xorshf32(uint32_t state);
     // ################################################ INITIALIZATION FUNCTIONS ################################################
 
     /// @brief INITIALIZES AN INPUT2D WITH THE GIVEN VALUES.
-    /// @param input
-    /// @param x0
-    /// @param y0
-    /// @param x1
-    /// @param y1
-    /// @param exc_value
-    /// @param pulse_mapping
+    /// @param input THE INPUT TO INITIALIZE.
+    /// @param x0 THE X0 COORDINATE OF THE INPUT.
+    /// @param y0 THE Y0 COORDINATE OF THE INPUT.
+    /// @param x1 THE X1 COORDINATE OF THE INPUT.
+    /// @param y1 THE Y1 COORDINATE OF THE INPUT.
+    /// @param exc_value THE VALUE TO EXCITE THE TARGET NEURONS.
+    /// @param pulse_mapping THE MAPPING ALGORITHM TO USE FOR PULSE GENERATION.
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
     unk_error_code_t i2d_init(unk_input2d_t **input, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1, unk_cortex_size_t y1, unk_neuron_value_t exc_value, unk_pulse_mapping_t pulse_mapping);
 
