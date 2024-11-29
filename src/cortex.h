@@ -267,13 +267,13 @@ extern "C"
         unk_neuron_t *neurons; // NEURONS ARRAY.
     } unk_cortex3d_t;
 
-    #ifdef __CUDACC__
-        /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
-        __host__ __device__ uint32_t xorshf32(uint32_t state);
-    #else
-        /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
-        uint32_t xorshf32(uint32_t state);
-    #endif // __CUDACC__
+#ifdef __CUDACC__
+    /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
+    __host__ __device__ uint32_t xorshf32(uint32_t state);
+#else
+/// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
+uint32_t xorshf32(uint32_t state);
+#endif // __CUDACC__
 
     // ################################################ INITIALIZATION FUNCTIONS ################################################
 
@@ -428,7 +428,7 @@ extern "C"
     /// @param input THE INPUT TO COMPUTE THE MEAN VALUE FROM.
     /// @param result POINTER TO THE RESULT OF THE COMPUTATION. THE MEAN VALUE WILL BE STORED HERE.
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t i2d_mean(unk_input2d_t* input, unk_ticks_count_t* result);
+    unk_error_code_t i2d_mean(unk_input2d_t *input, unk_ticks_count_t *result);
 
     /// @brief COMPUTES THE MEAN VALUE OF AN OUTPUT2D'S VALUES.
     /// @param output THE OUTPUT TO COMPUTE THE MEAN VALUE FROM.
