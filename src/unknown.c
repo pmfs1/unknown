@@ -304,68 +304,53 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
 
 // ########################################## INPUT MAPPING FUNCTIONS ##########################################
 
-unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input,
-                          unk_pulse_mapping_t pulse_mapping)
+static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t step, unk_ticks_count_t input,
+                                         unk_ticks_count_t upper, unk_bool_t rounded)
 {
-    if (input < sample_window)
+    if (input < upper / 2)
     {
-        switch (pulse_mapping)
+        if (input == 0) return UNK_TRUE;
+        unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)input) : upper / input;
+        return step % div == 0;
+    }
+    else
+    {
+        if (input >= upper) return UNK_TRUE;
+        unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)(upper - input)) : upper / (upper - input);
+        return step % div != 0;
+    }
+}
+
+unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
+                          unk_ticks_count_t input, unk_pulse_mapping_t pulse_mapping)
+{
+    if (input >= sample_window) return UNK_FALSE;
+    const unk_ticks_count_t upper = sample_window - 1;
+    switch (pulse_mapping)
+    {
+        case UNK_PULSE_MAPPING_LINEAR:
+            return input < sample_window && sample_step % (sample_window - input) == 0;
+        case UNK_PULSE_MAPPING_FPROP:
+            return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
+        case UNK_PULSE_MAPPING_RPROP:
+            return calc_prop_pulse(sample_step, input, upper, UNK_TRUE);
+        case UNK_PULSE_MAPPING_DFPROP:
         {
-        case UNK_PULSE_MAPPING_LINEAR: ;
-            return sample_step % (sample_window - input) == 0;
-        case UNK_PULSE_MAPPING_FPROP: ;
-            unk_ticks_count_t upper = sample_window - 1;
-            if (input < sample_window / 2)
-            {
-                if ((sample_step <= 0) ||
-                    (input > 0 && sample_step % (upper / input) == 0))
-                {
-                    return UNK_TRUE;
-                }
-            }
-            else
-            {
-                if (input >= upper || sample_step % (upper / (upper - input)) != 0)
-                {
-                    return UNK_TRUE;
-                }
-            }
-            return UNK_FALSE;
-        case UNK_PULSE_MAPPING_RPROP: ;
-            double d_upper = sample_window - 1;
-            double d_input = input;
-            if ((double)input < ((double)sample_window) / 2)
-            {
-                if ((sample_step <= 0) ||
-                    (input > 0 && sample_step % (unk_ticks_count_t)round(d_upper / d_input) == 0))
-                {
-                    return UNK_TRUE;
-                }
-            }
-            else
-            {
-                if (input >= d_upper || sample_step % (unk_ticks_count_t)round(d_upper / (d_upper - d_input)) != 0)
-                {
-                    return UNK_TRUE;
-                }
-            }
-            return UNK_FALSE;
-        case UNK_PULSE_MAPPING_DFPROP: ;
             static unk_ticks_count_t prev_input = 0;
-            unk_ticks_count_t input_diff = (input > prev_input) ? 
-                                          input - prev_input : 
-                                          prev_input - input;
+            static unk_ticks_count_t prev_sample_window = 0;
+            if (prev_sample_window != sample_window)
+            {
+                prev_input = 0;
+                prev_sample_window = sample_window;
+            }
+            unk_ticks_count_t input_diff = (input > prev_input) ? input - prev_input : prev_input - input;
             prev_input = input;
-            if (input_diff > 0) {
+            if (input_diff > 0)
+            {
                 unk_ticks_count_t pulse_rate = (sample_window - input_diff) / 2;
-                return (pulse_rate == 0) || (sample_step % (pulse_rate + 1) == 0);
+                return pulse_rate == 0 || sample_step % (pulse_rate + 1) == 0;
             }
-            unk_ticks_count_t upper = sample_window - 1;
-            if (input < sample_window / 2) {
-                return (input == 0) || (sample_step % (upper / (input + 1)) == 0);
-            } else {
-                return (input >= upper) || (sample_step % (upper / (upper - input + 1)) == 0);
-            }
+            return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
         }
     }
     return UNK_FALSE;
