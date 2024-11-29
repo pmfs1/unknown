@@ -181,6 +181,29 @@ __global__ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_corte
 
 // ########################################## INPUT MAPPING FUNCTIONS ##########################################
 
+/// @brief CALCULATES THE PULSE PATTERN FOR THE DIFFERENTIAL FAST PROPORTIONAL MAPPING ALGORITHM
+/// @param step THE CURRENT STEP POSITION IN THE WINDOW
+/// @param input THE INPUT VALUE TO MAP
+/// @param upper THE UPPER BOUND OF THE SAMPLING WINDOW
+/// @param rounded TRUE IF THE DIVISION SHOULD BE ROUNDED, FALSE OTHERWISE
+/// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
+__host__ __device__ static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t step, unk_ticks_count_t input,
+                                                             unk_ticks_count_t upper, unk_bool_t rounded)
+{
+    if (input < upper / 2)
+    {
+        if (input == 0) return UNK_TRUE;
+        unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)input) : upper / input;
+        return step % div == 0;
+    }
+    else
+    {
+        if (input >= upper) return UNK_TRUE;
+        unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)(upper - input)) : upper / (upper - input);
+        return step % div != 0;
+    }
+}
+
 /// @brief MAPS AN INPUT VALUE TO A PULSE PATTERN USING THE SPECIFIED MAPPING ALGORITHM
 /// ALL MAPPING ALGORITHMS ARE IMPLEMENTED WITHIN THIS SINGLE FUNCTION:
 /// - LINEAR: SIMPLE UNIFORM DISTRIBUTION WITH MINIMUM ONE PULSE;
@@ -192,72 +215,36 @@ __global__ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_corte
 /// @param input THE INPUT VALUE TO MAP (MUST BE IN RANGE 0..(SAMPLE_WINDOW - 1))
 /// @param pulse_mapping THE MAPPING ALGORITHM TO USE FOR PULSE GENERATION
 /// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
-__host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input,
-                                              unk_pulse_mapping_t pulse_mapping)
+__host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
+                                              unk_ticks_count_t input, unk_pulse_mapping_t pulse_mapping)
 {
-    if (input < sample_window)
+    if (input >= sample_window) return UNK_FALSE;
+    const unk_ticks_count_t upper = sample_window - 1;
+    switch (pulse_mapping)
     {
-        switch (pulse_mapping)
+        case UNK_PULSE_MAPPING_LINEAR:
+            return input < sample_window && sample_step % (sample_window - input) == 0;
+        case UNK_PULSE_MAPPING_FPROP:
+            return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
+        case UNK_PULSE_MAPPING_RPROP:
+            return calc_prop_pulse(sample_step, input, upper, UNK_TRUE);
+        case UNK_PULSE_MAPPING_DFPROP:
         {
-        case UNK_PULSE_MAPPING_LINEAR:;
-            return (sample_step % (sample_window - input) == 0) ? UNK_TRUE : UNK_FALSE;
-        case UNK_PULSE_MAPPING_FPROP:;
-            unk_ticks_count_t upper = sample_window - 1;
-            if (input < sample_window / 2)
+            static unk_ticks_count_t prev_input = 0;
+            static unk_ticks_count_t prev_sample_window = 0;
+            if (prev_sample_window != sample_window)
             {
-                if ((sample_step <= 0) ||
-                    (sample_step % (upper / input) == 0))
-                {
-                    return UNK_TRUE;
-                }
+                prev_input = 0;
+                prev_sample_window = sample_window;
             }
-            else
+            unk_ticks_count_t input_diff = (input > prev_input) ? input - prev_input : prev_input - input;
+            prev_input = input;
+            if (input_diff > 0)
             {
-                if (input >= upper || sample_step % (upper / (upper - input)) != 0)
-                {
-                    return UNK_TRUE;
-                }
+                unk_ticks_count_t pulse_rate = (sample_window - input_diff) / 2;
+                return pulse_rate == 0 || sample_step % (pulse_rate + 1) == 0;
             }
-            return UNK_FALSE;
-        case UNK_PULSE_MAPPING_RPROP:;
-            double d_upper = sample_window - 1;
-            double d_input = input;
-            if ((double)input < ((double)sample_window) / 2)
-            {
-                if ((sample_step <= 0) ||
-                    sample_step % (unk_ticks_count_t)round(d_upper / d_input) == 0)
-                {
-                    return UNK_TRUE;
-                }
-            }
-            else
-            {
-                if (input >= d_upper || sample_step % (unk_ticks_count_t)round(d_upper / (d_upper - d_input)) != 0)
-                {
-                    return UNK_TRUE;
-                }
-            }
-            return UNK_FALSE;
-        case UNK_PULSE_MAPPING_DFPROP:;
-            {
-                static unk_ticks_count_t prev_input = 0;
-                unk_ticks_count_t input_diff = (input > prev_input) ? input - prev_input : prev_input - input;
-                prev_input = input;
-                if (input_diff > 0)
-                {
-                    unk_ticks_count_t pulse_rate = (sample_window - input_diff) / 2;
-                    return ((pulse_rate == 0) || (sample_step % (pulse_rate + 1) == 0)) ? UNK_TRUE : UNK_FALSE;
-                }
-                unk_ticks_count_t upper = sample_window - 1;
-                if (input < sample_window / 2)
-                {
-                    return ((input == 0) || (sample_step % (upper / (input + 1)) == 0)) ? UNK_TRUE : UNK_FALSE;
-                }
-                else
-                {
-                    return ((input >= upper) || (sample_step % (upper / (upper - input + 1)) == 0)) ? UNK_TRUE : UNK_FALSE;
-                }
-            }
+            return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
         }
     }
     return UNK_FALSE;
