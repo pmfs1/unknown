@@ -110,7 +110,7 @@ __global__ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_corte
                 // COMPUTE THE CURRENT SYNAPSE STRENGTH
                 unk_syn_strength_t syn_strength = (prev_str_mask_a & 0x01U) | ((prev_str_mask_b & 0x01U) << 0x01U) | ((prev_str_mask_c & 0x01U) << 0x02U);
                 // PICK A RANDOM NUMBER FOR EACH NEIGHBOR, CAPPED TO THE MAX UINT16 VALUE
-                next_neuron->rand_state = xorshf32(next_neuron->rand_state);
+                next_neuron->rand_state = cuda_xorshf32(next_neuron->rand_state);
                 unk_chance_t random = next_neuron->rand_state % 0xFFFFU;
                 // INVERSE OF THE CURRENT SYNAPSE STRENGTH, USEFUL WHEN COMPUTING DEPRESSION PROBABILITY (SYNAPSE DELETION AND WEAKENING)
                 unk_syn_strength_t strength_diff = UNK_MAX_SYN_STRENGTH - syn_strength;
