@@ -3,8 +3,6 @@ on:
   pull_request:
     types: [ closed ]
     branches: [ "trunk" ]
-env:
-    GH_TOKEN: ${{ github.token }}
 jobs:
   TAG:
     name: 'TAG'
@@ -19,25 +17,11 @@ jobs:
           TIME=$(date '+%H%M')
           TAG_NAME="${DATE}.${TIME}"
           echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
-      - name: 'RENAME PULL REQUEST TITLE'
-        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-        run: |
-          TAG_NAME=$(echo "${{ steps.INFER_TAG_NAME.outputs.TAG_NAME }}")
-          gh pr edit --title "TAG-${TAG_NAME}"
-      # - name: 'RENAME GITHUB_REF'
-      #   if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
-      #   run: |
-      #     TAG_NAME=$(echo "${{ steps.INFER_TAG_NAME.outputs.TAG_NAME }}")
-      #     git branch -m "${{ github.GITHUB_REF }}" "TAG-${TAG_NAME}"
-      #     git fetch origin
-      #     git branch -u origin/"TAG-${TAG_NAME}" "TAG-${TAG_NAME}"
-      #     git remote set-head origin -a
       - name: 'UPDATE LAST COMMIT & CREATE TAG'
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
           TAG_NAME=$(echo "${{ steps.INFER_TAG_NAME.outputs.TAG_NAME }}")
           git checkout "${{ github.GITHUB_BASE_REF }}"
-          git commit --amend -m "TAG-${TAG_NAME}" -S
           git tag "${TAG_NAME}"
           git push --force origin HEAD:"${{ github.GITHUB_BASE_REF }}"
           git push origin "${TAG_NAME}"
