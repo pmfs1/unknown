@@ -23,6 +23,150 @@ __host__ __device__ uint32_t cuda_xorshf32(uint32_t state)
     return x;
 }
 
+// ########################################## INITIALIZATION FUNCTIONS ##########################################
+
+/// @brief COMPUTES AND RETURNS THE GRID SIZE TO ALLOCATE ON DEVICE.
+/// @param cortex THE CORTEX TO COMPUTE THE GRID SIZE FOR
+/// @return THE GRID SIZE TO ALLOCATE ON DEVICE
+/// NOTE: THE PASSED CORTEX MUST BE INITIALIZED BEFORE THIS FUNCTION IS CALLED, OTHERWISE AN ERROR MAY OCCUR.
+dim3 c2d_get_grid_size(unk_cortex2d_t *cortex)
+{
+    // CORTEX SIZE MAY NOT BE EXACTLY DIVISIBLE BY BLOCK_SIZE, SO AN EXTRA BLOCK IS ALLOCATED WHEN NEEDED.
+    dim3 result(cortex->width / BLOCK_SIZE_2D + (cortex->width % BLOCK_SIZE_2D != 0 ? 1 : 0), cortex->height / BLOCK_SIZE_2D + (cortex->height % BLOCK_SIZE_2D ? 1 : 0));
+    return result;
+}
+
+/// @brief COMPUTES AND RETURNS THE BLOCK SIZE TO ALLOCATE ON DEVICE.
+/// @param cortex THE CORTEX TO COMPUTE THE BLOCK SIZE FOR
+/// @return THE BLOCK SIZE TO ALLOCATE ON DEVICE
+/// NOTE: THE PASSED CORTEX MUST BE INITIALIZED BEFORE THIS FUNCTION IS CALLED, OTHERWISE AN ERROR MAY OCCUR.
+dim3 c2d_get_block_size(unk_cortex2d_t *cortex)
+{
+    return dim3(BLOCK_SIZE_2D, BLOCK_SIZE_2D);
+}
+
+/// @brief INITIALIZES A NEW INPUT2D STRUCTURE ON DEVICE.
+/// @param input THE INPUT2D STRUCTURE TO INITIALIZE
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t i2d_to_device(unk_input2d_t *device_input, unk_input2d_t *host_input)
+{
+    cudaError_t cuda_error;
+    unk_input2d_t *tmp_input = (unk_input2d_t *)malloc(sizeof(unk_input2d_t));
+    if (tmp_input == NULL)
+    {
+        return UNK_ERROR_FAILED_ALLOC;
+    }
+    (*tmp_input) = (*host_input);
+    cuda_error = cudaMalloc((void **)&(tmp_input->values), (host_input->x1 - host_input->x0) * (host_input->y1 - host_input->y0) * sizeof(unk_ticks_count_t));
+    CUDA_ERROR_CHECK();
+    if (cuda_error != cudaSuccess)
+    {
+        return UNK_ERROR_FAILED_ALLOC;
+    }
+    cudaMemcpy(
+        tmp_input->values,
+        host_input->values,
+        ((host_input->x1 - host_input->x0) * (host_input->y1 - host_input->y0)) * sizeof(unk_ticks_count_t),
+        cudaMemcpyHostToDevice);
+    CUDA_ERROR_CHECK();
+    cudaMemcpy(
+        device_input,
+        tmp_input,
+        sizeof(unk_input2d_t),
+        cudaMemcpyHostToDevice);
+    CUDA_ERROR_CHECK();
+    free(tmp_input);
+    return UNK_ERROR_NONE;
+}
+
+/// @brief INITIALIZES A NEW INPUT2D STRUCTURE ON HOST.
+/// @param input THE INPUT2D STRUCTURE TO INITIALIZE
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t i2d_to_host(unk_input2d_t *host_input, unk_input2d_t *device_input)
+{
+    // [TODO]
+    return UNK_ERROR_NONE;
+}
+
+/// @brief INITIALIZES A NEW CORTEX2D STRUCTURE ON DEVICE.
+/// @param cortex THE CORTEX2D STRUCTURE TO INITIALIZE
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t c2d_to_device(unk_cortex2d_t *device_cortex, unk_cortex2d_t *host_cortex)
+{
+    cudaError_t cuda_error;
+    unk_cortex2d_t *tmp_cortex = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
+    if (tmp_cortex == NULL)
+    {
+        return UNK_ERROR_FAILED_ALLOC;
+    }
+    (*tmp_cortex) = (*host_cortex);
+    cuda_error = cudaMalloc((void **)&(tmp_cortex->neurons), host_cortex->width * host_cortex->height * sizeof(unk_neuron_t));
+    CUDA_ERROR_CHECK();
+    if (cuda_error != cudaSuccess)
+    {
+        return UNK_ERROR_FAILED_ALLOC;
+    }
+    cudaMemcpy(
+        tmp_cortex->neurons,
+        host_cortex->neurons,
+        host_cortex->width * host_cortex->height * sizeof(unk_neuron_t),
+        cudaMemcpyHostToDevice);
+    CUDA_ERROR_CHECK();
+    cudaMemcpy(device_cortex, tmp_cortex, sizeof(unk_cortex2d_t), cudaMemcpyHostToDevice);
+    CUDA_ERROR_CHECK();
+    free(tmp_cortex);
+    return UNK_ERROR_NONE;
+}
+
+/// @brief INITIALIZES A NEW CORTEX2D STRUCTURE ON HOST.
+/// @param cortex THE CORTEX2D STRUCTURE TO INITIALIZE
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t c2d_to_host(unk_cortex2d_t *host_cortex, unk_cortex2d_t *device_cortex)
+{
+    unk_cortex2d_t *tmp_cortex = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
+    if (tmp_cortex == NULL)
+    {
+        return UNK_ERROR_FAILED_ALLOC;
+    }
+    cudaMemcpy(tmp_cortex, device_cortex, sizeof(unk_cortex2d_t), cudaMemcpyDeviceToHost);
+    CUDA_ERROR_CHECK();
+    (*host_cortex) = (*tmp_cortex);
+    host_cortex->neurons = (unk_neuron_t *)malloc(tmp_cortex->width * tmp_cortex->height * sizeof(unk_neuron_t));
+    cudaMemcpy(host_cortex->neurons, tmp_cortex->neurons, tmp_cortex->width * tmp_cortex->height * sizeof(unk_neuron_t), cudaMemcpyDeviceToHost);
+    CUDA_ERROR_CHECK();
+    free(tmp_cortex);
+    return UNK_ERROR_NONE;
+}
+
+/// @brief DESTROYS AN INPUT2D STRUCTURE ON DEVICE AND FREES MEMORY.
+/// @param input THE INPUT2D STRUCTURE TO DESTROY
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t i2d_device_destroy(unk_input2d_t *input)
+{
+    // [TODO]
+    return UNK_ERROR_NONE;
+}
+
+/// @brief DESTROYS A CORTEX2D STRUCTURE ON DEVICE AND FREES MEMORY.
+/// @param cortex THE CORTEX2D STRUCTURE TO DESTROY
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t c2d_device_destroy(unk_cortex2d_t *cortex)
+{
+    unk_cortex2d_t *tmp_cortex = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
+    if (tmp_cortex == NULL)
+    {
+        return UNK_ERROR_FAILED_ALLOC;
+    }
+    cudaMemcpy(tmp_cortex, cortex, sizeof(unk_cortex2d_t), cudaMemcpyDeviceToHost);
+    CUDA_ERROR_CHECK();
+    cudaFree(tmp_cortex->neurons);
+    CUDA_ERROR_CHECK();
+    free(tmp_cortex);
+    cudaFree(cortex);
+    CUDA_ERROR_CHECK();
+    return UNK_ERROR_NONE;
+}
+
 // ########################################## EXECUTION FUNCTIONS ##########################################
 
 /// @brief FEEDS A CORTEX THROUGH THE PROVIDED INPUT2D. INPUT DATA SHOULD ALREADY BE IN THE PROVIDED INPUT2D
@@ -113,7 +257,7 @@ __global__ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_corte
     // EVOLUTION STEP MECHANICS:
     // - ADD 1 TO HANDLE EDGE CASES AND ENSURE HUMAN-READABLE BEHAVIOR
     // - 0x0000 -> 1 TICK BETWEEN EVOLUTIONS (EVOLVES EVERY TICK)
-    // - 0xFFFF -> 65536 TICKS BETWEEN EVOLUTIONS (NEVER EVOLVES)     
+    // - 0xFFFF -> 65536 TICKS BETWEEN EVOLUTIONS (NEVER EVOLVES)
     bool evolve = (prev_cortex->ticks_count % (((unk_evol_step_t)prev_cortex->evol_step) + 1)) == 0;
     // PROCESS EACH NEIGHBOR IN THE DEFINED NEIGHBORHOOD
     for (unk_nh_radius_t j = 0; j < nh_diameter; j++)
@@ -277,13 +421,15 @@ __host__ __device__ static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t s
 {
     if (input < upper / 2)
     {
-        if (input == 0) return UNK_TRUE;
+        if (input == 0)
+            return UNK_TRUE;
         unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)input) : upper / input;
         return (step % div == 0) ? UNK_TRUE : UNK_FALSE;
     }
     else
     {
-        if (input >= upper) return UNK_TRUE;
+        if (input >= upper)
+            return UNK_TRUE;
         unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)(upper - input)) : upper / (upper - input);
         return (step % div != 0) ? UNK_TRUE : UNK_FALSE;
     }
@@ -303,34 +449,35 @@ __host__ __device__ static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t s
 __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
                                               unk_ticks_count_t input, unk_pulse_mapping_t pulse_mapping)
 {
-    if (input >= sample_window) return UNK_FALSE;
+    if (input >= sample_window)
+        return UNK_FALSE;
     const unk_ticks_count_t upper = sample_window - 1;
     switch (pulse_mapping)
     {
-        case UNK_PULSE_MAPPING_LINEAR:
-            return (input < sample_window && sample_step % (sample_window - input) == 0) ? UNK_TRUE : UNK_FALSE;
-        case UNK_PULSE_MAPPING_FPROP:
-            return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
-        case UNK_PULSE_MAPPING_RPROP:
-            return calc_prop_pulse(sample_step, input, upper, UNK_TRUE);
-        case UNK_PULSE_MAPPING_DFPROP:
+    case UNK_PULSE_MAPPING_LINEAR:
+        return (input < sample_window && sample_step % (sample_window - input) == 0) ? UNK_TRUE : UNK_FALSE;
+    case UNK_PULSE_MAPPING_FPROP:
+        return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
+    case UNK_PULSE_MAPPING_RPROP:
+        return calc_prop_pulse(sample_step, input, upper, UNK_TRUE);
+    case UNK_PULSE_MAPPING_DFPROP:
+    {
+        static unk_ticks_count_t prev_input = 0;
+        static unk_ticks_count_t prev_sample_window = 0;
+        if (prev_sample_window != sample_window)
         {
-            static unk_ticks_count_t prev_input = 0;
-            static unk_ticks_count_t prev_sample_window = 0;
-            if (prev_sample_window != sample_window)
-            {
-                prev_input = 0;
-                prev_sample_window = sample_window;
-            }
-            unk_ticks_count_t input_diff = (input > prev_input) ? input - prev_input : prev_input - input;
-            prev_input = input;
-            if (input_diff > 0)
-            {
-                unk_ticks_count_t pulse_rate = (sample_window - input_diff) / 2;
-                return (pulse_rate == 0 || sample_step % (pulse_rate + 1) == 0) ? UNK_TRUE : UNK_FALSE;
-            }
-            return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
+            prev_input = 0;
+            prev_sample_window = sample_window;
         }
+        unk_ticks_count_t input_diff = (input > prev_input) ? input - prev_input : prev_input - input;
+        prev_input = input;
+        if (input_diff > 0)
+        {
+            unk_ticks_count_t pulse_rate = (sample_window - input_diff) / 2;
+            return (pulse_rate == 0 || sample_step % (pulse_rate + 1) == 0) ? UNK_TRUE : UNK_FALSE;
+        }
+        return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
+    }
     }
     return UNK_FALSE;
 }

@@ -5,6 +5,17 @@
 #include "population.h"
 #include "error.h"
 
+#define CUDA_ERROR_CHECK() { \
+    cudaError_t e = cudaGetLastError(); \
+    if (e != cudaSuccess) { \
+        printf("Cuda failure %s(%d): %d(%s)\n", __FILE__, __LINE__ - 1, e, cudaGetErrorString(e)); \
+        exit(0); \
+    } \
+}
+
+/// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
+__host__ __device__ uint32_t cuda_xorshf32(uint32_t state);
+
 // DEFAULT BLOCK SIZES FOR 1D, 2D AND 3D KERNEL EXECUTIONS.
 // BLOCK SIZES ARE DESIGNED NOT TO EXCEED THE 1024 THREAD PER BLOCK LIMIT IN THE CUDA ARCHITECTURE.
 // BLOCK SIZE 1D: 256 THREADS PER BLOCK.
@@ -13,6 +24,50 @@
 #define BLOCK_SIZE_1D 256
 #define BLOCK_SIZE_2D 32
 #define BLOCK_SIZE_3D 8
+
+// ########################################## INITIALIZATION FUNCTIONS ##########################################
+
+/// @brief COMPUTES AND RETURNS THE GRID SIZE TO ALLOCATE ON DEVICE.
+/// @param cortex THE CORTEX TO COMPUTE THE GRID SIZE FOR
+/// @return THE GRID SIZE TO ALLOCATE ON DEVICE
+/// NOTE: THE PASSED CORTEX MUST BE INITIALIZED BEFORE THIS FUNCTION IS CALLED, OTHERWISE AN ERROR MAY OCCUR.
+dim3 c2d_get_grid_size(unk_cortex2d_t *cortex);
+
+/// @brief COMPUTES AND RETURNS THE BLOCK SIZE TO ALLOCATE ON DEVICE.
+/// @param cortex THE CORTEX TO COMPUTE THE BLOCK SIZE FOR
+/// @return THE BLOCK SIZE TO ALLOCATE ON DEVICE
+/// NOTE: THE PASSED CORTEX MUST BE INITIALIZED BEFORE THIS FUNCTION IS CALLED, OTHERWISE AN ERROR MAY OCCUR.
+dim3 c2d_get_block_size(unk_cortex2d_t *cortex);
+
+/// @brief INITIALIZES A NEW INPUT2D STRUCTURE ON DEVICE.
+/// @param input THE INPUT2D STRUCTURE TO INITIALIZE
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t i2d_to_device(unk_input2d_t *device_input, unk_input2d_t *host_input);
+
+/// @brief INITIALIZES A NEW INPUT2D STRUCTURE ON HOST.
+/// @param input THE INPUT2D STRUCTURE TO INITIALIZE
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t i2d_to_host(unk_input2d_t *host_input, unk_input2d_t *device_input);
+
+/// @brief INITIALIZES A NEW CORTEX2D STRUCTURE ON DEVICE.
+/// @param cortex THE CORTEX2D STRUCTURE TO INITIALIZE
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t c2d_to_device(unk_cortex2d_t *device_cortex, unk_cortex2d_t *host_cortex);
+
+/// @brief INITIALIZES A NEW CORTEX2D STRUCTURE ON HOST.
+/// @param cortex THE CORTEX2D STRUCTURE TO INITIALIZE
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t c2d_to_host(unk_cortex2d_t *host_cortex, unk_cortex2d_t *device_cortex);
+
+/// @brief DESTROYS AN INPUT2D STRUCTURE ON DEVICE AND FREES MEMORY.
+/// @param input THE INPUT2D STRUCTURE TO DESTROY
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t i2d_device_destroy(unk_input2d_t *input);
+
+/// @brief DESTROYS A CORTEX2D STRUCTURE ON DEVICE AND FREES MEMORY.
+/// @param cortex THE CORTEX2D STRUCTURE TO DESTROY
+/// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
+unk_error_code_t c2d_device_destroy(unk_cortex2d_t *cortex);
 
 // ########################################## EXECUTION FUNCTIONS ##########################################
 
