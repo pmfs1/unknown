@@ -9,7 +9,7 @@ ARC_FLAGS=-rcs
 ifdef CUDA_ARCH
 	CUDA_ARCH_FLAG=-arch=$(CUDA_ARCH)
 else
-	CUDA_ARCH_FLAG=-arch=sm_35
+	CUDA_ARCH_FLAG=-arch=sm_52
 endif
 
 MODE=

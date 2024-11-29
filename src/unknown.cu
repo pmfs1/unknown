@@ -194,13 +194,13 @@ __host__ __device__ static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t s
     {
         if (input == 0) return UNK_TRUE;
         unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)input) : upper / input;
-        return step % div == 0;
+        return (step % div == 0) ? UNK_TRUE : UNK_FALSE;
     }
     else
     {
         if (input >= upper) return UNK_TRUE;
         unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)(upper - input)) : upper / (upper - input);
-        return step % div != 0;
+        return (step % div != 0) ? UNK_TRUE : UNK_FALSE;
     }
 }
 
@@ -223,7 +223,7 @@ __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, u
     switch (pulse_mapping)
     {
         case UNK_PULSE_MAPPING_LINEAR:
-            return input < sample_window && sample_step % (sample_window - input) == 0;
+            return (input < sample_window && sample_step % (sample_window - input) == 0) ? UNK_TRUE : UNK_FALSE;
         case UNK_PULSE_MAPPING_FPROP:
             return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
         case UNK_PULSE_MAPPING_RPROP:
@@ -242,7 +242,7 @@ __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, u
             if (input_diff > 0)
             {
                 unk_ticks_count_t pulse_rate = (sample_window - input_diff) / 2;
-                return pulse_rate == 0 || sample_step % (pulse_rate + 1) == 0;
+                return (pulse_rate == 0 || sample_step % (pulse_rate + 1) == 0) ? UNK_TRUE : UNK_FALSE;
             }
             return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
         }
