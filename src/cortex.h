@@ -330,38 +330,6 @@ extern "C"
     /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
     unk_error_code_t c2d_copy(unk_cortex2d_t *to, unk_cortex2d_t *from);
 
-    #ifdef __CUDACC__
-        /// @brief COMPUTES AND RETURNS THE GRID SIZE TO ALLOCATE ON DEVICE.
-        /// @param cortex THE CORTEX TO COMPUTE THE GRID SIZE FOR.
-        /// @return THE GRID SIZE TO ALLOCATE ON DEVICE.
-        /// @note THE PASSED CORTEX MUST BE INITIALIZED BEFORE THIS FUNCTION IS CALLED, OTHERWISE AN ERROR MAY OCCUR.
-        dim3 c2d_get_grid_size(unk_cortex2d_t *cortex);
-
-        /// @brief COMPUTES AND RETURNS THE BLOCK SIZE TO ALLOCATE ON DEVICE.
-        /// @param cortex THE CORTEX TO COMPUTE THE BLOCK SIZE FOR.
-        /// @return THE BLOCK SIZE TO ALLOCATE ON DEVICE.
-        /// @note THE PASSED CORTEX MUST BE INITIALIZED BEFORE THIS FUNCTION IS CALLED, OTHERWISE AN ERROR MAY OCCUR.
-        dim3 c2d_get_block_size(unk_cortex2d_t *cortex);
-        
-        /// @brief COPIES AN INPUT2D FROM HOST TO DEVICE.
-        unk_error_code_t i2d_to_device(unk_input2d_t *device_input, unk_input2d_t *host_input);
-        
-        /// @brief COPIES AN INPUT2D FROM DEVICE TO HOST.
-        unk_error_code_t i2d_to_host(unk_input2d_t *host_input, unk_input2d_t *device_input);
-        
-        /// @brief COPIES A CORTEX2D FROM HOST TO DEVICE.
-        unk_error_code_t c2d_to_device(unk_cortex2d_t *device_cortex, unk_cortex2d_t *host_cortex);
-        
-        /// @brief COPIES A CORTEX2D FROM DEVICE TO HOST.
-        unk_error_code_t c2d_to_host(unk_cortex2d_t *host_cortex, unk_cortex2d_t *device_cortex);
-        
-        /// @brief DESTROYS AN INPUT2D ON DEVICE.
-        unk_error_code_t i2d_device_destroy(unk_input2d_t *input);
-        
-        /// @brief DESTROYS A CORTEX2D ON DEVICE.
-        unk_error_code_t c2d_device_destroy(unk_cortex2d_t *cortex);
-    #endif // __CUDACC__
-
     // ################################################ SETTER FUNCTIONS ################################################
 
     /// @brief SETS THE NEIGHBORHOOD RADIUS FOR ALL NEURONS IN THE CORTEX.
