@@ -1,5 +1,5 @@
-#ifndef __UNKNOWN_STD__
-#define __UNKNOWN_STD__
+#ifndef __UNKNOWN__
+#define __UNKNOWN__
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -8,7 +8,6 @@
 #include <math.h>
 #include "cortex.h"
 #include "population.h"
-#include "error.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -54,4 +53,4 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-#endif // __UNKNOWN_STD__
+#endif // __UNKNOWN__
