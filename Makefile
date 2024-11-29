@@ -9,12 +9,12 @@ ARC_FLAGS=-rcs
 ifdef CUDA_ARCH
 	CUDA_ARCH_FLAG=-arch=$(CUDA_ARCH)
 else
-	CUDA_ARCH_FLAG=
+	CUDA_ARCH_FLAG=-arch=sm_35
 endif
 
 MODE=
-NVCOMP_FLAGS=--compiler-options '-fPIC' -G $(CUDA_ARCH_FLAG)
-NVLINK_FLAGS=$(CUDA_ARCH_FLAG)
+NVCOMP_FLAGS=--compiler-options '-fPIC' -G $(CUDA_ARCH_FLAG) -I/usr/local/cuda/include
+NVLINK_FLAGS=$(CUDA_ARCH_FLAG) -L/usr/local/cuda/lib64
 STD_LIBS=-lm
 CUDA_STD_LIBS=-lcudart
 SRC_DIR=./src
@@ -43,6 +43,7 @@ install: std-install cuda-install
 install-headers:
 	sudo $(MKDIR) $(SYSTEM_INCLUDE_DIR)/unknown
 	sudo cp $(SRC_DIR)/*.h $(SYSTEM_INCLUDE_DIR)/unknown
+	sudo cp $(SRC_DIR)/*.cuh $(SYSTEM_INCLUDE_DIR)/unknown
 
 install-lib:
 ifneq ($(MODE), archive)
@@ -75,7 +76,7 @@ cuda-build: cortex.o population.o unknown.cuda.o
 	$(CCOMP) $(CCOMP_FLAGS) -c $^ -o $(BIN_DIR)/$@
 
 %.cuda.o: $(SRC_DIR)/%.cu
-	$(NVCOMP) $(NVCOMP_FLAGS) -c $^ -o $(BIN_DIR)/$@
+	$(NVCOMP) $(NVCOMP_FLAGS) -c $< -o $(BIN_DIR)/$@
 
 create:
 	$(MKDIR) $(BIN_DIR)
