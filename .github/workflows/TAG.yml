@@ -3,6 +3,8 @@ on:
   pull_request:
     types: [ closed ]
     branches: [ "trunk" ]
+env:
+    GH_TOKEN: ${{ github.token }}
 jobs:
   TAG:
     name: 'TAG'

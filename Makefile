@@ -9,12 +9,12 @@ ARC_FLAGS=-rcs
 ifdef CUDA_ARCH
 	CUDA_ARCH_FLAG=-arch=$(CUDA_ARCH)
 else
-	CUDA_ARCH_FLAG=
+	CUDA_ARCH_FLAG=-arch=sm_52
 endif
 
 MODE=
-NVCOMP_FLAGS=--compiler-options '-fPIC' -G $(CUDA_ARCH_FLAG)
-NVLINK_FLAGS=$(CUDA_ARCH_FLAG)
+NVCOMP_FLAGS=--compiler-options '-fPIC' -G $(CUDA_ARCH_FLAG) -I/usr/local/cuda/include
+NVLINK_FLAGS=$(CUDA_ARCH_FLAG) -L/usr/local/cuda/lib64
 STD_LIBS=-lm
 CUDA_STD_LIBS=-lcudart
 SRC_DIR=./src
@@ -36,13 +36,14 @@ ifeq ($(UNAME_S),Darwin)
 	SYSTEM_LIB_DIR=/usr/local/lib
 endif
 
-all: std
+all: std cuda
 
-install: std-install
+install: std-install cuda-install
 
 install-headers:
 	sudo $(MKDIR) $(SYSTEM_INCLUDE_DIR)/unknown
 	sudo cp $(SRC_DIR)/*.h $(SYSTEM_INCLUDE_DIR)/unknown
+	sudo cp $(SRC_DIR)/*.cuh $(SYSTEM_INCLUDE_DIR)/unknown
 
 install-lib:
 ifneq ($(MODE), archive)
@@ -63,23 +64,24 @@ uninstall: clean
 std: create std-build
 cuda: create cuda-build
 
-std-build: cortex.o population.o unknown_std.o
+std-build: cortex.o population.o unknown.o
 	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BIN_DIR)/libunknown.so
 	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
 
-cuda-build: cortex.o population.o unknown_cuda.o
+cuda-build: cortex.o population.o unknown.cuda.o
 	$(NVCOMP) $(NVLINK_FLAGS) -shared $(OBJS) $(CUDA_STD_LIBS) -o $(BIN_DIR)/libunknown.so
 	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
 
 %.o: $(SRC_DIR)/%.c
 	$(CCOMP) $(CCOMP_FLAGS) -c $^ -o $(BIN_DIR)/$@
 
-%.o: $(SRC_DIR)/%.cu
-	$(NVCOMP) $(NVCOMP_FLAGS) -c $^ -o $(BIN_DIR)/$@
+%.cuda.o: $(SRC_DIR)/%.cu
+	$(NVCOMP) $(NVCOMP_FLAGS) -c $< -o $(BIN_DIR)/$@
 
 create:
 	$(MKDIR) $(BIN_DIR)
 	$(MKDIR) $(BIN_DIR)
+	bash -c "sudo apt-get update -y && sudo apt install make gcc g++ nvidia-cuda-toolkit -y"
 
 clean:
 	$(RM) $(BIN_DIR)
