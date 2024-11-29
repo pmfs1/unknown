@@ -271,8 +271,8 @@ extern "C"
     /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
     __host__ __device__ uint32_t xorshf32(uint32_t state);
 #else
-/// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
-uint32_t xorshf32(uint32_t state);
+    /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
+    uint32_t xorshf32(uint32_t state);
 #endif // __CUDACC__
 
     // ################################################ INITIALIZATION FUNCTIONS ################################################
