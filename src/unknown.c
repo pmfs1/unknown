@@ -246,6 +246,29 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
 
 // ########################################## INPUT MAPPING FUNCTIONS ##########################################
 
+/// @brief CALCULATES THE PULSE PATTERN FOR THE DIFFERENTIAL FAST PROPORTIONAL MAPPING ALGORITHM
+/// @param step THE CURRENT STEP POSITION IN THE WINDOW
+/// @param input THE INPUT VALUE TO MAP
+/// @param upper THE UPPER BOUND OF THE SAMPLING WINDOW
+/// @param rounded TRUE IF THE DIVISION SHOULD BE ROUNDED, FALSE OTHERWISE
+/// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
+static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t step, unk_ticks_count_t input,
+                                         unk_ticks_count_t upper, unk_bool_t rounded)
+{
+    if (input < upper / 2)
+    {
+        if (input == 0) return UNK_TRUE;
+        unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)input) : upper / input;
+        return step % div == 0;
+    }
+    else
+    {
+        if (input >= upper) return UNK_TRUE;
+        unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)(upper - input)) : upper / (upper - input);
+        return step % div != 0;
+    }
+}
+
 /// @brief MAPS AN INPUT VALUE TO A PULSE PATTERN USING THE SPECIFIED MAPPING ALGORITHM
 /// ALL MAPPING ALGORITHMS ARE IMPLEMENTED WITHIN THIS SINGLE FUNCTION:
 /// - LINEAR: SIMPLE UNIFORM DISTRIBUTION WITH MINIMUM ONE PULSE;
@@ -290,27 +313,4 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
         }
     }
     return UNK_FALSE;
-}
-
-/// @brief CALCULATES THE PULSE PATTERN FOR THE DIFFERENTIAL FAST PROPORTIONAL MAPPING ALGORITHM
-/// @param step THE CURRENT STEP POSITION IN THE WINDOW
-/// @param input THE INPUT VALUE TO MAP
-/// @param upper THE UPPER BOUND OF THE SAMPLING WINDOW
-/// @param rounded TRUE IF THE DIVISION SHOULD BE ROUNDED, FALSE OTHERWISE
-/// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
-static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t step, unk_ticks_count_t input,
-                                         unk_ticks_count_t upper, unk_bool_t rounded)
-{
-    if (input < upper / 2)
-    {
-        if (input == 0) return UNK_TRUE;
-        unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)input) : upper / input;
-        return step % div == 0;
-    }
-    else
-    {
-        if (input >= upper) return UNK_TRUE;
-        unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)(upper - input)) : upper / (upper - input);
-        return step % div != 0;
-    }
 }
