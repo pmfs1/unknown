@@ -1,171 +1,5 @@
 #include "unknown.h"
 
-// ########################################## INITIALIZATION FUNCTIONS FUNCTIONS ##########################################
-
-dim3 c2d_get_grid_size(unk_cortex2d_t *cortex)
-{
-    // Cortex size may not be exactly divisible by BLOCK_SIZE, so an extra block is allocated when needed.
-    dim3 result(cortex->width / BLOCK_SIZE_2D + (cortex->width % BLOCK_SIZE_2D != 0 ? 1 : 0), cortex->height / BLOCK_SIZE_2D + (cortex->height % BLOCK_SIZE_2D ? 1 : 0));
-    return result;
-}
-
-dim3 c2d_get_block_size(unk_cortex2d_t *cortex)
-{
-    return dim3(BLOCK_SIZE_2D, BLOCK_SIZE_2D);
-}
-
-unk_error_code_t i2d_to_device(unk_input2d_t *device_input, unk_input2d_t *host_input)
-{
-    cudaError_t cuda_error;
-
-    // Allocate tmp input on the host.
-    unk_input2d_t *tmp_input = (unk_input2d_t *)malloc(sizeof(unk_input2d_t));
-    if (tmp_input == NULL)
-    {
-        return UNK_ERROR_FAILED_ALLOC;
-    }
-
-    // Copy host input to tmp input.
-    (*tmp_input) = (*host_input);
-
-    // Allocate values on the device.
-    cuda_error = cudaMalloc((void **)&(tmp_input->values), (host_input->x1 - host_input->x0) * (host_input->y1 - host_input->y0) * sizeof(unk_ticks_count_t));
-    cudaCheckError();
-    if (cuda_error != cudaSuccess)
-    {
-        return UNK_ERROR_FAILED_ALLOC;
-    }
-
-    // Copy values to device.
-    cudaMemcpy(
-        tmp_input->values,
-        host_input->values,
-        ((host_input->x1 - host_input->x0) * (host_input->y1 - host_input->y0)) * sizeof(unk_ticks_count_t),
-        cudaMemcpyHostToDevice);
-    cudaCheckError();
-
-    // Copy tmp input to device.
-    cudaMemcpy(
-        device_input,
-        tmp_input,
-        sizeof(unk_input2d_t),
-        cudaMemcpyHostToDevice);
-    cudaCheckError();
-
-    // Cleanup.
-    free(tmp_input);
-
-    return UNK_ERROR_NONE;
-}
-
-unk_error_code_t i2d_to_host(unk_input2d_t *host_input, unk_input2d_t *device_input)
-{
-    // TODO
-    return UNK_ERROR_NONE;
-}
-
-unk_error_code_t c2d_to_device(unk_cortex2d_t *device_cortex, unk_cortex2d_t *host_cortex)
-{
-    cudaError_t cuda_error;
-
-    // Allocate tmp cortex on the host.
-    unk_cortex2d_t *tmp_cortex = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
-    if (tmp_cortex == NULL)
-    {
-        return UNK_ERROR_FAILED_ALLOC;
-    }
-
-    // Copy host cortex to tmp cortex.
-    (*tmp_cortex) = (*host_cortex);
-
-    // Allocate neurons on the device.
-    cuda_error = cudaMalloc((void **)&(tmp_cortex->neurons), host_cortex->width * host_cortex->height * sizeof(unk_neuron_t));
-    cudaCheckError();
-    if (cuda_error != cudaSuccess)
-    {
-        return UNK_ERROR_FAILED_ALLOC;
-    }
-
-    // Copy neurons to device.
-    cudaMemcpy(
-        tmp_cortex->neurons,
-        host_cortex->neurons,
-        host_cortex->width * host_cortex->height * sizeof(unk_neuron_t),
-        cudaMemcpyHostToDevice);
-    cudaCheckError();
-
-    // Copy tmp cortex to device.
-    cudaMemcpy(device_cortex, tmp_cortex, sizeof(unk_cortex2d_t), cudaMemcpyHostToDevice);
-    cudaCheckError();
-
-    // Cleanup.
-    free(tmp_cortex);
-
-    return UNK_ERROR_NONE;
-}
-
-unk_error_code_t c2d_to_host(unk_cortex2d_t *host_cortex, unk_cortex2d_t *device_cortex)
-{
-    // Allocate tmp cortex on the host.
-    unk_cortex2d_t *tmp_cortex = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
-    if (tmp_cortex == NULL)
-    {
-        return UNK_ERROR_FAILED_ALLOC;
-    }
-
-    // Copy tmp cortex to device.
-    cudaMemcpy(tmp_cortex, device_cortex, sizeof(unk_cortex2d_t), cudaMemcpyDeviceToHost);
-    cudaCheckError();
-
-    // Copy tmp cortex to host cortex.
-    (*host_cortex) = (*tmp_cortex);
-
-    // Allocate neurons on the host.
-    host_cortex->neurons = (unk_neuron_t *)malloc(tmp_cortex->width * tmp_cortex->height * sizeof(unk_neuron_t));
-
-    // Copy tmp cortex neurons (still on device) to host cortex.
-    cudaMemcpy(host_cortex->neurons, tmp_cortex->neurons, tmp_cortex->width * tmp_cortex->height * sizeof(unk_neuron_t), cudaMemcpyDeviceToHost);
-    cudaCheckError();
-
-    // Cleanup.
-    free(tmp_cortex);
-
-    return UNK_ERROR_NONE;
-}
-
-unk_error_code_t i2d_device_destroy(unk_input2d_t *input)
-{
-    // TODO
-    return UNK_ERROR_NONE;
-}
-
-unk_error_code_t c2d_device_destroy(unk_cortex2d_t *cortex)
-{
-    // Allocate tmp cortex on the host.
-    unk_cortex2d_t *tmp_cortex = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
-    if (tmp_cortex == NULL)
-    {
-        return UNK_ERROR_FAILED_ALLOC;
-    }
-
-    // Copy device cortex to host in order to free its neurons.
-    cudaMemcpy(tmp_cortex, cortex, sizeof(unk_cortex2d_t), cudaMemcpyDeviceToHost);
-    cudaCheckError();
-
-    // Free device neurons.
-    cudaFree(tmp_cortex->neurons);
-    cudaCheckError();
-
-    // Free tmp cortex.
-    free(tmp_cortex);
-
-    // Finally free device cortex.
-    cudaFree(cortex);
-    cudaCheckError();
-
-    return UNK_ERROR_NONE;
-}
-
 // ########################################## EXECUTION FUNCTIONS ##########################################
 
 __global__ void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
@@ -282,7 +116,7 @@ __global__ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_corte
                                                   ((prev_str_mask_c & 0x01U) << 0x02U);
 
                 // Pick a random number for each neighbor, capped to the max uint16 value.
-                next_neuron->rand_state = cuda_xorshf32(next_neuron->rand_state);
+                next_neuron->rand_state = xorshf32(next_neuron->rand_state);
                 unk_chance_t random = next_neuron->rand_state % 0xFFFFU;
 
                 // Inverse of the current synapse strength, useful when computing depression probability (synapse deletion and weakening).
@@ -427,117 +261,64 @@ __global__ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_corte
 
 __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input, unk_pulse_mapping_t pulse_mapping)
 {
-    unk_bool_t result = UNK_FALSE;
-
-    // Make sure the provided input correctly lies inside the provided window.
     if (input < sample_window)
     {
+        unk_ticks_count_t upper = sample_window - 1;
         switch (pulse_mapping)
         {
-        case UNK_PULSE_MAPPING_LINEAR:
-            result = value_to_pulse_linear(sample_window, sample_step, input);
-            break;
-        case UNK_PULSE_MAPPING_FPROP:
-            result = value_to_pulse_fprop(sample_window, sample_step, input);
-            break;
-        case UNK_PULSE_MAPPING_RPROP:
-            result = value_to_pulse_rprop(sample_window, sample_step, input);
-            break;
-        default:
-            break;
+        case UNK_PULSE_MAPPING_LINEAR: ;
+            return (sample_step % (sample_window - input) == 0) ? UNK_TRUE : UNK_FALSE;
+        case UNK_PULSE_MAPPING_FPROP: ;
+            if (input < sample_window / 2)
+            {
+                if ((sample_step == 0) ||
+                    (input > 0 && sample_step % (upper / input) == 0))
+                {
+                    return UNK_TRUE;
+                }
+            }
+            else
+            {
+                if (input >= upper || sample_step % (upper / (upper - input)) != 0)
+                {
+                    return UNK_TRUE;
+                }
+            }
+            return UNK_FALSE;
+        case UNK_PULSE_MAPPING_RPROP: ;
+            if (input < sample_window / 2)
+            {
+                if ((sample_step == 0) ||
+                    (input > 0 && sample_step % (upper / input) == 0))
+                {
+                    return UNK_TRUE;
+                }
+            }
+            else
+            {
+                if (input >= upper || sample_step % (upper / (upper - input)) != 0)
+                {
+                    return UNK_TRUE;
+                }
+            }
+            return UNK_FALSE;
+        case UNK_PULSE_MAPPING_DFPROP: ;
+            if (input < sample_window / 2)
+            {
+                if ((sample_step == 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0))
+                {
+                    return UNK_TRUE;
+                }
+            }
+            else
+            {
+                if (input >= upper || sample_step % (upper / ((upper - input) * 2)) != 0)
+                {
+                    return UNK_TRUE;
+                }
+            }
+            return UNK_FALSE;
         }
     }
-
-    return result;
-}
-
-__host__ __device__ unk_bool_t value_to_pulse_linear(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input)
-{
-    // sample_window = 10;
-    // x = input;
-    // |@| | | | | | | | | | -> x = 0;
-    // |@| | | | | | | | |@| -> x = 1;
-    // |@| | | | | | | |@| | -> x = 2;
-    // |@| | | | | | |@| | | -> x = 3;
-    // |@| | | | | |@| | | | -> x = 4;
-    // |@| | | | |@| | | | | -> x = 5;
-    // |@| | | |@| | | |@| | -> x = 6;
-    // |@| | |@| | |@| | |@| -> x = 7;
-    // |@| |@| |@| |@| |@| | -> x = 8;
-    // |@|@|@|@|@|@|@|@|@|@| -> x = 9;
-    return (sample_step % (sample_window - input) == 0) ? UNK_TRUE : UNK_FALSE;
-}
-
-__host__ __device__ unk_bool_t value_to_pulse_fprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input)
-{
-    unk_bool_t result = UNK_FALSE;
-    unk_ticks_count_t upper = sample_window - 1;
-
-    // sample_window = 10;
-    // upper = sample_window - 1 = 9;
-    // x = input;
-    // |@| | | | | | | | | | -> x = 0;
-    // |@| | | | | | | | |@| -> x = 1;
-    // |@| | | |@| | | |@| | -> x = 2;
-    // |@| | |@| | |@| | |@| -> x = 3;
-    // |@| |@| |@| |@| |@| | -> x = 4;
-    // | |@| |@| |@| |@| |@| -> x = 5;
-    // | |@|@| |@|@| |@|@| | -> x = 6;
-    // | |@|@|@| |@|@|@| |@| -> x = 7;
-    // | |@|@|@|@|@|@|@|@| | -> x = 8;
-    // | |@|@|@|@|@|@|@|@|@| -> x = 9;
-    if (input < sample_window / 2)
-    {
-        if ((sample_step <= 0) ||
-            (sample_step % (upper / input) == 0))
-        {
-            result = UNK_TRUE;
-        }
-    }
-    else
-    {
-        if (input >= upper || sample_step % (upper / (upper - input)) != 0)
-        {
-            result = UNK_TRUE;
-        }
-    }
-
-    return result;
-}
-
-__host__ __device__ unk_bool_t value_to_pulse_rprop(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input)
-{
-    unk_bool_t result = UNK_FALSE;
-    double upper = sample_window - 1;
-    double d_input = input;
-
-    // sample_window = 10;
-    // upper = sample_window - 1 = 9;
-    // |@| | | | | | | | | | -> x = 0;
-    // |@| | | | | | | | |@| -> x = 1;
-    // |@| | | | |@| | | | | -> x = 2;
-    // |@| | |@| | |@| | |@| -> x = 3;
-    // |@| |@| |@| |@| |@| | -> x = 4;
-    // | |@| |@| |@| |@| |@| -> x = 5;
-    // | |@|@| |@|@| |@|@| | -> x = 6;
-    // | |@|@|@|@| |@|@|@|@| -> x = 7;
-    // | |@|@|@|@|@|@|@|@| | -> x = 8;
-    // | |@|@|@|@|@|@|@|@|@| -> x = 9;
-    if ((double)input < ((double)sample_window) / 2)
-    {
-        if ((sample_step <= 0) ||
-            sample_step % (unk_ticks_count_t)round(upper / d_input) == 0)
-        {
-            result = UNK_TRUE;
-        }
-    }
-    else
-    {
-        if (input >= upper || sample_step % (unk_ticks_count_t)round(upper / (upper - d_input)) != 0)
-        {
-            result = UNK_TRUE;
-        }
-    }
-
-    return result;
+    return UNK_FALSE;
 }

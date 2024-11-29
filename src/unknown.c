@@ -313,7 +313,7 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
         case UNK_PULSE_MAPPING_FPROP:;
             if (input < sample_window / 2)
             {
-                if ((sample_step = 0) ||
+                if ((sample_step == 0) ||
                     (input > 0 && sample_step % (upper / input) == 0))
                 {
                     return UNK_TRUE;

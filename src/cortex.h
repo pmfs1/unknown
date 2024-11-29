@@ -269,7 +269,7 @@ extern "C"
 
     #ifdef __CUDACC__
         /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
-        __host__ __device__ uint32_t cuda_xorshf32(uint32_t state);
+        __host__ __device__ uint32_t xorshf32(uint32_t state);
     #else
         /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
         uint32_t xorshf32(uint32_t state);
