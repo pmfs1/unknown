@@ -11,13 +11,7 @@ jobs:
     steps:
     - name: 'CHECKOUT'
       uses: actions/checkout@v4
-    - name: 'INSTALL STD'
+    - name: 'INSTALL'
       run: make std
-    - name: 'INSTALL CUDA'
-      run: make cuda
-    - name: 'INSTALL HEADERS'
-      run: make install-headers
-    - name: 'INSTALL LIB'
-      run: make install-lib
     - name: 'UNINSTALL'
       run: make uninstall
