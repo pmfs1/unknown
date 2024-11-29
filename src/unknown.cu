@@ -199,9 +199,9 @@ __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, u
     {
         switch (pulse_mapping)
         {
-            case UNK_PULSE_MAPPING_LINEAR: ;
+            case UNK_PULSE_MAPPING_LINEAR:;
                 return (sample_step % (sample_window - input) == 0) ? UNK_TRUE : UNK_FALSE;
-            case UNK_PULSE_MAPPING_FPROP: ;
+            case UNK_PULSE_MAPPING_FPROP:;
                 unk_ticks_count_t upper = sample_window - 1;
                 if (input < sample_window / 2)
                 {
@@ -219,7 +219,7 @@ __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, u
                     }
                 }
                 return UNK_FALSE;
-            case UNK_PULSE_MAPPING_RPROP: ;
+            case UNK_PULSE_MAPPING_RPROP:;
                 double d_upper = sample_window - 1;
                 double d_input = input;
                 if ((double)input < ((double)sample_window) / 2)
@@ -238,9 +238,22 @@ __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, u
                     }
                 }
                 return UNK_FALSE;
-            case UNK_PULSE_MAPPING_DFPROP: ;
-                return UNK_FALSE;
-                // [TODO] IMPLEMENT DIFFERENTIAL FAST PROPORTIONAL MAPPING
+            case UNK_PULSE_MAPPING_DFPROP:;
+                {
+                    static unk_ticks_count_t prev_input = 0;
+                    unk_ticks_count_t input_diff = (input > prev_input) ? input - prev_input : prev_input - input;
+                    prev_input = input;
+                    if (input_diff > 0) {
+                        unk_ticks_count_t pulse_rate = (sample_window - input_diff) / 2;
+                        return ((pulse_rate == 0) || (sample_step % (pulse_rate + 1) == 0)) ? UNK_TRUE : UNK_FALSE;
+                    }
+                    unk_ticks_count_t upper = sample_window - 1;
+                    if (input < sample_window / 2) {
+                        return ((input == 0) || (sample_step % (upper / (input + 1)) == 0)) ? UNK_TRUE : UNK_FALSE;
+                    } else {
+                        return ((input >= upper) || (sample_step % (upper / (upper - input + 1)) == 0)) ? UNK_TRUE : UNK_FALSE;
+                    }
+                }
         }
     }
     return UNK_FALSE;
