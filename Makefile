@@ -36,7 +36,7 @@ ifeq ($(UNAME_S),Darwin)
 	SYSTEM_LIB_DIR=/usr/local/lib
 endif
 
-all: std
+all: std cuda
 
 install: std-install cuda-install
 

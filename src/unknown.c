@@ -1,5 +1,7 @@
 #include "unknown.h"
 
+// ########################################## EXECUTION FUNCTIONS ##########################################
+
 void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
 {
 #pragma omp parallel for collapse(2)
@@ -300,20 +302,22 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
     next_cortex->ticks_count++;
 }
 
+// ########################################## INPUT MAPPING FUNCTIONS ##########################################
+
 unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input,
                           unk_pulse_mapping_t pulse_mapping)
 {
     if (input < sample_window)
     {
-        unk_ticks_count_t upper = sample_window - 1;
         switch (pulse_mapping)
         {
-        case UNK_PULSE_MAPPING_LINEAR:;
+        case UNK_PULSE_MAPPING_LINEAR: ;
             return sample_step % (sample_window - input) == 0;
-        case UNK_PULSE_MAPPING_FPROP:;
+        case UNK_PULSE_MAPPING_FPROP: ;
+            unk_ticks_count_t upper = sample_window - 1;
             if (input < sample_window / 2)
             {
-                if ((sample_step == 0) ||
+                if ((sample_step <= 0) ||
                     (input > 0 && sample_step % (upper / input) == 0))
                 {
                     return UNK_TRUE;
@@ -327,38 +331,27 @@ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sam
                 }
             }
             return UNK_FALSE;
-        case UNK_PULSE_MAPPING_RPROP:;
-            if (input < sample_window / 2)
+        case UNK_PULSE_MAPPING_RPROP: ;
+            double d_upper = sample_window - 1;
+            double d_input = input;
+            if ((double)input < ((double)sample_window) / 2)
             {
-                if ((sample_step == 0) ||
-                    (input > 0 && sample_step % (upper / input) == 0))
+                if ((sample_step <= 0) ||
+                    (input > 0 && sample_step % (unk_ticks_count_t)round(d_upper / d_input) == 0))
                 {
                     return UNK_TRUE;
                 }
             }
             else
             {
-                if (input >= upper || sample_step % (upper / (upper - input)) != 0)
+                if (input >= d_upper || sample_step % (unk_ticks_count_t)round(d_upper / (d_upper - d_input)) != 0)
                 {
                     return UNK_TRUE;
                 }
             }
             return UNK_FALSE;
-        case UNK_PULSE_MAPPING_DFPROP:;
-            if (input < sample_window / 2)
-            {
-                if ((sample_step == 0) || (input > 0 && sample_step % (upper / (input * 2)) == 0))
-                {
-                    return UNK_TRUE;
-                }
-            }
-            else
-            {
-                if (input >= upper || sample_step % (upper / ((upper - input) * 2)) != 0)
-                {
-                    return UNK_TRUE;
-                }
-            }
+        case UNK_PULSE_MAPPING_DFPROP: ;
+            // [TODO] IMPLEMENT DIFFERENTIAL FAST PROPORTIONAL MAPPING
             return UNK_FALSE;
         }
     }
