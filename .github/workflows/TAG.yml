@@ -10,18 +10,10 @@ jobs:
     steps:
       - name: 'CHECKOUT'
         uses: actions/checkout@v4
-      - name: 'INFER TAG NAME'
-        id: 'INFER_TAG_NAME'
-        run: |
-          DATE=$(date '+%Y.%m.%d')
-          TIME=$(date '+%H%M')
-          TAG_NAME="${DATE}.${TIME}"
-          echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
       - name: 'UPDATE LAST COMMIT & CREATE TAG'
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
-          TAG_NAME=$(echo "${{ steps.INFER_TAG_NAME.outputs.TAG_NAME }}")
-          git checkout "${{ github.GITHUB_BASE_REF }}"
-          git tag "${TAG_NAME}"
-          git push --force origin HEAD:"${{ github.GITHUB_BASE_REF }}"
-          git push origin "${TAG_NAME}"
+          git checkout trunk
+          git tag "$(git log -1 --pretty=format:"%s" trunk | grep -oP ".*?(?=\()" | sed 's/ //g' | tr '[:upper:]' '[:lower:]')"
+          git push --force origin HEAD:trunk
+          git push origin "$(git log -1 --pretty=format:"%s" trunk | grep -oP ".*?(?=\()" | sed 's/ //g' | tr '[:upper:]' '[:lower:]')"

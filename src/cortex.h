@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "error.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -23,7 +22,7 @@ extern "C"
 #define NH_DIAM_2D(r) (2 * (r) + 1)
 
 // COMPUTES THE NUMBER OF NEIGHBORS IN A SQUARE NEIGHBORHOOD GIVEN ITS DIAMETER.
-#define NH_COUNT_2D(d) ((d) * (d) - 1)
+#define NH_COUNT_2D(d) ((d) * (d)-1)
 
 // TRANSLATES BIDIMENSIONAL INDEXES TO A MONODIMENSIONAL ONE.
 // |I| IS THE ROW INDEX.
@@ -271,8 +270,8 @@ extern "C"
     /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
     __host__ __device__ uint32_t cuda_xorshf32(uint32_t state);
 #else
-    /// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
-    uint32_t xorshf32(uint32_t state);
+/// MARSIGLIA'S XORSHIFT PSEUDO-RANDOM NUMBER GENERATOR WITH PERIOD 2^32-1.
+uint32_t xorshf32(uint32_t state);
 #endif // __CUDACC__
 
     // ################################################ INITIALIZATION FUNCTIONS ################################################
@@ -285,8 +284,7 @@ extern "C"
     /// @param y1 THE Y1 COORDINATE OF THE INPUT.
     /// @param exc_value THE VALUE TO EXCITE THE TARGET NEURONS.
     /// @param pulse_mapping THE MAPPING ALGORITHM TO USE FOR PULSE GENERATION.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t i2d_init(unk_input2d_t **input, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1, unk_cortex_size_t y1, unk_neuron_value_t exc_value, unk_pulse_mapping_t pulse_mapping);
+    void i2d_init(unk_input2d_t **input, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1, unk_cortex_size_t y1, unk_neuron_value_t exc_value, unk_pulse_mapping_t pulse_mapping);
 
     /// @brief INITIALIZES AN OUTPUT2D WITH THE PROVIDED VALUES.
     /// @param output
@@ -294,150 +292,121 @@ extern "C"
     /// @param y0
     /// @param x1
     /// @param y1
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t o2d_init(unk_output2d_t **output, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1, unk_cortex_size_t y1);
+    void o2d_init(unk_output2d_t **output, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1, unk_cortex_size_t y1);
 
     /// @brief INITIALIZES THE GIVEN CORTEX WITH DEFAULT VALUES.
     /// @param cortex THE CORTEX TO INITIALIZE.
     /// @param width THE WIDTH OF THE CORTEX.
     /// @param height THE HEIGHT OF THE CORTEX.
     /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius);
+    void c2d_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius);
 
     /// @brief INITIALIZES THE GIVEN CORTEX WITH RANDOM VALUES.
     /// @param cortex THE CORTEX TO INITIALIZE.
     /// @param width THE WIDTH OF THE CORTEX.
     /// @param height THE HEIGHT OF THE CORTEX.
     /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_rand_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius);
+    void c2d_rand_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius);
 
     /// @brief DESTROYS THE GIVEN INPUT2D AND FREES MEMORY.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t i2d_destroy(unk_input2d_t *input);
+    void i2d_destroy(unk_input2d_t *input);
 
     /// @brief DESTROYS THE GIVEN OUTPUT2D AND FREES MEMORY.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t o2d_destroy(unk_output2d_t *output);
+    void o2d_destroy(unk_output2d_t *output);
 
     /// @brief DESTROYS THE GIVEN CORTEX2D AND FREES MEMORY FOR IT AND ITS NEURONS.
     /// @param CORTEX THE CORTEX TO DESTROY
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_destroy(unk_cortex2d_t *cortex);
+    void c2d_destroy(unk_cortex2d_t *cortex);
 
     /// @brief RETURNS A CORTEX WITH THE SAME PROPERTIES AS THE GIVEN ONE.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_copy(unk_cortex2d_t *to, unk_cortex2d_t *from);
+    void c2d_copy(unk_cortex2d_t *to, unk_cortex2d_t *from);
 
     // ################################################ SETTER FUNCTIONS ################################################
 
     /// @brief SETS THE NEIGHBORHOOD RADIUS FOR ALL NEURONS IN THE CORTEX.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_nhradius(unk_cortex2d_t *cortex, unk_nh_radius_t radius);
+    void c2d_set_nhradius(unk_cortex2d_t *cortex, unk_nh_radius_t radius);
 
     /// @brief SETS THE NEIGHBORHOOD MASK FOR ALL NEURONS IN THE CORTEX.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_nhmask(unk_cortex2d_t *cortex, unk_nh_mask_t mask);
+    void c2d_set_nhmask(unk_cortex2d_t *cortex, unk_nh_mask_t mask);
 
     /// @brief SETS THE EVOLUTION STEP FOR THE CORTEX.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_evol_step(unk_cortex2d_t *cortex, unk_evol_step_t evol_step);
+    void c2d_set_evol_step(unk_cortex2d_t *cortex, unk_evol_step_t evol_step);
 
     /// @brief SETS THE PULSE WINDOW WIDTH FOR THE CORTEX.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_pulse_window(unk_cortex2d_t *cortex, unk_ticks_count_t window);
+    void c2d_set_pulse_window(unk_cortex2d_t *cortex, unk_ticks_count_t window);
 
     /// @brief SETS THE SAMPLE WINDOW FOR THE CORTEX.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_sample_window(unk_cortex2d_t *cortex, unk_ticks_count_t sample_window);
+    void c2d_set_sample_window(unk_cortex2d_t *cortex, unk_ticks_count_t sample_window);
 
     /// @brief SETS THE FIRE THRESHOLD FOR ALL NEURONS IN THE CORTEX.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_fire_threshold(unk_cortex2d_t *cortex, unk_neuron_value_t threshold);
+    void c2d_set_fire_threshold(unk_cortex2d_t *cortex, unk_neuron_value_t threshold);
 
     /// @brief SETS THE SYNGEN CHANCE FOR THE CORTEX. SYNGEN CHANCE DEFINES THE PROBABILITY FOR SYNAPSE GENERATION AND DELETION.
     /// @param syngen_chance THE CHANCE TO APPLY (MUST BE BETWEEN 0X0000U AND 0XFFFFU).
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_syngen_chance(unk_cortex2d_t *cortex, unk_chance_t syngen_chance);
+    void c2d_set_syngen_chance(unk_cortex2d_t *cortex, unk_chance_t syngen_chance);
 
     /// @brief SETS THE SYNSTR CHANCE FOR THE CORTEX. SYNSTR CHANCE DEFINES THE PROBABILITY FOR SYNAPSE STRENGTHENING AND WEAKENING.
     /// @param synstr_chance THE CHANCE TO APPLY (MUST BE BETWEEN 0X0000U AND 0XFFFFU).
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_synstr_chance(unk_cortex2d_t *cortex, unk_chance_t synstr_chance);
+    void c2d_set_synstr_chance(unk_cortex2d_t *cortex, unk_chance_t synstr_chance);
 
     /// @brief SETS THE MAXIMUM NUMBER OF (INPUT) SYNAPSES FOR THE NEURONS OF THE CORTEX.
     /// @param cortex THE CORTEX TO EDIT.
     /// @param syn_count THE MAX NUMBER OF ALLOWABLE SYNAPSES.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_max_syn_count(unk_cortex2d_t *cortex, unk_syn_count_t syn_count);
+    void c2d_set_max_syn_count(unk_cortex2d_t *cortex, unk_syn_count_t syn_count);
 
     /// @brief SETS THE MAXIMUM ALLOWABLE TOUCH FOR EACH NEURON IN THE NETWORK.
     /// A NEURON TOUCH IS DEFINED AS ITS SYNAPSES COUNT DIVIDED BY ITS TOTAL NEIGHBORS COUNT.
     /// @param touch THE TOUCH TO ASSIGN THE CORTEX. ONLY VALUES BETWEEN 0 AND 1 ARE ALLOWED.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_max_touch(unk_cortex2d_t *cortex, float touch);
+    void c2d_set_max_touch(unk_cortex2d_t *cortex, float touch);
 
     /// @brief SETS THE PREFERRED INPUT MAPPING FOR THE GIVEN CORTEX.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_pulse_mapping(unk_cortex2d_t *cortex, unk_pulse_mapping_t pulse_mapping);
+    void c2d_set_pulse_mapping(unk_cortex2d_t *cortex, unk_pulse_mapping_t pulse_mapping);
 
     /// @brief SETS THE RANGE FOR EXCITATORY TO INHIBITORY RATIOS IN SINGLE NEURONS.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_inhexc_range(unk_cortex2d_t *cortex, unk_chance_t inhexc_range);
+    void c2d_set_inhexc_range(unk_cortex2d_t *cortex, unk_chance_t inhexc_range);
 
     /// @brief SETS THE PROPORTION BETWEEN EXCITATORY AND INHIBITORY GENERATED SYNAPSES.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_inhexc_ratio(unk_cortex2d_t *cortex, unk_chance_t inhexc_ratio);
+    void c2d_set_inhexc_ratio(unk_cortex2d_t *cortex, unk_chance_t inhexc_ratio);
 
     /// @brief SETS WHETHER THE TICK PASS SHOULD WRAP AROUND THE EDGES (PACMAN EFFECT).
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_set_wrapped(unk_cortex2d_t *cortex, unk_bool_t wrapped);
+    void c2d_set_wrapped(unk_cortex2d_t *cortex, unk_bool_t wrapped);
 
     /// @brief DISABLES SELF CONNECTIONS WHITHIN THE SPECIFIED BOUNDS.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_syn_disable(unk_cortex2d_t *cortex, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1, unk_cortex_size_t y1);
+    void c2d_syn_disable(unk_cortex2d_t *cortex, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1, unk_cortex_size_t y1);
 
     /// @brief RANDOMLY MUTATES THE CORTEX SHAPE.
     /// @param cortex THE CORTEX TO EDIT.
     /// @param mut_chance THE PROBABILITY OF APPLYING A MUTATION TO THE CORTEX SHAPE.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_mutate_shape(unk_cortex2d_t *cortex, unk_chance_t mut_chance);
+    void c2d_mutate_shape(unk_cortex2d_t *cortex, unk_chance_t mut_chance);
 
     /// @brief RANDOMLY MUTATES THE CORTEX.
     /// @param cortex THE CORTEX TO EDIT.
     /// @param mut_chance THE PROBABILITY OF APPLYING A MUTATION TO ANY MUTABLE PROPERTY OF THE CORTEX.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_mutate(unk_cortex2d_t *cortex, unk_chance_t mut_chance);
+    void c2d_mutate(unk_cortex2d_t *cortex, unk_chance_t mut_chance);
 
     /// @brief RANDOMLY MUTATES THE PROVIDED NEURON.
     /// @param neuron THE NEURON TO MUTATE.
     /// @param mut_chance THE PROBABILITY OF APPLYING A MUTATION TO ANY MUTABLE PROPERTY OF THE NEURON.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t n2d_mutate(unk_neuron_t *neuron, unk_chance_t mut_chance);
+    void n2d_mutate(unk_neuron_t *neuron, unk_chance_t mut_chance);
 
     // ################################################ GETTER FUNCTIONS ################################################
 
     /// @brief STORES THE STRING REPRESENTATION OF THE GIVEN CORTEX TO THE PROVIDED STRING [TARGET].
     /// @param cortex THE CORTEX TO INSPECT.
     /// @param result THE STRING TO FILL WITH CORTEX DATA.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t c2d_to_string(unk_cortex2d_t *cortex, char *result);
+    void c2d_to_string(unk_cortex2d_t *cortex, char *result);
 
     /// @brief COMPUTES THE MEAN VALUE OF AN INPUT2D'S VALUES.
     /// @param input THE INPUT TO COMPUTE THE MEAN VALUE FROM.
     /// @param result POINTER TO THE RESULT OF THE COMPUTATION. THE MEAN VALUE WILL BE STORED HERE.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t i2d_mean(unk_input2d_t *input, unk_ticks_count_t *result);
+    void i2d_mean(unk_input2d_t *input, unk_ticks_count_t *result);
 
     /// @brief COMPUTES THE MEAN VALUE OF AN OUTPUT2D'S VALUES.
     /// @param output THE OUTPUT TO COMPUTE THE MEAN VALUE FROM.
     /// @param result POINTER TO THE RESULT OF THE COMPUTATION. THE MEAN VALUE WILL BE STORED HERE.
-    /// @return THE CODE FOR THE OCCURRED ERROR, [UNK_ERROR_NONE] IF NONE.
-    unk_error_code_t o2d_mean(unk_output2d_t *output, unk_ticks_count_t *result);
+    void o2d_mean(unk_output2d_t *output, unk_ticks_count_t *result);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif // __CORTEX__
