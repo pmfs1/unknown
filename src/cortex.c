@@ -464,13 +464,7 @@ void c2d_set_inhexc_ratio(unk_cortex2d_t *cortex, unk_chance_t inhexc_ratio)
 /// @brief SETS WHETHER THE TICK PASS SHOULD WRAP AROUND THE EDGES (PACMAN EFFECT).
 void c2d_set_wrapped(unk_cortex2d_t *cortex, unk_bool_t wrapped)
 {
-    // STORE WRAPPING STATE IN MOST SIGNIFICANT BIT OF PULSE_MAPPING
-    // THIS AVOIDS ADDING A NEW FIELD TO THE STRUCT WHILE MAINTAINING COMPATIBILITY
-    if (wrapped == UNK_TRUE) {
-        cortex->pulse_mapping |= 0x80000000U;  // Set MSB to 1
-    } else {
-        cortex->pulse_mapping &= 0x7FFFFFFFU;  // Set MSB to 0
-    }
+    // [TODO]
 }
 
 /// @brief DISABLES SELF CONNECTIONS WHITHIN THE SPECIFIED BOUNDS.
