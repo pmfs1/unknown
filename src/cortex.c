@@ -129,10 +129,7 @@ void o2d_init(unk_output2d_t **output,
 /// @param width THE WIDTH OF THE CORTEX.
 /// @param height THE HEIGHT OF THE CORTEX.
 /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON.
-void c2d_init(unk_cortex2d_t **cortex,
-              unk_cortex_size_t width,
-              unk_cortex_size_t height,
-              unk_nh_radius_t nh_radius)
+void c2d_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius)
 {
     // VERIFY NEIGHBORHOOD SIZE DOESN'T EXCEED MASK CAPACITY
     if (NH_COUNT_2D(NH_DIAM_2D(nh_radius)) > sizeof(unk_nh_mask_t) * 8)
@@ -636,21 +633,6 @@ void n2d_mutate(unk_neuron_t *neuron, unk_chance_t mut_chance)
 }
 
 // ################################################ GETTER FUNCTIONS ################################################
-
-/// @brief STORES THE STRING REPRESENTATION OF THE GIVEN CORTEX TO THE PROVIDED STRING [TARGET].
-/// @param cortex THE CORTEX TO INSPECT.
-/// @param result THE STRING TO FILL WITH CORTEX DATA.
-void c2d_to_string(unk_cortex2d_t *cortex, char *result)
-{
-    snprintf(result,
-             256,
-             "cortex(\n\twidth:%d\n\theight:%d\n\tnh_radius:%d\n\tpulse_window:%d\n\tsample_window:%d\n)",
-             cortex->width,
-             cortex->height,
-             cortex->nh_radius,
-             cortex->pulse_window,
-             cortex->sample_window);
-}
 
 /// @brief COMPUTES THE MEAN VALUE OF AN INPUT2D'S VALUES.
 /// @param input THE INPUT TO COMPUTE THE MEAN VALUE FROM.
