@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     c2d_copy(odd_cortex, even_cortex);
     char cortex_string[100];
     c2d_to_string(even_cortex, cortex_string);
-    printf("%s", cortex_string);
+    printf("%s\n", cortex_string);
     unk_input2d_t *input;
     i2d_init(&input,
              (cortex_width / 2) - (input_width / 2),
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
         {
             uint64_t elapsed = millis() - start_time;
             double fps = i / (elapsed / 1000.0f);
-            printf("\nPerformed %d iterations in %llums; %.2f ticks per second", i + 1, elapsed, fps);
+            printf("Performed %d iterations in %lums; %.2f ticks per second\n", i + 1, elapsed, fps);
             c2d_to_file(even_cortex, (char *)"out/test.c2d");
         }
     }
