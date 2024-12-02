@@ -230,7 +230,7 @@ int main(int argc, char **argv)
     unk_cortex_size_t cortex_height = 256;
     unk_cortex_size_t input_width = 32;
     unk_cortex_size_t input_height = 1;
-    uint32_t iterations_count = 10000;
+    uint32_t iterations_count = 1000;
     unk_nh_radius_t nh_radius = 2;
     unk_cortex2d_t *even_cortex;
     unk_cortex2d_t *odd_cortex;
