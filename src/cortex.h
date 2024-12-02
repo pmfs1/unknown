@@ -22,7 +22,7 @@ extern "C"
 #define NH_DIAM_2D(r) (2 * (r) + 1)
 
 // COMPUTES THE NUMBER OF NEIGHBORS IN A SQUARE NEIGHBORHOOD GIVEN ITS DIAMETER.
-#define NH_COUNT_2D(d) ((d) * (d)-1)
+#define NH_COUNT_2D(d) ((d) * (d) - 1)
 
 // TRANSLATES BIDIMENSIONAL INDEXES TO A MONODIMENSIONAL ONE.
 // |I| IS THE ROW INDEX.
@@ -410,11 +410,6 @@ uint32_t xorshf32(uint32_t state);
     void n2d_mutate(unk_neuron_t *neuron, unk_chance_t mut_chance);
 
     // ################################################ GETTER FUNCTIONS ################################################
-
-    /// @brief STORES THE STRING REPRESENTATION OF THE GIVEN CORTEX TO THE PROVIDED STRING [TARGET].
-    /// @param cortex THE CORTEX TO INSPECT.
-    /// @param result THE STRING TO FILL WITH CORTEX DATA.
-    void c2d_to_string(unk_cortex2d_t *cortex, char *result);
 
     /// @brief COMPUTES THE MEAN VALUE OF AN INPUT2D'S VALUES.
     /// @param input THE INPUT TO COMPUTE THE MEAN VALUE FROM.

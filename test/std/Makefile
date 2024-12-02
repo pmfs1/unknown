@@ -25,9 +25,12 @@ endif
 
 all: clean bench
 
-bench: create
+bench: create utils.o
 	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BIN_DIR)/$@.o
-	$(CCOMP) $(CLINK_FLAGS) $(OBJS) -o $(BIN_DIR)/$@ $(STD_LIBS) $(UNKNOWN_LIBS)
+	$(CCOMP) $(CLINK_FLAGS) $(BIN_DIR)/bench.o $(BIN_DIR)/utils.o -o $(BIN_DIR)/$@ $(STD_LIBS) $(UNKNOWN_LIBS)
+
+utils.o: create
+	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/utils.c -o $(BIN_DIR)/utils.o
 
 create:
 	$(MKDIR) $(BIN_DIR)
