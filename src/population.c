@@ -236,7 +236,20 @@ void p2d_breed(unk_population2d_t *population, unk_cortex2d_t **child)
     population->rand_state = xorshf32(population->rand_state);
     winner_parent_index = population->rand_state % population->parents_count;
     c2d_set_fire_threshold(*child, parents[winner_parent_index].fire_threshold);
-    // [TODO] SET RECOVERY VALUE AND EXC/DECAY VALUES
+    //// FROM HERE
+    // PICK RECOVERY VALUE FROM A RANDOM PARENT
+    population->rand_state = xorshf32(population->rand_state);
+    winner_parent_index = population->rand_state % population->parents_count;
+    (*child)->recovery_value = parents[winner_parent_index].recovery_value;
+    // PICK EXCITATORY VALUE FROM A RANDOM PARENT
+    population->rand_state = xorshf32(population->rand_state);
+    winner_parent_index = population->rand_state % population->parents_count;
+    (*child)->exc_value = parents[winner_parent_index].exc_value;
+    // PICK DECAY VALUE FROM A RANDOM PARENT
+    population->rand_state = xorshf32(population->rand_state);
+    winner_parent_index = population->rand_state % population->parents_count;
+    (*child)->decay_value = parents[winner_parent_index].decay_value;
+    //// TO HERE. A LOGICAL CHECK IS NEEDED
     // PICK SYNGEN CHANCE FROM A RANDOM PARENT
     population->rand_state = xorshf32(population->rand_state);
     winner_parent_index = population->rand_state % population->parents_count;
@@ -245,7 +258,10 @@ void p2d_breed(unk_population2d_t *population, unk_cortex2d_t **child)
     population->rand_state = xorshf32(population->rand_state);
     winner_parent_index = population->rand_state % population->parents_count;
     c2d_set_synstr_chance(*child, parents[winner_parent_index].synstr_chance);
-    // [TODO] SET MAX TOT STRENGTH
+    // SET MAX TOTAL STRENGTH FROM A RANDOM PARENT
+    population->rand_state = xorshf32(population->rand_state);
+    winner_parent_index = population->rand_state % population->parents_count;
+    (*child)->max_tot_strength = parents[winner_parent_index].max_tot_strength;
     // PICK MAX SYN COUNT FROM A RANDOM PARENT
     population->rand_state = xorshf32(population->rand_state);
     winner_parent_index = population->rand_state % population->parents_count;
@@ -301,26 +317,27 @@ void p2d_crossover(unk_population2d_t *population, unk_bool_t mutate)
     for (unk_population_size_t i = 0; i < population->size; i++)
     {
         // CREATE A NEW CHILD BY BREEDING PARENTS FROM THE POPULATION'S SELECTION POOL
-        unk_cortex2d_t *child = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
-        if (child == NULL)
-        {
-            return;
-        }
+        unk_cortex2d_t *child;
         p2d_breed(population, &child);
         // MUTATE THE NEWBORN IF SO SPECIFIED
         if (mutate)
         {
             c2d_mutate(child, population->mut_chance);
         }
-        // STORE THE PRODUCED CHILD
+        // STORE THE PRODUCED CHILD DIRECTLY INTO THE OFFSPRING ARRAY
         offspring[i] = *child;
+        // FREE THE TEMPORARY CHILD
+        free(child);
     }
-    // REPLACE OLD GENERATION WITH NEW OFFSPRING
+
+    // FREE OLD CORTICES
     for (unk_population_size_t i = 0; i < population->size; i++)
     {
-        // [TODO] THIS COMMAND CAUSES A "DOUBLE FREE OR CORRUPTION (OUT)" AFTER THE FIRST LOOP. IT LOOKS LIKE THE FIRST CORTEX IS BEING FREED TWICE: CHECK THIS OUT.
         c2d_destroy(&(population->cortices[i]));
     }
+    // FREE OLD CORTICES ARRAY
+    free(population->cortices);
+    // ASSIGN THE NEW OFFSPRING TO THE POPULATION
     population->cortices = offspring;
 }
 

@@ -36,7 +36,7 @@ ifeq ($(UNAME_S),Darwin)
 	SYSTEM_LIB_DIR=/usr/local/lib
 endif
 
-all: std
+all: std cuda
 
 install: std-install cuda-install
 
@@ -54,7 +54,7 @@ ifeq ($(MODE), archive)
 endif
 
 std-install: std install-headers install-lib
-# cuda-install: cuda install-headers install-lib
+cuda-install: cuda install-headers install-lib
 
 uninstall: clean
 	sudo $(RM) $(SYSTEM_INCLUDE_DIR)/unknown
@@ -62,21 +62,21 @@ uninstall: clean
 	sudo $(RM) $(SYSTEM_LIB_DIR)/libunknown.a
 
 std: create std-build
-# cuda: create cuda-build
+cuda: create cuda-build
 
 std-build: cortex.o population.o unknown.o
 	$(CCOMP) $(CLINK_FLAGS) -shared $(OBJS) $(STD_LIBS) -o $(BIN_DIR)/libunknown.so
 	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
 
-# cuda-build: cortex.o population.o unknown.cuda.o
-# 	$(NVCOMP) $(NVLINK_FLAGS) -shared $(OBJS) $(CUDA_STD_LIBS) -o $(BIN_DIR)/libunknown.so
-# 	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
+cuda-build: cortex.o population.o unknown.cuda.o
+	$(NVCOMP) $(NVLINK_FLAGS) -shared $(OBJS) $(CUDA_STD_LIBS) -o $(BIN_DIR)/libunknown.so
+	$(ARC) $(ARC_FLAGS) $(BIN_DIR)/libunknown.a $(OBJS)
 
 %.o: $(SRC_DIR)/%.c
 	$(CCOMP) $(CCOMP_FLAGS) -c $^ -o $(BIN_DIR)/$@
 
-# %.cuda.o: $(SRC_DIR)/%.cu
-# 	$(NVCOMP) $(NVCOMP_FLAGS) -c $< -o $(BIN_DIR)/$@
+%.cuda.o: $(SRC_DIR)/%.cu
+	$(NVCOMP) $(NVCOMP_FLAGS) -c $< -o $(BIN_DIR)/$@
 
 create:
 	$(MKDIR) $(BIN_DIR)
