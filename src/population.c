@@ -68,8 +68,8 @@ void p2d_init(unk_population2d_t **population, unk_population_size_t size,
 
 /// @brief POPULATES THE STARTING POOL OF CORTICES WITH THE PROVIDED VALUES
 /// @param population THE POPULATION WHOSE CORTICES TO SETUP
-/// @param width THE WIDTH OF THE CORTEX
-/// @param height THE HEIGHT OF THE CORTEX
+/// @param width THE WIDTH OF THE CORTICES IN THE POPULATION
+/// @param height THE HEIGHT OF THE CORTICES IN THE POPULATION
 /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON
 void p2d_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height,
                   unk_nh_radius_t nh_radius)
@@ -92,8 +92,8 @@ void p2d_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_c
 
 /// @brief POPULATES THE STARTING POOL OF CORTICES WITH RANDOM VALUES
 /// @param population THE POPULATION WHOSE CORTICES TO SETUP
-/// @param width THE WIDTH OF THE CORTEX
-/// @param height THE HEIGHT OF THE CORTEX
+/// @param width THE WIDTH OF THE CORTICES IN THE POPULATION
+/// @param height THE HEIGHT OF THE CORTICES IN THE POPULATION
 /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON
 void p2d_rand_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height,
                        unk_nh_radius_t nh_radius)
