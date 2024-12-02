@@ -59,7 +59,8 @@ __global__ void c2d_read2d(unk_cortex2d_t *cortex, unk_output2d_t *output)
     {
         return;
     }
-    // [TODO]
+    output->values[IDX2D(x, y, output->x1 - output->x0)] =
+        cortex->neurons[IDX2D(x + output->x0, y + output->y0, cortex->width)].pulse;
 }
 
 /// @brief PERFORMS A FULL RUN CYCLE OVER THE PROVIDED CORTEX. THIS UPDATES THE CORTEX STATE
