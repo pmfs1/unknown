@@ -98,11 +98,6 @@ extern "C"
     /// @param map_file_name THE PATH TO THE PGM MAP FILE TO READ.
     void c2d_inhexc_from_map(unk_cortex2d_t *cortex, char *map_file_name);
 
-    /// @brief SETS FIRE THRESHOLD FOR EACH NEURON IN THE PROVIDED CORTEX BY READING IT FROM A PGM MAP FILE.
-    /// @param cortex THE CORTEX TO APPLY CHANGES TO.
-    /// @param map_file_name THE PATH TO THE PGM MAP FILE TO READ.
-    void c2d_fthold_from_map(unk_cortex2d_t *cortex, char *map_file_name);
-
 #ifdef __cplusplus
 }
 #endif
