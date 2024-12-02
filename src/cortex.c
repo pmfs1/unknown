@@ -58,8 +58,13 @@ uint32_t xorshf32(uint32_t state)
 /// @param y1 THE Y1 COORDINATE OF THE INPUT.
 /// @param exc_value THE VALUE TO EXCITE THE TARGET NEURONS.
 /// @param pulse_mapping THE MAPPING ALGORITHM TO USE FOR PULSE GENERATION.
-void i2d_init(unk_input2d_t **input, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1,
-              unk_cortex_size_t y1, unk_neuron_value_t exc_value, unk_pulse_mapping_t pulse_mapping)
+void i2d_init(unk_input2d_t **input,
+              unk_cortex_size_t x0,
+              unk_cortex_size_t y0,
+              unk_cortex_size_t x1,
+              unk_cortex_size_t y1,
+              unk_neuron_value_t exc_value,
+              unk_pulse_mapping_t pulse_mapping)
 {
     // VALIDATE INPUT SIZE PARAMETERS
     if (x1 <= x0 || y1 <= y0)
@@ -91,7 +96,10 @@ void i2d_init(unk_input2d_t **input, unk_cortex_size_t x0, unk_cortex_size_t y0,
 /// @param y0 THE Y0 COORDINATE OF THE OUTPUT.
 /// @param x1 THE X1 COORDINATE OF THE OUTPUT.
 /// @param y1 THE Y1 COORDINATE OF THE OUTPUT.
-void o2d_init(unk_output2d_t **output, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1,
+void o2d_init(unk_output2d_t **output,
+              unk_cortex_size_t x0,
+              unk_cortex_size_t y0,
+              unk_cortex_size_t x1,
               unk_cortex_size_t y1)
 {
     // VALIDATE INPUT SIZE PARAMETERS
@@ -121,7 +129,9 @@ void o2d_init(unk_output2d_t **output, unk_cortex_size_t x0, unk_cortex_size_t y
 /// @param width THE WIDTH OF THE CORTEX.
 /// @param height THE HEIGHT OF THE CORTEX.
 /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON.
-void c2d_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height,
+void c2d_init(unk_cortex2d_t **cortex,
+              unk_cortex_size_t width,
+              unk_cortex_size_t height,
               unk_nh_radius_t nh_radius)
 {
     // VERIFY NEIGHBORHOOD SIZE DOESN'T EXCEED MASK CAPACITY
@@ -192,7 +202,9 @@ void c2d_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_
 /// @param width THE WIDTH OF THE CORTEX.
 /// @param height THE HEIGHT OF THE CORTEX.
 /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON.
-void c2d_rand_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height,
+void c2d_rand_init(unk_cortex2d_t **cortex,
+                   unk_cortex_size_t width,
+                   unk_cortex_size_t height,
                    unk_nh_radius_t nh_radius)
 {
     // VERIFY NEIGHBORHOOD SIZE DOESN'T EXCEED MASK CAPACITY
@@ -232,7 +244,8 @@ void c2d_rand_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_
     (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
     (*cortex)->max_tot_strength = (*cortex)->rand_state % UNK_MAX_MAX_TOT_STRENGTH;
     (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
-    (*cortex)->max_syn_count = (*cortex)->rand_state % ((unk_syn_count_t)(UNK_MAX_MAX_TOUCH * NH_COUNT_2D(NH_DIAM_2D(nh_radius))));
+    (*cortex)->max_syn_count =
+        (*cortex)->rand_state % ((unk_syn_count_t)(UNK_MAX_MAX_TOUCH * NH_COUNT_2D(NH_DIAM_2D(nh_radius))));
     (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
     (*cortex)->inhexc_range = (*cortex)->rand_state % UNK_MAX_INHEXC_RANGE;
     (*cortex)->rand_state = xorshf32((*cortex)->rand_state);
@@ -455,8 +468,11 @@ void c2d_set_wrapped(unk_cortex2d_t *cortex, unk_bool_t wrapped)
 }
 
 /// @brief DISABLES SELF CONNECTIONS WHITHIN THE SPECIFIED BOUNDS.
-void c2d_syn_disable(unk_cortex2d_t *cortex, unk_cortex_size_t x0, unk_cortex_size_t y0,
-                     unk_cortex_size_t x1, unk_cortex_size_t y1)
+void c2d_syn_disable(unk_cortex2d_t *cortex,
+                     unk_cortex_size_t x0,
+                     unk_cortex_size_t y0,
+                     unk_cortex_size_t x1,
+                     unk_cortex_size_t y1)
 {
     // MAKE SURE THE PROVIDED VALUES ARE WITHIN THE CORTEX SIZE
     if (x0 >= 0 && y0 >= 0 && x1 <= cortex->width && y1 <= cortex->height)
@@ -497,8 +513,8 @@ void c2d_mutate_shape(unk_cortex2d_t *cortex, unk_chance_t mut_chance)
     if (new_width != cortex->width || new_height != cortex->height)
     {
         // ATTEMPT TO RESIZE THE NEURON ARRAY FOR NEW DIMENSIONS
-        cortex->neurons = (unk_neuron_t *)realloc(cortex->neurons,
-                                                  (size_t)new_width * (size_t)new_height * sizeof(unk_neuron_t));
+        cortex->neurons =
+            (unk_neuron_t *)realloc(cortex->neurons, (size_t)new_width * (size_t)new_height * sizeof(unk_neuron_t));
         if (cortex->neurons == NULL)
         {
             return;
@@ -626,8 +642,14 @@ void n2d_mutate(unk_neuron_t *neuron, unk_chance_t mut_chance)
 /// @param result THE STRING TO FILL WITH CORTEX DATA.
 void c2d_to_string(unk_cortex2d_t *cortex, char *result)
 {
-    snprintf(result, 256, "cortex(\n\twidth:%d\n\theight:%d\n\tnh_radius:%d\n\tpulse_window:%d\n\tsample_window:%d\n)",
-             cortex->width, cortex->height, cortex->nh_radius, cortex->pulse_window, cortex->sample_window);
+    snprintf(result,
+             256,
+             "cortex(\n\twidth:%d\n\theight:%d\n\tnh_radius:%d\n\tpulse_window:%d\n\tsample_window:%d\n)",
+             cortex->width,
+             cortex->height,
+             cortex->nh_radius,
+             cortex->pulse_window,
+             cortex->sample_window);
 }
 
 /// @brief COMPUTES THE MEAN VALUE OF AN INPUT2D'S VALUES.

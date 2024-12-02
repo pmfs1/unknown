@@ -2,8 +2,8 @@
 #define __CORTEX__
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
@@ -284,7 +284,13 @@ uint32_t xorshf32(uint32_t state);
     /// @param y1 THE Y1 COORDINATE OF THE INPUT.
     /// @param exc_value THE VALUE TO EXCITE THE TARGET NEURONS.
     /// @param pulse_mapping THE MAPPING ALGORITHM TO USE FOR PULSE GENERATION.
-    void i2d_init(unk_input2d_t **input, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1, unk_cortex_size_t y1, unk_neuron_value_t exc_value, unk_pulse_mapping_t pulse_mapping);
+    void i2d_init(unk_input2d_t **input,
+                  unk_cortex_size_t x0,
+                  unk_cortex_size_t y0,
+                  unk_cortex_size_t x1,
+                  unk_cortex_size_t y1,
+                  unk_neuron_value_t exc_value,
+                  unk_pulse_mapping_t pulse_mapping);
 
     /// @brief INITIALIZES AN OUTPUT2D WITH THE PROVIDED VALUES.
     /// @param output
@@ -292,21 +298,31 @@ uint32_t xorshf32(uint32_t state);
     /// @param y0
     /// @param x1
     /// @param y1
-    void o2d_init(unk_output2d_t **output, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1, unk_cortex_size_t y1);
+    void o2d_init(unk_output2d_t **output,
+                  unk_cortex_size_t x0,
+                  unk_cortex_size_t y0,
+                  unk_cortex_size_t x1,
+                  unk_cortex_size_t y1);
 
     /// @brief INITIALIZES THE GIVEN CORTEX WITH DEFAULT VALUES.
     /// @param cortex THE CORTEX TO INITIALIZE.
     /// @param width THE WIDTH OF THE CORTEX.
     /// @param height THE HEIGHT OF THE CORTEX.
     /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON.
-    void c2d_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius);
+    void c2d_init(unk_cortex2d_t **cortex,
+                  unk_cortex_size_t width,
+                  unk_cortex_size_t height,
+                  unk_nh_radius_t nh_radius);
 
     /// @brief INITIALIZES THE GIVEN CORTEX WITH RANDOM VALUES.
     /// @param cortex THE CORTEX TO INITIALIZE.
     /// @param width THE WIDTH OF THE CORTEX.
     /// @param height THE HEIGHT OF THE CORTEX.
     /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON.
-    void c2d_rand_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_t height, unk_nh_radius_t nh_radius);
+    void c2d_rand_init(unk_cortex2d_t **cortex,
+                       unk_cortex_size_t width,
+                       unk_cortex_size_t height,
+                       unk_nh_radius_t nh_radius);
 
     /// @brief DESTROYS THE GIVEN INPUT2D AND FREES MEMORY.
     void i2d_destroy(unk_input2d_t *input);
@@ -372,7 +388,11 @@ uint32_t xorshf32(uint32_t state);
     void c2d_set_wrapped(unk_cortex2d_t *cortex, unk_bool_t wrapped);
 
     /// @brief DISABLES SELF CONNECTIONS WHITHIN THE SPECIFIED BOUNDS.
-    void c2d_syn_disable(unk_cortex2d_t *cortex, unk_cortex_size_t x0, unk_cortex_size_t y0, unk_cortex_size_t x1, unk_cortex_size_t y1);
+    void c2d_syn_disable(unk_cortex2d_t *cortex,
+                         unk_cortex_size_t x0,
+                         unk_cortex_size_t y0,
+                         unk_cortex_size_t x1,
+                         unk_cortex_size_t y1);
 
     /// @brief RANDOMLY MUTATES THE CORTEX SHAPE.
     /// @param cortex THE CORTEX TO EDIT.

@@ -13,7 +13,11 @@ void c2d_feed2d(unk_cortex2d_t *cortex, unk_input2d_t *input)
     {
         for (unk_cortex_size_t x = input->x0; x < input->x1; x++)
         {
-            unk_bool_t excite = value_to_pulse(cortex->sample_window, cortex->ticks_count % cortex->sample_window, input->values[IDX2D(x - input->x0, y - input->y0, input->x1 - input->x0)], cortex->pulse_mapping);
+            unk_bool_t excite =
+                value_to_pulse(cortex->sample_window,
+                               cortex->ticks_count % cortex->sample_window,
+                               input->values[IDX2D(x - input->x0, y - input->y0, input->x1 - input->x0)],
+                               cortex->pulse_mapping);
             if (excite)
             {
                 cortex->neurons[IDX2D(x, y, cortex->width)].value += input->exc_value;
@@ -33,7 +37,8 @@ void c2d_read2d(unk_cortex2d_t *cortex, unk_output2d_t *output)
     {
         for (unk_cortex_size_t x = output->x0; x < output->x1; x++)
         {
-            output->values[IDX2D(x - output->x0, y - output->y0, output->x1 - output->x0)] = cortex->neurons[IDX2D(x, y, cortex->width)].pulse;
+            output->values[IDX2D(x - output->x0, y - output->y0, output->x1 - output->x0)] =
+                cortex->neurons[IDX2D(x, y, cortex->width)].pulse;
         }
     }
 }
@@ -101,15 +106,21 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
                     unk_cortex_size_t neighbor_x = x + (i - prev_cortex->nh_radius);
                     unk_cortex_size_t neighbor_y = y + (j - prev_cortex->nh_radius);
                     // SKIP CENTER NEURON AND CHECK BOUNDARY CONDITIONS
-                    if ((j != prev_cortex->nh_radius || i != prev_cortex->nh_radius) && (neighbor_x >= 0 && neighbor_y >= 0 && neighbor_x < prev_cortex->width && neighbor_y < prev_cortex->height))
+                    if ((j != prev_cortex->nh_radius || i != prev_cortex->nh_radius) &&
+                        (neighbor_x >= 0 && neighbor_y >= 0 && neighbor_x < prev_cortex->width &&
+                         neighbor_y < prev_cortex->height))
                     {
                         // THE INDEX OF THE CURRENT NEIGHBOR IN THE CURRENT NEURON'S NEIGHBORHOOD
                         unk_cortex_size_t neighbor_nh_index = IDX2D(i, j, nh_diameter);
-                        unk_cortex_size_t neighbor_index = IDX2D(WRAP(neighbor_x, prev_cortex->width), WRAP(neighbor_y, prev_cortex->height), prev_cortex->width);
+                        unk_cortex_size_t neighbor_index = IDX2D(WRAP(neighbor_x, prev_cortex->width),
+                                                                 WRAP(neighbor_y, prev_cortex->height),
+                                                                 prev_cortex->width);
                         // FETCH THE CURRENT NEIGHBOR
                         unk_neuron_t neighbor = prev_cortex->neurons[neighbor_index];
                         // COMPUTE THE CURRENT SYNAPSE STRENGTH
-                        unk_syn_strength_t syn_strength = (prev_str_mask_a & 0x01U) | ((prev_str_mask_b & 0x01U) << 0x01U) | ((prev_str_mask_c & 0x01U) << 0x02U);
+                        unk_syn_strength_t syn_strength = (prev_str_mask_a & 0x01U) |
+                                                          ((prev_str_mask_b & 0x01U) << 0x01U) |
+                                                          ((prev_str_mask_c & 0x01U) << 0x02U);
                         // PICK A RANDOM NUMBER FOR EACH NEIGHBOR, CAPPED TO THE MAX UINT16 VALUE
                         next_neuron->rand_state = xorshf32(next_neuron->rand_state);
                         unk_chance_t random = next_neuron->rand_state % 0xFFFFU;
@@ -118,7 +129,9 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
                         // CHECK IF THE LAST BIT OF THE MASK IS 1 OR 0: 1 = ACTIVE SYNAPSE, 0 = INACTIVE SYNAPSE
                         if (prev_ac_mask & 0x01U)
                         {
-                            unk_neuron_value_t neighbor_influence = ((prev_exc_mask & 0x01U) ? prev_cortex->exc_value : -prev_cortex->exc_value) * ((syn_strength / 4) + 1);
+                            unk_neuron_value_t neighbor_influence =
+                                ((prev_exc_mask & 0x01U) ? prev_cortex->exc_value : -prev_cortex->exc_value) *
+                                ((syn_strength / 4) + 1);
                             if (neighbor.value > prev_cortex->fire_threshold)
                             {
                                 if (next_neuron->value + neighbor_influence < prev_cortex->recovery_value)
@@ -139,7 +152,8 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
                             // 2. BELOW MAX SYNAPSE COUNT
                             // 3. PASSES RANDOM PROBABILITY CHECK
                             // FREQUENCY COMPONENT
-                            if (!(prev_ac_mask & 0x01U) && prev_neuron.syn_count < next_neuron->max_syn_count && random < prev_cortex->syngen_chance * (unk_chance_t)neighbor.pulse)
+                            if (!(prev_ac_mask & 0x01U) && prev_neuron.syn_count < next_neuron->max_syn_count &&
+                                random < prev_cortex->syngen_chance * (unk_chance_t)neighbor.pulse)
                             {
                                 // ADD SYNAPSE
                                 next_neuron->synac_mask |= (0x01UL << neighbor_nh_index);
@@ -181,21 +195,37 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
                                 // 1. NOT AT MAX STRENGTH
                                 // 2. TOTAL STRENGTH BELOW MAXIMUM
                                 // 3. PASSES PROBABILITY CHECK
-                                if (syn_strength < UNK_MAX_SYN_STRENGTH && prev_neuron.tot_syn_strength < prev_cortex->max_tot_strength && random < prev_cortex->synstr_chance * (unk_chance_t)neighbor.pulse * (unk_chance_t)strength_diff)
+                                if (syn_strength < UNK_MAX_SYN_STRENGTH &&
+                                    prev_neuron.tot_syn_strength < prev_cortex->max_tot_strength &&
+                                    random < prev_cortex->synstr_chance * (unk_chance_t)neighbor.pulse *
+                                                 (unk_chance_t)strength_diff)
                                 {
                                     syn_strength++;
-                                    next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_a =
+                                        (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) |
+                                        ((syn_strength & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_b =
+                                        (prev_neuron.synstr_mask_b & ~(0x01UL << neighbor_nh_index)) |
+                                        (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_c =
+                                        (prev_neuron.synstr_mask_c & ~(0x01UL << neighbor_nh_index)) |
+                                        (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
                                     next_neuron->tot_syn_strength++;
                                 }
                                 // WEAKEN SYNAPSE IF PASSES PROBABILITY CHECK
-                                else if (syn_strength > 0x00U && random < prev_cortex->synstr_chance / (neighbor.pulse + syn_strength + 1))
+                                else if (syn_strength > 0x00U &&
+                                         random < prev_cortex->synstr_chance / (neighbor.pulse + syn_strength + 1))
                                 {
                                     syn_strength--;
-                                    next_neuron->synstr_mask_a = (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) | ((syn_strength & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_b = (prev_neuron.synstr_mask_b & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
-                                    next_neuron->synstr_mask_c = (prev_neuron.synstr_mask_c & ~(0x01UL << neighbor_nh_index)) | (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_a =
+                                        (prev_neuron.synstr_mask_a & ~(0x01UL << neighbor_nh_index)) |
+                                        ((syn_strength & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_b =
+                                        (prev_neuron.synstr_mask_b & ~(0x01UL << neighbor_nh_index)) |
+                                        (((syn_strength >> 0x01U) & 0x01U) << neighbor_nh_index);
+                                    next_neuron->synstr_mask_c =
+                                        (prev_neuron.synstr_mask_c & ~(0x01UL << neighbor_nh_index)) |
+                                        (((syn_strength >> 0x02U) & 0x01U) << neighbor_nh_index);
                                     next_neuron->tot_syn_strength--;
                                 }
                             }
@@ -252,19 +282,24 @@ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_cortex)
 /// @param upper THE UPPER BOUND OF THE SAMPLING WINDOW
 /// @param rounded TRUE IF THE DIVISION SHOULD BE ROUNDED, FALSE OTHERWISE
 /// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
-static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t step, unk_ticks_count_t input,
-                                         unk_ticks_count_t upper, unk_bool_t rounded)
+static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t step,
+                                         unk_ticks_count_t input,
+                                         unk_ticks_count_t upper,
+                                         unk_bool_t rounded)
 {
     if (input < upper / 2)
     {
-        if (input == 0) return UNK_TRUE;
+        if (input == 0)
+            return UNK_TRUE;
         unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)input) : upper / input;
         return step % div == 0;
     }
     else
     {
-        if (input >= upper) return UNK_TRUE;
-        unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)(upper - input)) : upper / (upper - input);
+        if (input >= upper)
+            return UNK_TRUE;
+        unk_ticks_count_t div =
+            rounded ? (unk_ticks_count_t)round((double)upper / (double)(upper - input)) : upper / (upper - input);
         return step % div != 0;
     }
 }
@@ -280,37 +315,40 @@ static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t step, unk_ticks_count
 /// @param input THE INPUT VALUE TO MAP (MUST BE IN RANGE 0..(SAMPLE_WINDOW - 1))
 /// @param pulse_mapping THE MAPPING ALGORITHM TO USE FOR PULSE GENERATION
 /// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
-unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step,
-                          unk_ticks_count_t input, unk_pulse_mapping_t pulse_mapping)
+unk_bool_t value_to_pulse(unk_ticks_count_t sample_window,
+                          unk_ticks_count_t sample_step,
+                          unk_ticks_count_t input,
+                          unk_pulse_mapping_t pulse_mapping)
 {
-    if (input >= sample_window) return UNK_FALSE;
+    if (input >= sample_window)
+        return UNK_FALSE;
     const unk_ticks_count_t upper = sample_window - 1;
     switch (pulse_mapping)
     {
-        case UNK_PULSE_MAPPING_LINEAR:
-            return input < sample_window && sample_step % (sample_window - input) == 0;
-        case UNK_PULSE_MAPPING_FPROP:
-            return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
-        case UNK_PULSE_MAPPING_RPROP:
-            return calc_prop_pulse(sample_step, input, upper, UNK_TRUE);
-        case UNK_PULSE_MAPPING_DFPROP:
+    case UNK_PULSE_MAPPING_LINEAR:
+        return input < sample_window && sample_step % (sample_window - input) == 0;
+    case UNK_PULSE_MAPPING_FPROP:
+        return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
+    case UNK_PULSE_MAPPING_RPROP:
+        return calc_prop_pulse(sample_step, input, upper, UNK_TRUE);
+    case UNK_PULSE_MAPPING_DFPROP:
+    {
+        static unk_ticks_count_t prev_input = 0;
+        static unk_ticks_count_t prev_sample_window = 0;
+        if (prev_sample_window != sample_window)
         {
-            static unk_ticks_count_t prev_input = 0;
-            static unk_ticks_count_t prev_sample_window = 0;
-            if (prev_sample_window != sample_window)
-            {
-                prev_input = 0;
-                prev_sample_window = sample_window;
-            }
-            unk_ticks_count_t input_diff = (input > prev_input) ? input - prev_input : prev_input - input;
-            prev_input = input;
-            if (input_diff > 0)
-            {
-                unk_ticks_count_t pulse_rate = (sample_window - input_diff) / 2;
-                return pulse_rate == 0 || sample_step % (pulse_rate + 1) == 0;
-            }
-            return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
+            prev_input = 0;
+            prev_sample_window = sample_window;
         }
+        unk_ticks_count_t input_diff = (input > prev_input) ? input - prev_input : prev_input - input;
+        prev_input = input;
+        if (input_diff > 0)
+        {
+            unk_ticks_count_t pulse_rate = (sample_window - input_diff) / 2;
+            return pulse_rate == 0 || sample_step % (pulse_rate + 1) == 0;
+        }
+        return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
+    }
     }
     return UNK_FALSE;
 }

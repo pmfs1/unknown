@@ -76,8 +76,10 @@ extern "C"
     /// @param selection_pool_size SIZE OF THE SELECTION POOL FOR BREEDING
     /// @param mut_chance MUTATION PROBABILITY (0-65535)
     /// @param eval_function POINTER TO FITNESS EVALUATION FUNCTION
-    void p2d_init(unk_population2d_t **population, unk_population_size_t size,
-                  unk_population_size_t selection_pool_size, unk_chance_t mut_chance,
+    void p2d_init(unk_population2d_t **population,
+                  unk_population_size_t size,
+                  unk_population_size_t selection_pool_size,
+                  unk_chance_t mut_chance,
                   void (*eval_function)(unk_cortex2d_t *cortex, unk_cortex_fitness_t *fitness));
 
     /// @brief POPULATES THE STARTING POOL OF CORTICES WITH THE PROVIDED VALUES
@@ -85,7 +87,9 @@ extern "C"
     /// @param width THE WIDTH OF THE CORTICES IN THE POPULATION
     /// @param height THE HEIGHT OF THE CORTICES IN THE POPULATION
     /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON
-    void p2d_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height,
+    void p2d_populate(unk_population2d_t *population,
+                      unk_cortex_size_t width,
+                      unk_cortex_size_t height,
                       unk_nh_radius_t nh_radius);
 
     /// @brief POPULATES THE STARTING POOL OF CORTICES WITH RANDOM VALUES
@@ -93,7 +97,9 @@ extern "C"
     /// @param width THE WIDTH OF THE CORTICES IN THE POPULATION
     /// @param height THE HEIGHT OF THE CORTICES IN THE POPULATION
     /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON
-    void p2d_rand_populate(unk_population2d_t *population, unk_cortex_size_t width, unk_cortex_size_t height,
+    void p2d_rand_populate(unk_population2d_t *population,
+                           unk_cortex_size_t width,
+                           unk_cortex_size_t height,
                            unk_nh_radius_t nh_radius);
 
     /// @brief DESTROYS THE GIVEN CORTEX2D AND FREES MEMORY FOR IT AND ITS NEURONS

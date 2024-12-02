@@ -1,13 +1,13 @@
 #ifndef __UNKNOWN__
 #define __UNKNOWN__
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include <math.h>
 #include "cortex.h"
 #include "population.h"
+#include <math.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -48,7 +48,9 @@ extern "C"
     /// @param input THE INPUT VALUE TO MAP (MUST BE IN RANGE 0..(SAMPLE_WINDOW - 1))
     /// @param pulse_mapping THE MAPPING ALGORITHM TO USE FOR PULSE GENERATION
     /// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
-    unk_bool_t value_to_pulse(unk_ticks_count_t sample_window, unk_ticks_count_t sample_step, unk_ticks_count_t input,
+    unk_bool_t value_to_pulse(unk_ticks_count_t sample_window,
+                              unk_ticks_count_t sample_step,
+                              unk_ticks_count_t input,
                               unk_pulse_mapping_t pulse_mapping);
 #ifdef __cplusplus
 }
