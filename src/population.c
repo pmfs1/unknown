@@ -245,10 +245,7 @@ void p2d_breed(unk_population2d_t *population, unk_cortex2d_t **child)
     population->rand_state = xorshf32(population->rand_state);
     winner_parent_index = population->rand_state % population->parents_count;
     c2d_set_synstr_chance(*child, parents[winner_parent_index].synstr_chance);
-    // SET MAX TOTAL STRENGTH FROM A RANDOM PARENT
-    population->rand_state = xorshf32(population->rand_state);
-    winner_parent_index = population->rand_state % population->parents_count;
-    (*child)->max_tot_strength = parents[winner_parent_index].max_tot_strength;
+    // [TODO] SET MAX TOT STRENGTH
     // PICK MAX SYN COUNT FROM A RANDOM PARENT
     population->rand_state = xorshf32(population->rand_state);
     winner_parent_index = population->rand_state % population->parents_count;
