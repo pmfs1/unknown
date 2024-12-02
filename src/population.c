@@ -301,26 +301,27 @@ void p2d_crossover(unk_population2d_t *population, unk_bool_t mutate)
     for (unk_population_size_t i = 0; i < population->size; i++)
     {
         // CREATE A NEW CHILD BY BREEDING PARENTS FROM THE POPULATION'S SELECTION POOL
-        unk_cortex2d_t *child = (unk_cortex2d_t *)malloc(sizeof(unk_cortex2d_t));
-        if (child == NULL)
-        {
-            return;
-        }
+        unk_cortex2d_t *child;
         p2d_breed(population, &child);
         // MUTATE THE NEWBORN IF SO SPECIFIED
         if (mutate)
         {
             c2d_mutate(child, population->mut_chance);
         }
-        // STORE THE PRODUCED CHILD
+        // STORE THE PRODUCED CHILD DIRECTLY INTO THE OFFSPRING ARRAY
         offspring[i] = *child;
+        // FREE THE TEMPORARY CHILD
+        free(child);
     }
-    // REPLACE OLD GENERATION WITH NEW OFFSPRING
+
+    // FREE OLD CORTICES
     for (unk_population_size_t i = 0; i < population->size; i++)
     {
-        // [TODO] THIS COMMAND CAUSES A "DOUBLE FREE OR CORRUPTION (OUT)" AFTER THE FIRST LOOP. IT LOOKS LIKE THE FIRST CORTEX IS BEING FREED TWICE: CHECK THIS OUT.
         c2d_destroy(&(population->cortices[i]));
     }
+    // FREE OLD CORTICES ARRAY
+    free(population->cortices);
+    // ASSIGN THE NEW OFFSPRING TO THE POPULATION
     population->cortices = offspring;
 }
 
