@@ -96,32 +96,6 @@ void p2d_populate(unk_population2d_t *population,
     }
 }
 
-/// @brief POPULATES THE STARTING POOL OF CORTICES WITH RANDOM VALUES
-/// @param population THE POPULATION WHOSE CORTICES TO SETUP
-/// @param width THE WIDTH OF THE CORTICES IN THE POPULATION
-/// @param height THE HEIGHT OF THE CORTICES IN THE POPULATION
-/// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON
-void p2d_rand_populate(unk_population2d_t *population,
-                       unk_cortex_size_t width,
-                       unk_cortex_size_t height,
-                       unk_nh_radius_t nh_radius)
-{
-    for (unk_population_size_t i = 0; i < population->size; i++)
-    {
-        // ALLOCATE A TEMPORARY POINTER TO THE ITH CORTEX
-        unk_cortex2d_t *cortex;
-        // RANDOMLY INIT THE ITH CORTEX.
-        c2d_rand_init(&cortex, width, height, nh_radius);
-        population->cortices[i] = *cortex;
-        // THERE WAS AN ERROR INITIALIZING A CORTEX, SO ABORT POPULATION SETUP, CLEAN WHAT'S BEEN INITIALIZED UP TO NOW AND RETURN THE ERROR
-        for (unk_population_size_t j = 0; j < i - 1; j++)
-        {
-            // DESTROY THE JTH CORTEX
-            c2d_destroy(&(population->cortices[j]));
-        }
-    }
-}
-
 /// @brief DESTROYS THE GIVEN POPULATION AND FREES MEMORY
 /// @param population THE POPULATION TO DESTROY
 void p2d_destroy(unk_population2d_t *population)
