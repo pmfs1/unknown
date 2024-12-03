@@ -121,8 +121,8 @@ void p2d_rand_populate(unk_population2d_t *population,
     }
 }
 
-/// @brief DESTROYS THE GIVEN CORTEX2D AND FREES MEMORY FOR IT AND ITS NEURONS
-/// @param cortex THE CORTEX TO DESTROY
+/// @brief DESTROYS THE GIVEN POPULATION AND FREES MEMORY
+/// @param population THE POPULATION TO DESTROY
 void p2d_destroy(unk_population2d_t *population)
 {
     // FREE CORTICES
