@@ -1,51 +1,51 @@
 #include "cortex.h"
 
 #ifdef __CUDACC__
-// XORSHIFT RANDOM NUMBER GENERATOR (XOR32)
-// PURPOSE: GENERATES HIGH-QUALITY PSEUDO-RANDOM NUMBERS USING FAST XOR OPERATIONS
-// CHARACTERISTICS:
-//   - PERIOD: 2^32-1 (FULL CYCLE BEFORE REPETITION)
-//   - STATE MUST BE NON-ZERO TO PREVENT DEGENERATION TO ZERO
-//   - IMPLEMENTS MARSAGLIA'S "XOR" ALGORITHM (2003 PAPER "XORSHIFT RNGS")
-//   - PASSES DIEHARD STATISTICAL TESTS FOR RANDOMNESS QUALITY
-//   - EXTREMELY FAST: ONLY 3 XOR AND SHIFT OPERATIONS
-// PARAMETERS:
-//   - STATE: 32-BIT UNSIGNED INTEGER SERVING AS RANDOM STATE
-// RETURNS: NEXT PSEUDO-RANDOM NUMBER IN SEQUENCE
-// WARNING: INITIAL STATE MUST BE NON-ZERO TO AVOID DEGENERATION
-__host__ __device__ uint32_t cuda_xorshf32(uint32_t state)
-{
-    // ALGORITHM "XOR" FROM PAGE 4 OF MARSAGLIA, "XORSHIFT RNGS"
-    // APPLIES THREE XORSHIFT OPERATIONS TO GENERATE PSEUDO-RANDOM NUMBERS
-    uint32_t x = state;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    return x;
-}
+    // XORSHIFT RANDOM NUMBER GENERATOR (XOR32)
+    // PURPOSE: GENERATES HIGH-QUALITY PSEUDO-RANDOM NUMBERS USING FAST XOR OPERATIONS
+    // CHARACTERISTICS:
+    //   - PERIOD: 2^32-1 (FULL CYCLE BEFORE REPETITION)
+    //   - STATE MUST BE NON-ZERO TO PREVENT DEGENERATION TO ZERO
+    //   - IMPLEMENTS MARSAGLIA'S "XOR" ALGORITHM (2003 PAPER "XORSHIFT RNGS")
+    //   - PASSES DIEHARD STATISTICAL TESTS FOR RANDOMNESS QUALITY
+    //   - EXTREMELY FAST: ONLY 3 XOR AND SHIFT OPERATIONS
+    // PARAMETERS:
+    //   - STATE: 32-BIT UNSIGNED INTEGER SERVING AS RANDOM STATE
+    // RETURNS: NEXT PSEUDO-RANDOM NUMBER IN SEQUENCE
+    // WARNING: INITIAL STATE MUST BE NON-ZERO TO AVOID DEGENERATION
+    __host__ __device__ uint32_t cuda_xorshf32(uint32_t state)
+    {
+        // ALGORITHM "XOR" FROM PAGE 4 OF MARSAGLIA, "XORSHIFT RNGS"
+        // APPLIES THREE XORSHIFT OPERATIONS TO GENERATE PSEUDO-RANDOM NUMBERS
+        uint32_t x = state;
+        x ^= x << 13;
+        x ^= x >> 17;
+        x ^= x << 5;
+        return x;
+    }
 #else
-// XORSHIFT RANDOM NUMBER GENERATOR (XOR32)
-// PURPOSE: GENERATES HIGH-QUALITY PSEUDO-RANDOM NUMBERS USING FAST XOR OPERATIONS
-// CHARACTERISTICS:
-//   - PERIOD: 2^32-1 (FULL CYCLE BEFORE REPETITION)
-//   - STATE MUST BE NON-ZERO TO PREVENT DEGENERATION TO ZERO
-//   - IMPLEMENTS MARSAGLIA'S "XOR" ALGORITHM (2003 PAPER "XORSHIFT RNGS")
-//   - PASSES DIEHARD STATISTICAL TESTS FOR RANDOMNESS QUALITY
-//   - EXTREMELY FAST: ONLY 3 XOR AND SHIFT OPERATIONS
-// PARAMETERS:
-//   - STATE: 32-BIT UNSIGNED INTEGER SERVING AS RANDOM STATE
-// RETURNS: NEXT PSEUDO-RANDOM NUMBER IN SEQUENCE
-// WARNING: INITIAL STATE MUST BE NON-ZERO TO AVOID DEGENERATION
-uint32_t xorshf32(uint32_t state)
-{
-    // ALGORITHM "XOR" FROM PAGE 4 OF MARSAGLIA, "XORSHIFT RNGS"
-    // APPLIES THREE XORSHIFT OPERATIONS TO GENERATE PSEUDO-RANDOM NUMBERS
-    uint32_t x = state;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    return x;
-}
+    // XORSHIFT RANDOM NUMBER GENERATOR (XOR32)
+    // PURPOSE: GENERATES HIGH-QUALITY PSEUDO-RANDOM NUMBERS USING FAST XOR OPERATIONS
+    // CHARACTERISTICS:
+    //   - PERIOD: 2^32-1 (FULL CYCLE BEFORE REPETITION)
+    //   - STATE MUST BE NON-ZERO TO PREVENT DEGENERATION TO ZERO
+    //   - IMPLEMENTS MARSAGLIA'S "XOR" ALGORITHM (2003 PAPER "XORSHIFT RNGS")
+    //   - PASSES DIEHARD STATISTICAL TESTS FOR RANDOMNESS QUALITY
+    //   - EXTREMELY FAST: ONLY 3 XOR AND SHIFT OPERATIONS
+    // PARAMETERS:
+    //   - STATE: 32-BIT UNSIGNED INTEGER SERVING AS RANDOM STATE
+    // RETURNS: NEXT PSEUDO-RANDOM NUMBER IN SEQUENCE
+    // WARNING: INITIAL STATE MUST BE NON-ZERO TO AVOID DEGENERATION
+    uint32_t xorshf32(uint32_t state)
+    {
+        // ALGORITHM "XOR" FROM PAGE 4 OF MARSAGLIA, "XORSHIFT RNGS"
+        // APPLIES THREE XORSHIFT OPERATIONS TO GENERATE PSEUDO-RANDOM NUMBERS
+        uint32_t x = state;
+        x ^= x << 13;
+        x ^= x >> 17;
+        x ^= x << 5;
+        return x;
+    }
 #endif // __CUDACC__
 
 // ################################################ INITIALIZATION FUNCTIONS ################################################
@@ -285,6 +285,7 @@ void c2d_rand_init(unk_cortex2d_t **cortex,
 }
 
 /// @brief DESTROYS THE GIVEN INPUT2D AND FREES MEMORY.
+/// @param input THE INPUT TO DESTROY.
 void i2d_destroy(unk_input2d_t *input)
 {
     free(input->values);
@@ -292,6 +293,7 @@ void i2d_destroy(unk_input2d_t *input)
 }
 
 /// @brief DESTROYS THE GIVEN OUTPUT2D AND FREES MEMORY.
+/// @param output THE OUTPUT TO DESTROY.
 void o2d_destroy(unk_output2d_t *output)
 {
     free(output->values);
@@ -307,6 +309,8 @@ void c2d_destroy(unk_cortex2d_t *cortex)
 }
 
 /// @brief RETURNS A CORTEX WITH THE SAME PROPERTIES AS THE GIVEN ONE.
+/// @param to THE CORTEX TO COPY TO.
+/// @param from THE CORTEX TO COPY FROM.
 void c2d_copy(unk_cortex2d_t *to, unk_cortex2d_t *from)
 {
     to->width = from->width;
@@ -339,6 +343,8 @@ void c2d_copy(unk_cortex2d_t *to, unk_cortex2d_t *from)
 // ################################################ SETTER FUNCTIONS ################################################
 
 /// @brief SETS THE NEIGHBORHOOD RADIUS FOR ALL NEURONS IN THE CORTEX.
+/// @param cortex THE CORTEX TO EDIT.
+/// @param radius THE RADIUS TO ASSIGN TO THE CORTEX.
 void c2d_set_nhradius(unk_cortex2d_t *cortex, unk_nh_radius_t radius)
 {
     // MAKE SURE THE PROVIDED RADIUS IS VALID
@@ -350,6 +356,8 @@ void c2d_set_nhradius(unk_cortex2d_t *cortex, unk_nh_radius_t radius)
 }
 
 /// @brief SETS THE NEIGHBORHOOD MASK FOR ALL NEURONS IN THE CORTEX.
+/// @param cortex THE CORTEX TO EDIT.
+/// @param mask THE MASK TO ASSIGN TO THE CORTEX.
 void c2d_set_nhmask(unk_cortex2d_t *cortex, unk_nh_mask_t mask)
 {
     for (unk_cortex_size_t y = 0; y < cortex->height; y++)
@@ -362,12 +370,16 @@ void c2d_set_nhmask(unk_cortex2d_t *cortex, unk_nh_mask_t mask)
 }
 
 /// @brief SETS THE EVOLUTION STEP FOR THE CORTEX.
+/// @param cortex THE CORTEX TO EDIT.
+/// @param evol_step THE EVOLUTION STEP TO ASSIGN.
 void c2d_set_evol_step(unk_cortex2d_t *cortex, unk_evol_step_t evol_step)
 {
     cortex->evol_step = evol_step;
 }
 
 /// @brief SETS THE PULSE WINDOW WIDTH FOR THE CORTEX.
+/// @param cortex THE CORTEX TO EDIT.
+/// @param window THE PULSE WINDOW WIDTH TO ASSIGN.
 void c2d_set_pulse_window(unk_cortex2d_t *cortex, unk_ticks_count_t window)
 {
     // THE GIVEN WINDOW SIZE MUST BE BETWEEN 0 AND THE PULSE MASK SIZE (IN BITS)
@@ -378,18 +390,23 @@ void c2d_set_pulse_window(unk_cortex2d_t *cortex, unk_ticks_count_t window)
 }
 
 /// @brief SETS THE SAMPLE WINDOW FOR THE CORTEX.
+/// @param cortex THE CORTEX TO EDIT.
+/// @param sample_window THE SAMPLE WINDOW TO ASSIGN.
 void c2d_set_sample_window(unk_cortex2d_t *cortex, unk_ticks_count_t sample_window)
 {
     cortex->sample_window = sample_window;
 }
 
 /// @brief SETS THE FIRE THRESHOLD FOR ALL NEURONS IN THE CORTEX.
+/// @param cortex THE CORTEX TO EDIT.
+/// @param threshold THE FIRE THRESHOLD TO ASSIGN.
 void c2d_set_fire_threshold(unk_cortex2d_t *cortex, unk_neuron_value_t threshold)
 {
     cortex->fire_threshold = threshold;
 }
 
 /// @brief SETS THE SYNGEN CHANCE FOR THE CORTEX. SYNGEN CHANCE DEFINES THE PROBABILITY FOR SYNAPSE GENERATION AND DELETION.
+/// @param cortex THE CORTEX TO EDIT.
 /// @param syngen_chance THE CHANCE TO APPLY (MUST BE BETWEEN 0X0000U AND 0XFFFFU).
 void c2d_set_syngen_chance(unk_cortex2d_t *cortex, unk_chance_t syngen_chance)
 {
@@ -401,6 +418,7 @@ void c2d_set_syngen_chance(unk_cortex2d_t *cortex, unk_chance_t syngen_chance)
 }
 
 /// @brief SETS THE SYNSTR CHANCE FOR THE CORTEX. SYNSTR CHANCE DEFINES THE PROBABILITY FOR SYNAPSE STRENGTHENING AND WEAKENING.
+/// @param cortex THE CORTEX TO EDIT.
 /// @param synstr_chance THE CHANCE TO APPLY (MUST BE BETWEEN 0X0000U AND 0XFFFFU).
 void c2d_set_synstr_chance(unk_cortex2d_t *cortex, unk_chance_t synstr_chance)
 {
@@ -421,6 +439,7 @@ void c2d_set_max_syn_count(unk_cortex2d_t *cortex, unk_syn_count_t syn_count)
 
 /// @brief SETS THE MAXIMUM ALLOWABLE TOUCH FOR EACH NEURON IN THE NETWORK.
 /// A NEURON TOUCH IS DEFINED AS ITS SYNAPSES COUNT DIVIDED BY ITS TOTAL NEIGHBORS COUNT.
+/// @param cortex THE CORTEX TO EDIT.
 /// @param touch THE TOUCH TO ASSIGN THE CORTEX. ONLY VALUES BETWEEN 0 AND 1 ARE ALLOWED.
 void c2d_set_max_touch(unk_cortex2d_t *cortex, float touch)
 {
@@ -432,18 +451,24 @@ void c2d_set_max_touch(unk_cortex2d_t *cortex, float touch)
 }
 
 /// @brief SETS THE PREFERRED INPUT MAPPING FOR THE GIVEN CORTEX.
+/// @param cortex THE CORTEX TO EDIT.
+/// @param pulse_mapping THE MAPPING TO ASSIGN.
 void c2d_set_pulse_mapping(unk_cortex2d_t *cortex, unk_pulse_mapping_t pulse_mapping)
 {
     cortex->pulse_mapping = pulse_mapping;
 }
 
 /// @brief SETS THE RANGE FOR EXCITATORY TO INHIBITORY RATIOS IN SINGLE NEURONS.
+/// @param cortex THE CORTEX TO EDIT.
+/// @param inhexc_range THE RANGE TO ASSIGN.
 void c2d_set_inhexc_range(unk_cortex2d_t *cortex, unk_chance_t inhexc_range)
 {
     cortex->inhexc_range = inhexc_range;
 }
 
 /// @brief SETS THE PROPORTION BETWEEN EXCITATORY AND INHIBITORY GENERATED SYNAPSES.
+/// @param cortex THE CORTEX TO EDIT.
+/// @param inhexc_ratio THE RATIO TO ASSIGN.
 void c2d_set_inhexc_ratio(unk_cortex2d_t *cortex, unk_chance_t inhexc_ratio)
 {
     if (inhexc_ratio <= cortex->inhexc_range)
@@ -459,12 +484,19 @@ void c2d_set_inhexc_ratio(unk_cortex2d_t *cortex, unk_chance_t inhexc_ratio)
 }
 
 /// @brief SETS WHETHER THE TICK PASS SHOULD WRAP AROUND THE EDGES (PACMAN EFFECT).
+/// @param cortex THE CORTEX TO EDIT.
+/// @param wrapped A BOOLEAN VALUE INDICATING WHETHER WRAPPING SHOULD BE ENABLED.
 void c2d_set_wrapped(unk_cortex2d_t *cortex, unk_bool_t wrapped)
 {
     // [TODO]
 }
 
 /// @brief DISABLES SELF CONNECTIONS WHITHIN THE SPECIFIED BOUNDS.
+/// @param cortex THE CORTEX TO EDIT.
+/// @param x0 THE X0 COORDINATE OF THE BOUNDS.
+/// @param y0 THE Y0 COORDINATE OF THE BOUNDS.
+/// @param x1 THE X1 COORDINATE OF THE BOUNDS.
+/// @param y1 THE Y1 COORDINATE OF THE BOUNDS.
 void c2d_syn_disable(unk_cortex2d_t *cortex,
                      unk_cortex_size_t x0,
                      unk_cortex_size_t y0,

@@ -1,7 +1,7 @@
 CCOMP=gcc
 NVCOMP=nvcc
 ARC=ar
-STD_CCOMP_FLAGS=-std=c17 -Wall -pedantic -g -fPIC
+STD_CCOMP_FLAGS=-std=c17 -Wall -pedantic -g -fPIC -I$(INCLUDE_DIR)
 CCOMP_FLAGS=$(STD_CCOMP_FLAGS) -fopenmp
 CLINK_FLAGS=-Wall -fopenmp
 ARC_FLAGS=-rcs
@@ -13,11 +13,12 @@ else
 endif
 
 MODE=
-NVCOMP_FLAGS=--compiler-options '-fPIC' -G $(CUDA_ARCH_FLAG) -I/usr/local/cuda/include
+NVCOMP_FLAGS=--compiler-options '-fPIC' -G $(CUDA_ARCH_FLAG) -I/usr/local/cuda/include -I$(INCLUDE_DIR)
 NVLINK_FLAGS=$(CUDA_ARCH_FLAG) -L/usr/local/cuda/lib64
 STD_LIBS=-lm
 CUDA_STD_LIBS=-lcudart
 SRC_DIR=./src
+INCLUDE_DIR=./include
 BIN_DIR=./bin
 SYSTEM_INCLUDE_DIR=
 SYSTEM_LIB_DIR=
@@ -42,8 +43,8 @@ install: std-install cuda-install
 
 install-headers:
 	sudo $(MKDIR) $(SYSTEM_INCLUDE_DIR)/unknown
-	sudo cp $(SRC_DIR)/*.h $(SYSTEM_INCLUDE_DIR)/unknown
-	sudo cp $(SRC_DIR)/*.cuh $(SYSTEM_INCLUDE_DIR)/unknown
+	sudo cp $(INCLUDE_DIR)/*.h $(SYSTEM_INCLUDE_DIR)/unknown
+	sudo cp $(INCLUDE_DIR)/*.cuh $(SYSTEM_INCLUDE_DIR)/unknown
 
 install-lib:
 ifneq ($(MODE), archive)
