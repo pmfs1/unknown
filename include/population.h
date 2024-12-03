@@ -92,16 +92,6 @@ extern "C"
                       unk_cortex_size_t height,
                       unk_nh_radius_t nh_radius);
 
-    /// @brief POPULATES THE STARTING POOL OF CORTICES WITH RANDOM VALUES
-    /// @param population THE POPULATION WHOSE CORTICES TO SETUP
-    /// @param width THE WIDTH OF THE CORTICES IN THE POPULATION
-    /// @param height THE HEIGHT OF THE CORTICES IN THE POPULATION
-    /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON
-    void p2d_rand_populate(unk_population2d_t *population,
-                           unk_cortex_size_t width,
-                           unk_cortex_size_t height,
-                           unk_nh_radius_t nh_radius);
-
     /// @brief DESTROYS THE GIVEN POPULATION AND FREES MEMORY
     /// @param population THE POPULATION TO DESTROY
     void p2d_destroy(unk_population2d_t *population);
