@@ -288,45 +288,6 @@ __global__ void c2d_tick(unk_cortex2d_t *prev_cortex, unk_cortex2d_t *next_corte
 
 // ########################################## INPUT MAPPING FUNCTIONS ##########################################
 
-/// @brief CALCULATES THE PULSE PATTERN FOR THE DIFFERENTIAL FAST PROPORTIONAL MAPPING ALGORITHM
-/// @param step THE CURRENT STEP POSITION IN THE WINDOW
-/// @param input THE INPUT VALUE TO MAP
-/// @param upper THE UPPER BOUND OF THE SAMPLING WINDOW
-/// @param rounded TRUE IF THE DIVISION SHOULD BE ROUNDED, FALSE OTHERWISE
-/// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
-__host__ __device__ static inline unk_bool_t calc_prop_pulse(unk_ticks_count_t step,
-                                                             unk_ticks_count_t input,
-                                                             unk_ticks_count_t upper,
-                                                             unk_bool_t rounded)
-{
-    if (input < upper / 2)
-    {
-        if (input == 0)
-            return UNK_TRUE;
-        unk_ticks_count_t div = rounded ? (unk_ticks_count_t)round((double)upper / (double)input) : upper / input;
-        return (step % div == 0) ? UNK_TRUE : UNK_FALSE;
-    }
-    else
-    {
-        if (input >= upper)
-            return UNK_TRUE;
-        unk_ticks_count_t div =
-            rounded ? (unk_ticks_count_t)round((double)upper / (double)(upper - input)) : upper / (upper - input);
-        return (step % div != 0) ? UNK_TRUE : UNK_FALSE;
-    }
-}
-
-/// @brief MAPS AN INPUT VALUE TO A PULSE PATTERN USING THE SPECIFIED MAPPING ALGORITHM
-/// ALL MAPPING ALGORITHMS ARE IMPLEMENTED WITHIN THIS SINGLE FUNCTION:
-/// - LINEAR: SIMPLE UNIFORM DISTRIBUTION WITH MINIMUM ONE PULSE;
-/// - FPROP: FAST PROPORTIONAL FOR SMALL WINDOWS;
-/// - RPROP: PRECISE PROPORTIONAL FOR LARGE WINDOWS;
-/// - DFPROP: DIFFERENTIAL FAST PROPORTIONAL FOR RATE-OF-CHANGE DETECTION (SUITABLE FOR APPLICATIONS REQUIRING SENSITIVITY TO INPUT VARIATION).
-/// @param sample_window THE WIDTH OF THE SAMPLING WINDOW (MUST BE > 0)
-/// @param sample_step THE CURRENT STEP POSITION IN THE WINDOW (MUST BE < SAMPLE_WINDOW)
-/// @param input THE INPUT VALUE TO MAP (MUST BE IN RANGE 0..(SAMPLE_WINDOW - 1))
-/// @param pulse_mapping THE MAPPING ALGORITHM TO USE FOR PULSE GENERATION
-/// @return TRUE IF A PULSE SHOULD BE GENERATED AT THIS STEP, FALSE OTHERWISE
 __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window,
                                               unk_ticks_count_t sample_step,
                                               unk_ticks_count_t input,
@@ -335,15 +296,11 @@ __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window,
     if (input >= sample_window)
         return UNK_FALSE;
     const unk_ticks_count_t upper = sample_window - 1;
-    switch (pulse_mapping)
-    {
-    case UNK_PULSE_MAPPING_LINEAR:
-        return (input < sample_window && sample_step % (sample_window - input) == 0) ? UNK_TRUE : UNK_FALSE;
-    case UNK_PULSE_MAPPING_FPROP:
-        return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
-    case UNK_PULSE_MAPPING_RPROP:
-        return calc_prop_pulse(sample_step, input, upper, UNK_TRUE);
-    case UNK_PULSE_MAPPING_DFPROP:
+    // HANDLE SIMPLE LINEAR CASE FIRST
+    if (pulse_mapping == UNK_PULSE_MAPPING_LINEAR)
+        return (sample_step % (sample_window - input) == 0) ? UNK_TRUE : UNK_FALSE;
+    // HANDLE DIFFERENTIAL MAPPING
+    if (pulse_mapping == UNK_PULSE_MAPPING_DFPROP)
     {
         static unk_ticks_count_t prev_input = 0;
         static unk_ticks_count_t prev_sample_window = 0;
@@ -359,8 +316,20 @@ __host__ __device__ unk_bool_t value_to_pulse(unk_ticks_count_t sample_window,
             unk_ticks_count_t pulse_rate = (sample_window - input_diff) / 2;
             return (pulse_rate == 0 || sample_step % (pulse_rate + 1) == 0) ? UNK_TRUE : UNK_FALSE;
         }
-        return calc_prop_pulse(sample_step, input, upper, UNK_FALSE);
     }
+    // COMMON LOGIC FOR FPROP AND RPROP (AND DFPROP FALLBACK)
+    if (input == 0)
+        return UNK_TRUE;
+    if (input >= upper)
+        return UNK_TRUE;
+    const unk_bool_t is_lower_half = (input < upper / 2) ? UNK_TRUE : UNK_FALSE;
+    const unk_ticks_count_t divisor = is_lower_half ? input : (upper - input);
+    if (pulse_mapping == UNK_PULSE_MAPPING_RPROP)
+    {
+        const unk_ticks_count_t interval = (unk_ticks_count_t)round((double)upper / (double)divisor);
+        return (is_lower_half ? (sample_step % interval == 0) : (sample_step % interval != 0)) ? UNK_TRUE : UNK_FALSE;
     }
-    return UNK_FALSE;
+    // FPROP AND DFPROP FALLBACK
+    const unk_ticks_count_t interval = upper / divisor;
+    return (is_lower_half ? (sample_step % interval == 0) : (sample_step % interval != 0)) ? UNK_TRUE : UNK_FALSE;
 }
