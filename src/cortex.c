@@ -146,7 +146,7 @@ void c2d_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_
     // SETUP CORTEX PROPERTIES
     (*cortex)->width = width;
     (*cortex)->height = height;
-    (*cortex)->wrapped = UNK_FALSE;  // Initialize wrapped flag
+    (*cortex)->wrapped = UNK_FALSE;
     (*cortex)->ticks_count = 0x00U;
     (*cortex)->evols_count = 0x00U;
     (*cortex)->evol_step = UNK_DEFAULT_EVOL_STEP;
@@ -220,7 +220,7 @@ void c2d_rand_init(unk_cortex2d_t **cortex,
     // SETUP CORTEX PROPERTIES
     (*cortex)->width = width;
     (*cortex)->height = height;
-    (*cortex)->wrapped = UNK_FALSE;  // Initialize wrapped flag
+    (*cortex)->wrapped = UNK_FALSE;
     (*cortex)->ticks_count = 0x00U;
     (*cortex)->evols_count = 0x00U;
     (*cortex)->rand_state = (unk_rand_state_t)time(NULL);
