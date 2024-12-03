@@ -314,16 +314,6 @@ extern "C"
                   unk_cortex_size_t height,
                   unk_nh_radius_t nh_radius);
 
-    /// @brief INITIALIZES THE GIVEN CORTEX WITH RANDOM VALUES.
-    /// @param cortex THE CORTEX TO INITIALIZE.
-    /// @param width THE WIDTH OF THE CORTEX.
-    /// @param height THE HEIGHT OF THE CORTEX.
-    /// @param nh_radius THE NEIGHBORHOOD RADIUS FOR EACH INDIVIDUAL CORTEX NEURON.
-    void c2d_rand_init(unk_cortex2d_t **cortex,
-                       unk_cortex_size_t width,
-                       unk_cortex_size_t height,
-                       unk_nh_radius_t nh_radius);
-
     /// @brief DESTROYS THE GIVEN INPUT2D AND FREES MEMORY.
     /// @param input THE INPUT TO DESTROY.
     void i2d_destroy(unk_input2d_t *input);
