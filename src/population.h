@@ -102,8 +102,8 @@ extern "C"
                            unk_cortex_size_t height,
                            unk_nh_radius_t nh_radius);
 
-    /// @brief DESTROYS THE GIVEN CORTEX2D AND FREES MEMORY FOR IT AND ITS NEURONS
-    /// @param cortex THE CORTEX TO DESTROY
+    /// @brief DESTROYS THE GIVEN POPULATION AND FREES MEMORY
+    /// @param population THE POPULATION TO DESTROY
     void p2d_destroy(unk_population2d_t *population);
 
     // ################################################ SETTER FUNCTIONS ################################################

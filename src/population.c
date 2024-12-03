@@ -236,7 +236,18 @@ void p2d_breed(unk_population2d_t *population, unk_cortex2d_t **child)
     population->rand_state = xorshf32(population->rand_state);
     winner_parent_index = population->rand_state % population->parents_count;
     c2d_set_fire_threshold(*child, parents[winner_parent_index].fire_threshold);
-    // [TODO] SET RECOVERY VALUE AND EXC/DECAY VALUES
+    // PICK RECOVERY VALUE FROM A RANDOM PARENT
+    population->rand_state = xorshf32(population->rand_state);
+    winner_parent_index = population->rand_state % population->parents_count;
+    (*child)->recovery_value = parents[winner_parent_index]->recovery_value;
+    // PICK EXCITATORY VALUE FROM A RANDOM PARENT
+    population->rand_state = xorshf32(population->rand_state);
+    winner_parent_index = population->rand_state % population->parents_count;
+    (*child)->exc_value = parents[winner_parent_index]->exc_value;
+    // PICK DECAY VALUE FROM A RANDOM PARENT
+    population->rand_state = xorshf32(population->rand_state);
+    winner_parent_index = population->rand_state % population->parents_count;
+    (*child)->decay_value = parents[winner_parent_index]->decay_value;
     // PICK SYNGEN CHANCE FROM A RANDOM PARENT
     population->rand_state = xorshf32(population->rand_state);
     winner_parent_index = population->rand_state % population->parents_count;
@@ -245,7 +256,10 @@ void p2d_breed(unk_population2d_t *population, unk_cortex2d_t **child)
     population->rand_state = xorshf32(population->rand_state);
     winner_parent_index = population->rand_state % population->parents_count;
     c2d_set_synstr_chance(*child, parents[winner_parent_index].synstr_chance);
-    // [TODO] SET MAX TOT STRENGTH
+    // PICK MAX TOT STRENGTH FROM A RANDOM PARENT
+    population->rand_state = xorshf32(population->rand_state);
+    winner_parent_index = population->rand_state % population->parents_count;
+    (*child)->max_tot_strength = parents[winner_parent_index]->max_tot_strength;
     // PICK MAX SYN COUNT FROM A RANDOM PARENT
     population->rand_state = xorshf32(population->rand_state);
     winner_parent_index = population->rand_state % population->parents_count;
