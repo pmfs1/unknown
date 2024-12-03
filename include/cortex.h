@@ -22,7 +22,7 @@ extern "C"
 #define NH_DIAM_2D(r) (2 * (r) + 1)
 
 // COMPUTES THE NUMBER OF NEIGHBORS IN A SQUARE NEIGHBORHOOD GIVEN ITS DIAMETER.
-#define NH_COUNT_2D(d) ((d) * (d)-1)
+#define NH_COUNT_2D(d) ((d) * (d) - 1)
 
 // TRANSLATES BIDIMENSIONAL INDEXES TO A MONODIMENSIONAL ONE.
 // |I| IS THE ROW INDEX.
@@ -248,6 +248,9 @@ extern "C"
         // MAXIMUM ALLOWABLE TOUCH FOR EACH NEURON IN THE NETWORK.
         unk_pulse_mapping_t pulse_mapping;
 
+        // WHETHER EDGES SHOULD WRAP AROUND (PACMAN EFFECT)
+        unk_bool_t wrapped;
+
         unk_neuron_t *neurons; // NEURONS ARRAY.
     } unk_cortex2d_t;
 
@@ -452,6 +455,20 @@ extern "C"
     /// @param output THE OUTPUT TO COMPUTE THE MEAN VALUE FROM.
     /// @param result POINTER TO THE RESULT OF THE COMPUTATION. THE MEAN VALUE WILL BE STORED HERE.
     void o2d_mean(unk_output2d_t *output, unk_ticks_count_t *result);
+
+    // ################################################ HELPER FUNCTIONS ################################################
+
+    // @brief WRAPS THE GIVEN X COORDINATE AROUND THE CORTEX WIDTH.
+    // @param cortex THE CORTEX TO WRAP AROUND.
+    // @param x THE X COORDINATE TO WRAP.
+    // @return THE WRAPPED X COORDINATE.
+    unk_cortex_size_t c2d_wrap_x(unk_cortex2d_t *cortex, int32_t x);
+
+    // @brief WRAPS THE GIVEN Y COORDINATE AROUND THE CORTEX HEIGHT.
+    // @param cortex THE CORTEX TO WRAP AROUND.
+    // @param y THE Y COORDINATE TO WRAP.
+    // @return THE WRAPPED Y COORDINATE.
+    unk_cortex_size_t c2d_wrap_y(unk_cortex2d_t *cortex, int32_t y);
 
 #ifdef __cplusplus
 }

@@ -146,6 +146,7 @@ void c2d_init(unk_cortex2d_t **cortex, unk_cortex_size_t width, unk_cortex_size_
     // SETUP CORTEX PROPERTIES
     (*cortex)->width = width;
     (*cortex)->height = height;
+    (*cortex)->wrapped = UNK_FALSE;  // Initialize wrapped flag
     (*cortex)->ticks_count = 0x00U;
     (*cortex)->evols_count = 0x00U;
     (*cortex)->evol_step = UNK_DEFAULT_EVOL_STEP;
@@ -219,6 +220,7 @@ void c2d_rand_init(unk_cortex2d_t **cortex,
     // SETUP CORTEX PROPERTIES
     (*cortex)->width = width;
     (*cortex)->height = height;
+    (*cortex)->wrapped = UNK_FALSE;  // Initialize wrapped flag
     (*cortex)->ticks_count = 0x00U;
     (*cortex)->evols_count = 0x00U;
     (*cortex)->rand_state = (unk_rand_state_t)time(NULL);
@@ -331,6 +333,7 @@ void c2d_copy(unk_cortex2d_t *to, unk_cortex2d_t *from)
     to->inhexc_range = from->inhexc_range;
     to->sample_window = from->sample_window;
     to->pulse_mapping = from->pulse_mapping;
+    to->wrapped = from->wrapped;
     for (unk_cortex_size_t y = 0; y < from->height; y++)
     {
         for (unk_cortex_size_t x = 0; x < from->width; x++)
@@ -488,7 +491,7 @@ void c2d_set_inhexc_ratio(unk_cortex2d_t *cortex, unk_chance_t inhexc_ratio)
 /// @param wrapped A BOOLEAN VALUE INDICATING WHETHER WRAPPING SHOULD BE ENABLED.
 void c2d_set_wrapped(unk_cortex2d_t *cortex, unk_bool_t wrapped)
 {
-    // [TODO]
+    cortex->wrapped = wrapped;
 }
 
 /// @brief DISABLES SELF CONNECTIONS WHITHIN THE SPECIFIED BOUNDS.
@@ -702,4 +705,24 @@ void o2d_mean(unk_output2d_t *output, unk_ticks_count_t *result)
     }
     // STORE THE MEAN VALUE IN THE PROVIDED POINTER
     (*result) = (unk_ticks_count_t)(total / output_size);
+}
+
+// ################################################ HELPER FUNCTIONS ################################################
+
+// @brief WRAPS THE GIVEN X COORDINATE AROUND THE CORTEX WIDTH.
+// @param cortex THE CORTEX TO WRAP AROUND.
+// @param x THE X COORDINATE TO WRAP.
+// @return THE WRAPPED X COORDINATE.
+unk_cortex_size_t c2d_wrap_x(unk_cortex2d_t *cortex, int32_t x)
+{
+    return cortex->wrapped ? WRAP(x, cortex->width) : x;
+}
+
+// @brief WRAPS THE GIVEN Y COORDINATE AROUND THE CORTEX HEIGHT.
+// @param cortex THE CORTEX TO WRAP AROUND.
+// @param y THE Y COORDINATE TO WRAP.
+// @return THE WRAPPED Y COORDINATE.
+unk_cortex_size_t c2d_wrap_y(unk_cortex2d_t *cortex, int32_t y)
+{
+    return cortex->wrapped ? WRAP(y, cortex->height) : y;
 }
