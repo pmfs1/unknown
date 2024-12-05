@@ -8,145 +8,189 @@
 
 typedef struct
 {
-    uint64_t *tick_times;
+    uint64_t *samples;
     uint32_t count;
-    uint64_t total_time;
-    uint64_t min_tick;
-    uint64_t max_tick;
-    double avg_tick;
-    double std_dev;
-    uint64_t median_tick;
-    uint64_t p95_tick;
-    uint64_t p99_tick;
-    size_t total_memory;
-    size_t neuron_memory;
-    size_t overhead_memory;
-} benchmark_stats_t;
+    struct
+    {
+        uint64_t total;
+        uint64_t min;
+        uint64_t max;
+        double avg;
+        double std_dev;
+        uint64_t p95;
+    } timing;
+    struct
+    {
+        uint64_t feed;
+        uint64_t tick;
+    } operations;
+} benchmark_t;
+
+typedef struct
+{
+    unk_cortex_size_t width;
+    unk_cortex_size_t height;
+    uint32_t iterations;
+    benchmark_t results;
+} benchmark_config_t;
+
+#define WARMUP_ITERATIONS 50
+#define REPORT_INTERVAL 100
+#define PROGRESS_BAR_WIDTH 50
 
 static int compare_uint64(const void *a, const void *b)
 {
     return (*(uint64_t *)a - *(uint64_t *)b);
 }
 
-static void calculate_statistics(benchmark_stats_t *stats)
+static void calculate_statistics(benchmark_t *bench)
 {
-    qsort(stats->tick_times, stats->count, sizeof(uint64_t), compare_uint64);
-    // Calculate mean
+    qsort(bench->samples, bench->count, sizeof(uint64_t), compare_uint64);
     uint64_t sum = 0;
-    for (uint32_t i = 0; i < stats->count; i++)
+    bench->timing.min = bench->samples[0];
+    bench->timing.max = bench->samples[bench->count - 1];
+    for (uint32_t i = 0; i < bench->count; i++)
     {
-        sum += stats->tick_times[i];
+        sum += bench->samples[i];
     }
-    stats->avg_tick = (double)sum / stats->count;
-    // Calculate standard deviation
+    bench->timing.avg = (double)sum / bench->count;
     double variance = 0;
-    for (uint32_t i = 0; i < stats->count; i++)
+    for (uint32_t i = 0; i < bench->count; i++)
     {
-        double diff = (double)stats->tick_times[i] - stats->avg_tick;
+        double diff = (double)bench->samples[i] - bench->timing.avg;
         variance += diff * diff;
     }
-    stats->std_dev = sqrt(variance / stats->count);
-    // Calculate percentiles
-    stats->median_tick = stats->tick_times[stats->count / 2];
-    stats->p95_tick = stats->tick_times[(uint32_t)(stats->count * 0.95)];
-    stats->p99_tick = stats->tick_times[(uint32_t)(stats->count * 0.99)];
+    bench->timing.std_dev = sqrt(variance / bench->count);
+    bench->timing.p95 = bench->samples[(uint32_t)(bench->count * 0.95)];
 }
 
-void print_benchmark_summary(benchmark_stats_t *stats)
+static void print_config_results(benchmark_config_t *config)
 {
-    printf("\n====== Detailed Benchmark Summary ======\n");
-    printf("Performance Metrics:\n");
-    printf("  Total iterations: %d\n", stats->count);
-    printf("  Total time: %.2f seconds\n", stats->total_time / 1000.0);
-    printf("  Average FPS: %.2f\n", stats->count / (stats->total_time / 1000.0));
-    printf("\nTick Statistics (milliseconds):\n");
-    printf("  Min: %.3f\n", stats->min_tick / 1000.0);
-    printf("  Max: %.3f\n", stats->max_tick / 1000.0);
-    printf("  Average: %.3f\n", stats->avg_tick / 1000.0);
-    printf("  Std Dev: %.3f\n", stats->std_dev / 1000.0);
-    printf("  Median: %.3f\n", stats->median_tick / 1000.0);
-    printf("  95th percentile: %.3f\n", stats->p95_tick / 1000.0);
-    printf("  99th percentile: %.3f\n", stats->p99_tick / 1000.0);
-    printf("\nMemory Usage:\n");
-    printf("  Total: %.2f MB\n", stats->total_memory / (1024.0 * 1024.0));
-    printf("  Per neuron: %.2f bytes\n", (double)stats->neuron_memory / (stats->total_memory / sizeof(unk_neuron_t)));
-    printf("  Overhead: %.2f KB\n", stats->overhead_memory / 1024.0);
-    printf("=====================================\n");
+    printf("\n=== Benchmark Results [%dx%d, %d iterations] ===\n", config->width, config->height, config->iterations);
+    printf("Total time: %.2f seconds\n", config->results.timing.total / 1000.0);
+    printf("Throughput: %.2f FPS\n", config->results.count / (config->results.timing.total / 1000.0));
+    printf("Latency (ms):\n");
+    printf("  Min: %.3f, Avg: %.3f, Max: %.3f\n",
+           config->results.timing.min / 1000.0,
+           config->results.timing.avg / 1000.0,
+           config->results.timing.max / 1000.0);
+    printf("  P95: %.3f, StdDev: %.3f\n", config->results.timing.p95 / 1000.0, config->results.timing.std_dev / 1000.0);
+    printf("Operation Time (avg ms):\n");
+    printf("  Feed: %.3f, Tick: %.3f\n",
+           config->results.operations.feed / (double)config->results.count / 1000.0,
+           config->results.operations.tick / (double)config->results.count / 1000.0);
+    printf("=====================\n");
+}
+
+static void print_progress_bar(double percentage) {
+    int pos = (int)(PROGRESS_BAR_WIDTH * percentage / 100.0);
+    printf("\r[");
+    for (int i = 0; i < PROGRESS_BAR_WIDTH; i++) {
+        if (i < pos) printf("=");
+        else if (i == pos) printf(">");
+        else printf(" ");
+    }
+    printf("] %.1f%%", percentage);
+    fflush(stdout);
 }
 
 int main(int argc, char **argv)
 {
-    unk_cortex_size_t cortex_width = 512;
-    unk_cortex_size_t cortex_height = 256;
-    unk_cortex_size_t input_width = 32;
-    unk_cortex_size_t input_height = 1;
-    uint32_t iterations_count = 1000;
-    unk_nh_radius_t nh_radius = 2;
-    unk_cortex2d_t *even_cortex;
-    unk_cortex2d_t *odd_cortex;
-    c2d_init(&even_cortex, cortex_width, cortex_height, nh_radius);
-    c2d_init(&odd_cortex, cortex_width, cortex_height, nh_radius);
-    c2d_set_evol_step(even_cortex, 0x01U);
-    c2d_set_pulse_mapping(even_cortex, UNK_PULSE_MAPPING_RPROP);
-    c2d_set_max_syn_count(even_cortex, 24);
-    char touchFileName[40];
-    char inhexcFileName[40];
-    snprintf(touchFileName, 40, "./res/%d_%d_touch.pgm", cortex_width, cortex_height);
-    snprintf(inhexcFileName, 40, "./res/%d_%d_inhexc.pgm", cortex_width, cortex_height);
-    c2d_touch_from_map(even_cortex, touchFileName);
-    c2d_inhexc_from_map(even_cortex, inhexcFileName);
-    c2d_copy(odd_cortex, even_cortex);
-    char cortex_string[100];
-    c2d_to_string(even_cortex, cortex_string);
-    printf("%s\n", cortex_string);
-    unk_input2d_t *input;
-    i2d_init(&input,
-             (cortex_width / 2) - (input_width / 2),
-             0,
-             (cortex_width / 2) + (input_width / 2),
-             input_height,
-             UNK_DEFAULT_EXC_VALUE * 2,
-             UNK_PULSE_MAPPING_FPROP);
-    for (unk_cortex_size_t i = 0; i < input_width * input_height; i++)
+    const struct
     {
-        input->values[i] = even_cortex->sample_window - 1;
-    }
-    benchmark_stats_t stats = {0};
-    stats.tick_times = (uint64_t *)malloc(iterations_count * sizeof(uint64_t));
-    stats.count = iterations_count;
-    uint64_t start_time = millis();
-    stats.min_tick = UINT64_MAX;
-    stats.max_tick = 0;
-    for (uint32_t i = 0; i < iterations_count; i++)
+        unk_cortex_size_t width;
+        unk_cortex_size_t height;
+    } sizes[] = {
+        {100, 60},
+        {200, 120},
+        {512, 256},
+        {1024, 512},
+    };
+    const uint32_t iterations[] = {1000, 10000};
+    const size_t size_count = sizeof(sizes) / sizeof(sizes[0]);
+    const size_t iter_count = sizeof(iterations) / sizeof(iterations[0]);
+    for (size_t s = 0; s < size_count; s++)
     {
-        uint64_t tick_start = millis();
-        unk_cortex2d_t *prev_cortex = i % 2 ? odd_cortex : even_cortex;
-        unk_cortex2d_t *next_cortex = i % 2 ? even_cortex : odd_cortex;
-        c2d_feed2d(prev_cortex, input);
-        c2d_tick(prev_cortex, next_cortex);
-        uint64_t tick_time = millis() - tick_start;
-        stats.tick_times[i] = tick_time;
-        stats.min_tick = tick_time < stats.min_tick ? tick_time : stats.min_tick;
-        stats.max_tick = tick_time > stats.max_tick ? tick_time : stats.max_tick;
-        if ((i + 1) % 100 == 0)
+        for (size_t i = 0; i < iter_count; i++)
         {
-            uint64_t elapsed = millis() - start_time;
-            double fps = (i + 1) / (elapsed / 1000.0f);
-            printf("Iteration %d: %.2f fps (last tick: %.2fms)\n", i + 1, fps, tick_time / 1000.0);
-            c2d_to_file(even_cortex, (char *)"out/test.c2d");
+            benchmark_config_t config = {.width = sizes[s].width,
+                                         .height = sizes[s].height,
+                                         .iterations = iterations[i]};
+            printf("\nTesting configuration: %dx%d with %d iterations\n",
+                   config.width,
+                   config.height,
+                   config.iterations);
+            unk_cortex2d_t *even_cortex;
+            unk_cortex2d_t *odd_cortex;
+            c2d_init(&even_cortex, config.width, config.height, 2);
+            c2d_init(&odd_cortex, config.width, config.height, 2);
+            // Setup cortex
+            c2d_set_evol_step(even_cortex, 0x01U);
+            c2d_set_pulse_mapping(even_cortex, UNK_PULSE_MAPPING_RPROP);
+            c2d_set_max_syn_count(even_cortex, 24);
+            // Load maps
+            char touchFileName[40], inhexcFileName[40];
+            snprintf(touchFileName, 40, "./res/%d_%d_touch.pgm", config.width, config.height);
+            snprintf(inhexcFileName, 40, "./res/%d_%d_inhexc.pgm", config.width, config.height);
+            c2d_touch_from_map(even_cortex, touchFileName);
+            c2d_inhexc_from_map(even_cortex, inhexcFileName);
+            c2d_copy(odd_cortex, even_cortex);
+            // Setup input
+            unk_input2d_t *input;
+            i2d_init(&input,
+                     (config.width / 2) - (32 / 2),
+                     0,
+                     (config.width / 2) + (32 / 2),
+                     1,
+                     UNK_DEFAULT_EXC_VALUE * 2,
+                     UNK_PULSE_MAPPING_FPROP);
+            for (unk_cortex_size_t idx = 0; idx < 32; idx++)
+            {
+                input->values[idx] = even_cortex->sample_window - 1;
+            }
+            // Initialize benchmark
+            config.results.count = config.iterations;
+            config.results.samples = (uint64_t *)malloc(config.iterations * sizeof(uint64_t));
+            // Warmup phase
+            printf("Warming up...\n");
+            for (uint32_t i = 0; i < WARMUP_ITERATIONS; i++)
+            {
+                unk_cortex2d_t *prev = i % 2 ? odd_cortex : even_cortex;
+                unk_cortex2d_t *next = i % 2 ? even_cortex : odd_cortex;
+                c2d_feed2d(prev, input);
+                c2d_tick(prev, next);
+            }
+            // Benchmark phase
+            printf("Running benchmark...\n");
+            uint64_t start_time = millis();
+            for (uint32_t iter = 0; iter < config.iterations; iter++)
+            {
+                uint64_t iter_start = millis();
+                unk_cortex2d_t *prev = iter % 2 ? odd_cortex : even_cortex;
+                unk_cortex2d_t *next = iter % 2 ? even_cortex : odd_cortex;
+                uint64_t op_time = millis();
+                c2d_feed2d(prev, input);
+                config.results.operations.feed += millis() - op_time;
+                op_time = millis();
+                c2d_tick(prev, next);
+                config.results.operations.tick += millis() - op_time;
+                config.results.samples[iter] = millis() - iter_start;
+                if ((iter + 1) % REPORT_INTERVAL == 0)
+                {
+                    double progress = (iter + 1) / (double)config.iterations * 100;
+                    print_progress_bar(progress);
+                }
+            }
+            printf("\n");
+            config.results.timing.total = millis() - start_time;
+            calculate_statistics(&config.results);
+            print_config_results(&config);
+            // Cleanup
+            free(config.results.samples);
+            c2d_destroy(even_cortex);
+            c2d_destroy(odd_cortex);
+            i2d_destroy(input);
         }
     }
-    stats.total_time = millis() - start_time;
-    stats.total_memory =
-        (cortex_width * cortex_height * sizeof(unk_neuron_t) * 2) + (input_width * input_height * sizeof(float));
-    stats.neuron_memory = sizeof(unk_neuron_t);
-    stats.overhead_memory = sizeof(unk_cortex2d_t) * 2 + sizeof(unk_input2d_t);
-    calculate_statistics(&stats);
-    print_benchmark_summary(&stats);
-    free(stats.tick_times);
-    c2d_to_file(even_cortex, (char *)"out/test.c2d");
-    c2d_destroy(even_cortex);
-    c2d_destroy(odd_cortex);
-    i2d_destroy(input);
     return 0;
 }
