@@ -13,9 +13,11 @@
     "explorer.copyRelativePathSeparator": "/",
     "files.autoSave": "onFocusChange",
     "files.associations": {
+        "*.rmd": "markdown",
         ".clang*": "yaml",
         "*.hpp.in": "cpp",
-        "*.in": "cpp"
+        "*.in": "cpp",
+        "utils.h": "c"
     },
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
