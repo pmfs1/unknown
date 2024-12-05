@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <unknown/unknown.h>
 
@@ -33,6 +34,12 @@ typedef struct
     uint32_t iterations;
     benchmark_t results;
 } benchmark_config_t;
+
+typedef struct
+{
+    size_t count;
+    benchmark_config_t *configs;
+} benchmark_results_t;
 
 #define WARMUP_ITERATIONS 50
 #define REPORT_INTERVAL 100
@@ -110,6 +117,51 @@ static void print_verbose_iteration(uint32_t iteration, uint64_t total_time, uin
            (tick_time * 100.0) / total_time);
 }
 
+static void print_ascii_bar(double value, double max_value, int width)
+{
+    int bar_width = (int)((value / max_value) * width);
+    printf("[");
+    for (int i = 0; i < width; i++)
+    {
+        printf(i < bar_width ? "█" : " ");
+    }
+    printf("] %.2f", value);
+}
+
+static void print_comparison_graphs(benchmark_results_t *results)
+{
+    const int GRAPH_WIDTH = 40;
+    // Find max values for scaling
+    double max_fps = 0, max_latency = 0;
+    for (size_t i = 0; i < results->count; i++)
+    {
+        benchmark_config_t *cfg = &results->configs[i];
+        double fps = cfg->results.count / (cfg->results.timing.total / 1000.0);
+        max_fps = fps > max_fps ? fps : max_fps;
+        max_latency = cfg->results.timing.avg > max_latency ? cfg->results.timing.avg : max_latency;
+    }
+    printf("\n=== Performance Comparison ===\n\n");
+    // Print FPS comparison
+    printf("Throughput (FPS):\n");
+    for (size_t i = 0; i < results->count; i++)
+    {
+        benchmark_config_t *cfg = &results->configs[i];
+        double fps = cfg->results.count / (cfg->results.timing.total / 1000.0);
+        printf("%dx%d (%d): ", cfg->width, cfg->height, cfg->iterations);
+        print_ascii_bar(fps, max_fps, GRAPH_WIDTH);
+        printf("\n");
+    }
+    printf("\nLatency (ms):\n");
+    for (size_t i = 0; i < results->count; i++)
+    {
+        benchmark_config_t *cfg = &results->configs[i];
+        printf("%dx%d (%d): ", cfg->width, cfg->height, cfg->iterations);
+        print_ascii_bar(cfg->results.timing.avg / 1000.0, max_latency / 1000.0, GRAPH_WIDTH);
+        printf("\n");
+    }
+    printf("\n=============================\n");
+}
+
 int main(int argc, char **argv)
 {
     // Add verbose flag
@@ -127,7 +179,6 @@ int main(int argc, char **argv)
             exit(EXIT_FAILURE);
         }
     }
-
     const struct
     {
         unk_cortex_size_t width;
@@ -141,6 +192,9 @@ int main(int argc, char **argv)
     const uint32_t iterations[] = {1000, 10000};
     const size_t size_count = sizeof(sizes) / sizeof(sizes[0]);
     const size_t iter_count = sizeof(iterations) / sizeof(iterations[0]);
+    benchmark_results_t all_results = {.count = size_count * iter_count,
+                                       .configs = malloc(sizeof(benchmark_config_t) * size_count * iter_count)};
+    size_t result_idx = 0;
     for (size_t s = 0; s < size_count; s++)
     {
         for (size_t i = 0; i < iter_count; i++)
@@ -224,6 +278,7 @@ int main(int argc, char **argv)
             config.results.timing.total = millis() - start_time;
             calculate_statistics(&config.results);
             print_config_results(&config);
+            memcpy(&all_results.configs[result_idx++], &config, sizeof(benchmark_config_t));
             // Cleanup
             free(config.results.samples);
             c2d_destroy(even_cortex);
@@ -231,5 +286,7 @@ int main(int argc, char **argv)
             i2d_destroy(input);
         }
     }
+    print_comparison_graphs(&all_results);
+    free(all_results.configs);
     return 0;
 }
