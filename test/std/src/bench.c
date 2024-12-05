@@ -199,10 +199,10 @@ int main(int argc, char **argv)
         unk_cortex_size_t height;
     } quick_sizes[] = {
         {200, 120},
-        {512, 256}
+        {100, 60}
     };
-    const uint32_t iterations[] = {1000, 10000};
-    const uint32_t quick_iterations[] = {1000};
+    const uint32_t iterations[] = {1000, 10000, 100000};
+    const uint32_t quick_iterations[] = {10000};
     const size_t size_count = quick ? sizeof(quick_sizes) / sizeof(quick_sizes[0]) : sizeof(sizes) / sizeof(sizes[0]);
     const size_t iter_count =
         quick ? sizeof(quick_iterations) / sizeof(quick_iterations[0]) : sizeof(iterations) / sizeof(iterations[0]);
