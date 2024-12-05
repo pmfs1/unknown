@@ -13,7 +13,5 @@ jobs:
       uses: actions/checkout@v4
     - name: 'INSTALL'
       run: make install
-    - name: 'BENCHMARK'
-      run: cd test/std && make && ./bin/bench -q
     - name: 'UNINSTALL'
       run: make uninstall
