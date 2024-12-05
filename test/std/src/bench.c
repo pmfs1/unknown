@@ -82,20 +82,52 @@ static void print_config_results(benchmark_config_t *config)
     printf("=====================\n");
 }
 
-static void print_progress_bar(double percentage) {
+static void print_progress_bar(double percentage)
+{
     int pos = (int)(PROGRESS_BAR_WIDTH * percentage / 100.0);
     printf("\r[");
-    for (int i = 0; i < PROGRESS_BAR_WIDTH; i++) {
-        if (i < pos) printf("=");
-        else if (i == pos) printf(">");
-        else printf(" ");
+    for (int i = 0; i < PROGRESS_BAR_WIDTH; i++)
+    {
+        if (i < pos)
+            printf("=");
+        else if (i == pos)
+            printf(">");
+        else
+            printf(" ");
     }
     printf("] %.1f%%", percentage);
     fflush(stdout);
 }
 
+static void print_verbose_iteration(uint32_t iteration, uint64_t total_time, uint64_t feed_time, uint64_t tick_time)
+{
+    printf("Iteration %d:\n", iteration);
+    printf("  Total time: %.3f ms\n", total_time / 1000.0);
+    printf("  Feed time: %.3f ms\n", feed_time / 1000.0);
+    printf("  Tick time: %.3f ms\n", tick_time / 1000.0);
+    printf("  Operations ratio: %.2f%% feed, %.2f%% tick\n",
+           (feed_time * 100.0) / total_time,
+           (tick_time * 100.0) / total_time);
+}
+
 int main(int argc, char **argv)
 {
+    // Add verbose flag
+    int verbose = 0;
+    int opt;
+    while ((opt = getopt(argc, argv, "v")) != -1)
+    {
+        switch (opt)
+        {
+        case 'v':
+            verbose = 1;
+            break;
+        default:
+            fprintf(stderr, "Usage: %s [-v]\n", argv[0]);
+            exit(EXIT_FAILURE);
+        }
+    }
+
     const struct
     {
         unk_cortex_size_t width;
@@ -168,14 +200,21 @@ int main(int argc, char **argv)
                 uint64_t iter_start = millis();
                 unk_cortex2d_t *prev = iter % 2 ? odd_cortex : even_cortex;
                 unk_cortex2d_t *next = iter % 2 ? even_cortex : odd_cortex;
-                uint64_t op_time = millis();
+                uint64_t feed_start = millis();
                 c2d_feed2d(prev, input);
-                config.results.operations.feed += millis() - op_time;
-                op_time = millis();
+                uint64_t feed_time = millis() - feed_start;
+                config.results.operations.feed += feed_time;
+                uint64_t tick_start = millis();
                 c2d_tick(prev, next);
-                config.results.operations.tick += millis() - op_time;
-                config.results.samples[iter] = millis() - iter_start;
-                if ((iter + 1) % REPORT_INTERVAL == 0)
+                uint64_t tick_time = millis() - tick_start;
+                config.results.operations.tick += tick_time;
+                uint64_t iter_time = millis() - iter_start;
+                config.results.samples[iter] = iter_time;
+                if (verbose)
+                {
+                    print_verbose_iteration(iter, iter_time, feed_time, tick_time);
+                }
+                else if ((iter + 1) % REPORT_INTERVAL == 0)
                 {
                     double progress = (iter + 1) / (double)config.iterations * 100;
                     print_progress_bar(progress);
