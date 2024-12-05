@@ -14,6 +14,6 @@ jobs:
     - name: 'INSTALL'
       run: make install
     - name: 'BENCHMARK'
-      run: cd test/std && make && ./bin/bench -q
+      run: cd test/std && make && ./bin/bench -c
     - name: 'UNINSTALL'
       run: make uninstall

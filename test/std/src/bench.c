@@ -26,7 +26,6 @@ typedef struct
         uint64_t tick;
     } operations;
 } benchmark_t;
-
 typedef struct
 {
     unk_cortex_size_t width;
@@ -34,22 +33,18 @@ typedef struct
     uint32_t iterations;
     benchmark_t results;
 } benchmark_config_t;
-
 typedef struct
 {
     size_t count;
     benchmark_config_t *configs;
 } benchmark_results_t;
-
 #define WARMUP_ITERATIONS 50
 #define REPORT_INTERVAL 100
 #define PROGRESS_BAR_WIDTH 50
-
 static int compare_uint64(const void *a, const void *b)
 {
     return (*(uint64_t *)a - *(uint64_t *)b);
 }
-
 static void calculate_statistics(benchmark_t *bench)
 {
     qsort(bench->samples, bench->count, sizeof(uint64_t), compare_uint64);
@@ -70,7 +65,6 @@ static void calculate_statistics(benchmark_t *bench)
     bench->timing.std_dev = sqrt(variance / bench->count);
     bench->timing.p95 = bench->samples[(uint32_t)(bench->count * 0.95)];
 }
-
 static void print_config_results(benchmark_config_t *config)
 {
     printf("\n=== Benchmark Results [%dx%d, %d iterations] ===\n", config->width, config->height, config->iterations);
@@ -88,7 +82,6 @@ static void print_config_results(benchmark_config_t *config)
            config->results.operations.tick / (double)config->results.count / 1000.0);
     printf("=====================\n");
 }
-
 static void print_progress_bar(double percentage)
 {
     int pos = (int)(PROGRESS_BAR_WIDTH * percentage / 100.0);
@@ -105,7 +98,6 @@ static void print_progress_bar(double percentage)
     printf("] %.1f%%", percentage);
     fflush(stdout);
 }
-
 static void print_verbose_iteration(uint32_t iteration, uint64_t total_time, uint64_t feed_time, uint64_t tick_time)
 {
     printf("Iteration %d:\n", iteration);
@@ -116,7 +108,6 @@ static void print_verbose_iteration(uint32_t iteration, uint64_t total_time, uin
            (feed_time * 100.0) / total_time,
            (tick_time * 100.0) / total_time);
 }
-
 static void print_ascii_bar(double value, double max_value, int width)
 {
     int bar_width = (int)((value / max_value) * width);
@@ -127,7 +118,6 @@ static void print_ascii_bar(double value, double max_value, int width)
     }
     printf("] %.2f", value);
 }
-
 static void print_comparison_graphs(benchmark_results_t *results)
 {
     const int GRAPH_WIDTH = 40;
@@ -161,7 +151,6 @@ static void print_comparison_graphs(benchmark_results_t *results)
     }
     printf("\n=============================\n");
 }
-
 int main(int argc, char **argv)
 {
     // Add verbose and quick flags
@@ -192,6 +181,7 @@ int main(int argc, char **argv)
         {200, 120},
         {512, 256},
         {1024, 512},
+        {10000, 5000}
     };
     const struct
     {
@@ -199,8 +189,7 @@ int main(int argc, char **argv)
         unk_cortex_size_t height;
     } quick_sizes[] = {
         {200, 120},
-        {100, 60}
-    };
+        {100, 60}};
     const uint32_t iterations[] = {1000, 10000, 100000};
     const uint32_t quick_iterations[] = {10000};
     const size_t size_count = quick ? sizeof(quick_sizes) / sizeof(quick_sizes[0]) : sizeof(sizes) / sizeof(sizes[0]);
