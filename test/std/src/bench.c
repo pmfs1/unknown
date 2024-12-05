@@ -164,18 +164,22 @@ static void print_comparison_graphs(benchmark_results_t *results)
 
 int main(int argc, char **argv)
 {
-    // Add verbose flag
+    // Add verbose and quick flags
     int verbose = 0;
+    int quick = 0;
     int opt;
-    while ((opt = getopt(argc, argv, "v")) != -1)
+    while ((opt = getopt(argc, argv, "vq")) != -1)
     {
         switch (opt)
         {
         case 'v':
             verbose = 1;
             break;
+        case 'q':
+            quick = 1;
+            break;
         default:
-            fprintf(stderr, "Usage: %s [-v]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-v] [-q]\n", argv[0]);
             exit(EXIT_FAILURE);
         }
     }
@@ -189,9 +193,19 @@ int main(int argc, char **argv)
         {512, 256},
         {1024, 512},
     };
+    const struct
+    {
+        unk_cortex_size_t width;
+        unk_cortex_size_t height;
+    } quick_sizes[] = {
+        {100, 60},
+        {200, 120},
+    };
     const uint32_t iterations[] = {1000, 10000};
-    const size_t size_count = sizeof(sizes) / sizeof(sizes[0]);
-    const size_t iter_count = sizeof(iterations) / sizeof(iterations[0]);
+    const uint32_t quick_iterations[] = {1000};
+    const size_t size_count = quick ? sizeof(quick_sizes) / sizeof(quick_sizes[0]) : sizeof(sizes) / sizeof(sizes[0]);
+    const size_t iter_count =
+        quick ? sizeof(quick_iterations) / sizeof(quick_iterations[0]) : sizeof(iterations) / sizeof(iterations[0]);
     benchmark_results_t all_results = {.count = size_count * iter_count,
                                        .configs = malloc(sizeof(benchmark_config_t) * size_count * iter_count)};
     size_t result_idx = 0;
@@ -199,9 +213,9 @@ int main(int argc, char **argv)
     {
         for (size_t i = 0; i < iter_count; i++)
         {
-            benchmark_config_t config = {.width = sizes[s].width,
-                                         .height = sizes[s].height,
-                                         .iterations = iterations[i]};
+            benchmark_config_t config = {.width = quick ? quick_sizes[s].width : sizes[s].width,
+                                         .height = quick ? quick_sizes[s].height : sizes[s].height,
+                                         .iterations = quick ? quick_iterations[i] : iterations[i]};
             printf("\nTesting configuration: %dx%d with %d iterations\n",
                    config.width,
                    config.height,
