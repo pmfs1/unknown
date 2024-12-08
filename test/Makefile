@@ -8,6 +8,8 @@ SPIKES_COUNT_LIBS=-lncurses
 TIME_CUDA_LIBS=-lcuda -lcudart -lcublas -lcurand
 UNKNOWN_LIBS=-lunknown
 SRC_DIR=./src
+STD_SRC_DIR=./src/std
+CUDA_SRC_DIR=./src/cuda
 BIN_DIR=./bin
 OUT_DIR=./out
 OBJS=$(patsubst %.o,$(BIN_DIR)/%.o,$@.o)
@@ -26,7 +28,7 @@ endif
 all: clean bench
 
 bench: create utils.o
-	$(CCOMP) $(CCOMP_FLAGS) -c $(SRC_DIR)/$@.c -o $(BIN_DIR)/$@.o
+	$(CCOMP) $(CCOMP_FLAGS) -c $(STD_SRC_DIR)/$@.c -o $(BIN_DIR)/$@.o
 	$(CCOMP) $(CLINK_FLAGS) $(BIN_DIR)/bench.o $(BIN_DIR)/utils.o -o $(BIN_DIR)/$@ $(STD_LIBS) $(UNKNOWN_LIBS)
 
 utils.o: create
@@ -36,7 +38,7 @@ create:
 	$(MKDIR) $(BIN_DIR)
 	$(MKDIR) $(BIN_DIR)
 	$(MKDIR) $(OUT_DIR)
-	bash -c "sudo apt-get update -y && sudo apt install make gcc g++ libopencv-videoio-dev libopencv-core-dev -y"
+	# bash -c "sudo apt-get update -y && sudo apt install make gcc g++ libopencv-videoio-dev libopencv-core-dev -y"
 
 clean:
 	$(RM) $(BIN_DIR)

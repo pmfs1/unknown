@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "../utils.h"
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -26,6 +26,7 @@ typedef struct
         uint64_t tick;
     } operations;
 } benchmark_t;
+
 typedef struct
 {
     unk_cortex_size_t width;
@@ -33,18 +34,22 @@ typedef struct
     uint32_t iterations;
     benchmark_t results;
 } benchmark_config_t;
+
 typedef struct
 {
     size_t count;
     benchmark_config_t *configs;
 } benchmark_results_t;
+
 #define WARMUP_ITERATIONS 50
 #define REPORT_INTERVAL 100
 #define PROGRESS_BAR_WIDTH 50
+
 static int compare_uint64(const void *a, const void *b)
 {
     return (*(uint64_t *)a - *(uint64_t *)b);
 }
+
 static void calculate_statistics(benchmark_t *bench)
 {
     qsort(bench->samples, bench->count, sizeof(uint64_t), compare_uint64);
@@ -65,6 +70,7 @@ static void calculate_statistics(benchmark_t *bench)
     bench->timing.std_dev = sqrt(variance / bench->count);
     bench->timing.p95 = bench->samples[(uint32_t)(bench->count * 0.95)];
 }
+
 static void print_config_results(benchmark_config_t *config)
 {
     printf("\n=== Benchmark Results [%dx%d, %d iterations] ===\n", config->width, config->height, config->iterations);
@@ -82,6 +88,7 @@ static void print_config_results(benchmark_config_t *config)
            config->results.operations.tick / (double)config->results.count / 1000.0);
     printf("=====================\n");
 }
+
 static void print_progress_bar(double percentage)
 {
     int pos = (int)(PROGRESS_BAR_WIDTH * percentage / 100.0);
@@ -98,6 +105,7 @@ static void print_progress_bar(double percentage)
     printf("] %.1f%%", percentage);
     fflush(stdout);
 }
+
 static void print_verbose_iteration(uint32_t iteration, uint64_t total_time, uint64_t feed_time, uint64_t tick_time)
 {
     printf("Iteration %d:\n", iteration);
@@ -108,6 +116,7 @@ static void print_verbose_iteration(uint32_t iteration, uint64_t total_time, uin
            (feed_time * 100.0) / total_time,
            (tick_time * 100.0) / total_time);
 }
+
 static void print_ascii_bar(double value, double max_value, int width)
 {
     int bar_width = (int)((value / max_value) * width);
@@ -118,6 +127,7 @@ static void print_ascii_bar(double value, double max_value, int width)
     }
     printf("] %.2f", value);
 }
+
 static void print_comparison_graphs(benchmark_results_t *results)
 {
     const int GRAPH_WIDTH = 40;
@@ -151,6 +161,7 @@ static void print_comparison_graphs(benchmark_results_t *results)
     }
     printf("\n=============================\n");
 }
+
 int main(int argc, char **argv)
 {
     // Add verbose and quick flags
@@ -176,22 +187,14 @@ int main(int argc, char **argv)
     {
         unk_cortex_size_t width;
         unk_cortex_size_t height;
-    } sizes[] = {
-        {100, 60},
-        {200, 120},
-        {512, 256},
-        {1024, 512},
-        {10000, 5000}
-    };
+    } sizes[] = {{100, 60}, {200, 120}, {512, 256}, {1024, 512}, {10000, 5000}};
     const struct
     {
         unk_cortex_size_t width;
         unk_cortex_size_t height;
-    } quick_sizes[] = {
-        {10000, 5000},
-        {100, 60}};
-    const uint32_t iterations[] = {1000, 10000, 100000};
-    const uint32_t quick_iterations[] = {10000};
+    } quick_sizes[] = {{100, 60}, {200, 120}, {512, 256}};
+    const uint32_t iterations[] = {100, 1000, 10000, 100000};
+    const uint32_t quick_iterations[] = {100, 1000};
     const size_t size_count = quick ? sizeof(quick_sizes) / sizeof(quick_sizes[0]) : sizeof(sizes) / sizeof(sizes[0]);
     const size_t iter_count =
         quick ? sizeof(quick_iterations) / sizeof(quick_iterations[0]) : sizeof(iterations) / sizeof(iterations[0]);
@@ -240,15 +243,15 @@ int main(int argc, char **argv)
             // Initialize benchmark
             config.results.count = config.iterations;
             config.results.samples = (uint64_t *)malloc(config.iterations * sizeof(uint64_t));
-            // Warmup phase
-            printf("Warming up...\n");
-            for (uint32_t i = 0; i < WARMUP_ITERATIONS; i++)
-            {
-                unk_cortex2d_t *prev = i % 2 ? odd_cortex : even_cortex;
-                unk_cortex2d_t *next = i % 2 ? even_cortex : odd_cortex;
-                c2d_feed2d(prev, input);
-                c2d_tick(prev, next);
-            }
+            // // Warmup phase
+            // printf("Warming up...\n");
+            // for (uint32_t i = 0; i < WARMUP_ITERATIONS; i++)
+            // {
+            //     unk_cortex2d_t *prev = i % 2 ? odd_cortex : even_cortex;
+            //     unk_cortex2d_t *next = i % 2 ? even_cortex : odd_cortex;
+            //     c2d_feed2d(prev, input);
+            //     c2d_tick(prev, next);
+            // }
             // Benchmark phase
             printf("Running benchmark...\n");
             uint64_t start_time = millis();
@@ -282,6 +285,10 @@ int main(int argc, char **argv)
             calculate_statistics(&config.results);
             print_config_results(&config);
             memcpy(&all_results.configs[result_idx++], &config, sizeof(benchmark_config_t));
+            // Copy the cortex back to host in file out/test_$(width)_$(height)_std.
+            char outFileName[40];
+            snprintf(outFileName, 40, "./out/test_%d_%d_std.c2d", config.width, config.height);
+            c2d_to_file(even_cortex, outFileName);
             // Cleanup
             free(config.results.samples);
             c2d_destroy(even_cortex);
