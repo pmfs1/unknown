@@ -188,7 +188,7 @@ int main(int argc, char **argv)
         unk_cortex_size_t width;
         unk_cortex_size_t height;
     } quick_sizes[] = {
-        {200, 120},
+        {10000, 5000},
         {100, 60}};
     const uint32_t iterations[] = {1000, 10000, 100000};
     const uint32_t quick_iterations[] = {10000};
